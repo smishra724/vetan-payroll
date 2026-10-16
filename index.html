@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Vetan: payroll and HR for Indian companies. Employees, onboarding, attendance and roster, payroll with PF/ESI/PT/TDS, leave, loans and reports.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%230F2B26%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2219%22 font-family=%22Arial%22 font-weight=%22700%22 text-anchor=%22middle%22 fill=%22%23E39A1B%22%3Ev%3C/text%3E%3C/svg%3E">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.45 system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Vetan Payroll</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: fixed ledger-green sidebar + scrolling work area; sidebar becomes a drawer under 900px */
+:root{
+  --bg:#F3F6F4; --surface:#FFFFFF; --surface-2:#EDF2EF; --line:#DAE2DD; --fg:#13201C; --muted:#53635C;
+  --side:#0F2B26; --side-2:#163A33; --side-fg:#C5D6CF; --side-dim:#8FA79E; --side-active:#1E4D42;
+  --accent:#1B6A55; --accent-hover:#145442; --accent-fg:#FFFFFF; --accent-soft:#E2F0EA;
+  --mari:#9A5B00; --mari-bg:#FFF3DC; --mari-line:#F0D29A; --mari-dot:#E39A1B;
+  --ok:#17663F; --ok-bg:#E1F3E8; --bad:#AF2318; --bad-bg:#FCE9E7; --info:#22508F; --info-bg:#E6EEF9; --plum:#6B3A8C; --plum-bg:#F1E8F7;
+  --shadow:0 1px 2px rgba(15,43,38,.06),0 4px 14px rgba(15,43,38,.05);
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  --r:12px; --r-sm:8px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1412; --surface:#141E1B; --surface-2:#1A2622; --line:#283631; --fg:#E6EEEA; --muted:#9AADA5;
+  --side:#09171A; --side-2:#10252A; --side-fg:#B8CBC4; --side-dim:#7D948C; --side-active:#173D35;
+  --accent:#4DB592; --accent-hover:#63C7A4; --accent-fg:#05201A; --accent-soft:#16312A;
+  --mari:#F2B04A; --mari-bg:#2B2213; --mari-line:#5A4422; --mari-dot:#F2B04A;
+  --ok:#62D095; --ok-bg:#12291D; --bad:#F38B80; --bad-bg:#341719; --info:#8FB5EF; --info-bg:#15223A; --plum:#CDA2EE; --plum-bg:#2A1C35;
+  --shadow:none; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1412; --surface:#141E1B; --surface-2:#1A2622; --line:#283631; --fg:#E6EEEA; --muted:#9AADA5;
+  --side:#09171A; --side-2:#10252A; --side-fg:#B8CBC4; --side-dim:#7D948C; --side-active:#173D35;
+  --accent:#4DB592; --accent-hover:#63C7A4; --accent-fg:#05201A; --accent-soft:#16312A;
+  --mari:#F2B04A; --mari-bg:#2B2213; --mari-line:#5A4422; --mari-dot:#F2B04A;
+  --ok:#62D095; --ok-bg:#12291D; --bad:#F38B80; --bad-bg:#341719; --info:#8FB5EF; --info-bg:#15223A; --plum:#CDA2EE; --plum-bg:#2A1C35;
+  --shadow:none; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45}
+*{box-sizing:border-box}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:26px;font-weight:800} h2{font-size:16px;font-weight:700} h3{font-size:14px;font-weight:700}
+.num,td.n,th.n{font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100%}
+.side{background:var(--side);color:var(--side-fg);padding-block:18px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:12px;display:flex;flex-direction:column;gap:16px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{display:flex;flex-direction:column;gap:3px;padding:2px 8px}
+.brand b{font-family:var(--f-display);font-size:24px;font-weight:800;color:#fff;letter-spacing:-.02em}
+.brand b i{font-style:normal;color:var(--mari-dot)}
+.brand span{font-size:12px;color:var(--side-dim);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:#3DD68C;display:inline-block;flex:none}
+.dot.off{background:#E39A1B}
+.who{display:flex;gap:10px;align-items:center;background:var(--side-2);border-radius:10px;padding:10px 12px}
+.av{width:34px;height:34px;border-radius:50%;background:var(--side-active);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+.who b{color:#fff;font-size:14px;display:block}
+.who small{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--side-dim)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:11px;min-height:40px;padding:0 12px;border-radius:8px;color:var(--side-fg);text-decoration:none;font-weight:500}
+.nav a:hover{background:var(--side-2);color:#fff}
+.nav a[aria-current="page"]{background:var(--side-active);color:#fff;font-weight:700}
+.nav a[aria-current="page"] svg{color:var(--mari-dot)}
+.nav .grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--side-dim);padding:12px 12px 4px}
+.nav svg{width:18px;height:18px;flex:none}
+.nav .badge{margin-left:auto;background:var(--mari-dot);color:#1d1300;font-size:11px;font-weight:700;border-radius:10px;padding:1px 7px}
+.side-foot{margin-top:auto;font-size:12px;color:var(--side-dim);padding:0 8px}
+
+.main{display:flex;flex-direction:column;min-width:0}
+.top{display:flex;align-items:center;gap:12px;background:var(--surface);border-bottom:1px solid var(--line);padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.crumb{font-size:13px;color:var(--muted)} .crumb b{color:var(--fg);font-weight:600}
+.top .sp{flex:1}
+.menu-btn{display:none}
+.view{padding-block:22px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1240px;width:100%;display:flex;flex-direction:column;gap:18px}
+.conn{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:7px 12px;border-radius:8px;background:var(--ok-bg);color:var(--ok)}
+.conn.off{background:var(--mari-bg);color:var(--mari)}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.head p{margin:4px 0 0;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:0 15px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);color:var(--fg);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.primary:hover{background:var(--accent-hover);color:var(--accent-fg)}
+.btn.sm{min-height:30px;padding:0 10px;font-size:12.5px}
+.btn.danger{color:var(--bad)} .btn.danger:hover{border-color:var(--bad)}
+.btn.link{border:none;background:none;padding:0;min-height:0;color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn svg{width:16px;height:16px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);min-width:0}
+.card.warn{background:var(--mari-bg);border-color:var(--mari-line)}
+.card-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+.card-h small{color:var(--muted);font-size:12px}
+.cols{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+.cols>.wide{flex:3 1 440px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.cols>.narrow{flex:2 1 300px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi small{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kpi b{font-family:var(--f-display);font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.kpi.ok b{color:var(--ok)} .kpi.warn b{color:var(--mari)} .kpi.bad b{color:var(--bad)}
+
+.hero{display:flex;flex-wrap:wrap;background:var(--surface);border:1px solid var(--mari-line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.hero.done{border-color:var(--line)}
+.hero>div{flex:1 1 320px;padding:22px 24px;display:flex;flex-direction:column;gap:6px}
+.hero>div+div{border-left:1px solid var(--line)}
+.hero .big{font-family:var(--f-display);font-size:42px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.stat{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--mari)}
+.stat.ok{color:var(--ok)} .stat .dot{background:var(--mari-dot)} .stat.ok .dot{background:var(--ok)}
+.quad{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 22px;align-content:center}
+.quad small{font-size:12px;color:var(--muted);font-weight:600;display:block}
+.quad b{font-family:var(--f-display);font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.quad span{font-size:12px;color:var(--muted)}
+.muted{color:var(--muted)} .small{font-size:12.5px}
+
+.list>div{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+.list>div:first-child{border-top:none}
+.date{width:42px;text-align:center;flex:none}
+.date b{display:block;font-family:var(--f-display);font-size:20px;font-weight:800;line-height:1}
+.date small{font-size:11px;color:var(--muted)}
+.grow{flex:1;min-width:0}
+.grow b{display:block}
+.right{text-align:right}
+.icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent)}
+.icon.w{background:var(--mari-bg);color:var(--mari)}
+.icon svg{width:16px;height:16px}
+
+.bar{height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:10px 12px;background:var(--surface-2);white-space:nowrap}
+.tbl td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
+.tbl td.n,.tbl th.n{text-align:right;white-space:nowrap}
+.tbl tfoot td{font-weight:800;background:var(--surface-2)}
+.tbl td small{display:block;color:var(--muted);font-size:12px}
+.tbl tr.inactive td{opacity:.55}
+.tbl input.cell{width:92px;text-align:right;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;background:var(--surface-2);color:var(--muted)}
+.chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.warn{background:var(--mari-bg);color:var(--mari)} .chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.info{background:var(--info-bg);color:var(--info)} .chip.plum{background:var(--plum-bg);color:var(--plum)} .chip.acc{background:var(--accent-soft);color:var(--accent)}
+.acts{display:flex;gap:6px;flex-wrap:nowrap;justify-content:flex-end}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea,.input{border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;background:var(--surface);min-height:40px;width:100%}
+.field textarea{min-height:110px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+.field .hint{font-size:12px;color:var(--muted)}
+.fgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.fsec{font-family:var(--f-display);font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;margin:6px 0 -2px;grid-column:1/-1}
+.check{display:flex;gap:8px;align-items:center;min-height:40px}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.toolbar .input{width:auto;flex:1 1 220px}
+.toolbar select.input{flex:0 1 200px}
+
+.att-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table.att{border-collapse:collapse;font-size:12px}
+.att th,.att td{border-top:1px solid var(--line);padding:0;text-align:center}
+.att th{background:var(--surface-2);font-weight:700;padding:6px 0;min-width:34px;font-size:11px}
+.att th small{display:block;font-weight:500;color:var(--muted)}
+.att th.today{background:var(--accent);color:var(--accent-fg)} .att th.today small{color:var(--accent-fg)}
+.att .who-c{text-align:left;padding:8px 12px;min-width:170px;position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--line)}
+.att th.who-c{background:var(--surface-2)}
+.att .who-c small{display:block;color:var(--muted)}
+.att .sum{padding:6px 12px;text-align:right;white-space:nowrap;min-width:110px}
+.att button.c{width:32px;height:30px;margin:2px;border-radius:6px;border:1px solid transparent;background:transparent;font-size:11px;font-weight:700;cursor:pointer}
+.att button.c:hover{border-color:var(--accent)}
+.att button.c[disabled]{cursor:default}
+.c-P{color:var(--ok)} .c-A{background:var(--bad-bg)!important;color:var(--bad)} .c-HD{background:var(--mari-bg)!important;color:var(--mari)}
+.c-L{background:var(--info-bg)!important;color:var(--info)} .c-LW{background:var(--plum-bg)!important;color:var(--plum)} .c-WO,.c-NJ{color:var(--muted)} .c-H{background:var(--accent-soft)!important;color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:8px;font-size:12px}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+.legend b{display:inline-grid;place-items:center;min-width:26px;height:20px;border-radius:5px;font-size:10.5px;background:var(--surface-2)}
+
+.empty{text-align:center;padding:36px 16px;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty b{color:var(--fg);font-size:15px}
+.note{font-size:12.5px;padding:10px 12px;border-radius:8px;background:var(--info-bg);color:var(--info)}
+.note.warn{background:var(--mari-bg);color:var(--mari)}
+
+.modal{position:fixed;inset:0;background:rgba(6,18,15,.55);display:grid;place-items:center;z-index:50;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dialog{background:var(--surface);border-radius:14px;width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line)}
+.dialog.sm{width:min(460px,100%)}
+.dialog header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dialog .body{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.dialog footer{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.x{background:none;border:none;font-size:22px;line-height:1;cursor:pointer;color:var(--muted);width:36px;height:36px;border-radius:8px}
+.x:hover{background:var(--surface-2)}
+.toast{position:fixed;bottom:max(18px,env(safe-area-inset-bottom,0px));right:max(18px,env(safe-area-inset-right,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:60;max-width:calc(100vw - 32px)}
+.toast.bad{background:var(--bad);color:#fff}
+
+.slip{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.slip .sh{padding:16px 18px;background:var(--surface-2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.slip .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 16px;padding:14px 18px;font-size:13px}
+.slip .meta small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.slip .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));border-top:1px solid var(--line)}
+.slip .two>div{padding:12px 18px}
+.slip .two>div+div{border-left:1px solid var(--line)}
+.slip .ln{display:flex;justify-content:space-between;padding:4px 0;font-variant-numeric:tabular-nums}
+.slip .ln.t{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-weight:800}
+.slip .net{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:14px 18px;background:var(--accent-soft);font-weight:700}
+.slip .net b{font-family:var(--f-display);font-size:20px}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:6px 14px;cursor:pointer;font-weight:600}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.rate{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}
+.rate:first-of-type{border-top:none}
+.rate b{font-variant-numeric:tabular-nums;text-align:right}
+
+.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.steps li{flex:1 1 130px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600;padding:8px 10px;border-radius:8px;background:var(--surface-2)}
+.steps li b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--fg);font-size:11px;flex:none}
+.steps li.cur{background:var(--accent-soft);color:var(--accent)} .steps li.cur b{background:var(--accent);color:var(--accent-fg)}
+.steps li.done{color:var(--ok)} .steps li.done b{background:var(--ok);color:var(--surface)}
+.docs{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px}
+.doc{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.doc:first-child{border-top:none}
+.doc>.grow>b{font-size:13.5px}
+.file{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.file img,.file .pdf{width:44px;height:44px;border-radius:6px;object-fit:cover;flex:none;border:1px solid var(--line);background:var(--surface-2)}
+.file .pdf{display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--bad);background:var(--bad-bg)}
+.file .grow{min-width:140px;word-break:break-word}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.warn-t{color:var(--mari);font-weight:600}
+.ros th.n,.ros td.n{text-align:right}
+.ros select{border:1px solid transparent;border-radius:6px;padding:6px 4px;font-size:12px;font-weight:700;min-width:104px;cursor:pointer}
+.ros select:hover{border-color:var(--accent)}
+.ros td.day{padding:6px 4px;text-align:center}
+.ros th.day{text-align:center}
+.ros th.day.today{background:var(--accent);color:var(--accent-fg)}
+.sh0{background:var(--accent-soft);color:var(--accent)} .sh1{background:var(--info-bg);color:var(--info)} .sh2{background:var(--mari-bg);color:var(--mari)} .sh3{background:var(--plum-bg);color:var(--plum)} .sh4{background:var(--ok-bg);color:var(--ok)} .sh5{background:var(--bad-bg);color:var(--bad)}
+.shOFF{background:var(--surface-2);color:var(--muted)}
+.cov{font-size:11px;color:var(--muted);line-height:1.5}
+.shift{display:flex;flex-direction:column;gap:6px}
+.shift .t{font-family:var(--f-display);font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;left:0;top:0;bottom:0;width:270px;z-index:40;transform:translateX(-105%);transition:transform .2s;height:auto;padding-top:max(18px,env(safe-area-inset-top,0px))}
+  .side.open{transform:none}
+  .menu-btn{display:inline-flex}
+  .hero>div+div{border-left:none;border-top:1px solid var(--line)}
+  .slip .two>div+div{border-left:none;border-top:1px solid var(--line)}
+}
+@media (prefers-reduced-motion:reduce){.side{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side" aria-label="Main menu">
+    <div class="brand"><b>vetan<i>.</i></b><span id="connLabel"><span class="dot off"></span>Connecting…</span></div>
+    <div class="who"><div class="av" id="whoAv">H</div><div><b id="whoName">HR Admin</b><small id="whoRole">Payroll admin</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot" id="coName"></div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="btn sm menu-btn" id="menuBtn" type="button" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="crumb" id="crumb"></div><div class="sp"></div>
+      <span class="chip" id="roChip" hidden>View only</span>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+<div class="modal" id="modal" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ============ helpers ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const N=v=>{const x=parseFloat(v);return isFinite(x)?x:0};
+const inr=n=>(n<0?'−₹':'₹')+Math.round(Math.abs(n||0)).toLocaleString('en-IN');
+const lakh=n=>n>=1e7?'₹'+(n/1e7).toFixed(2)+' Cr':n>=1e5?'₹'+(n/1e5).toFixed(2)+' L':inr(n);
+const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const ymOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const ymLabel=ym=>{const[y,m]=ym.split('-');return MON[+m-1]+' '+y};
+const ymShift=(ym,k)=>{const[y,m]=ym.split('-').map(Number);return ymOf(new Date(y,m-1+k,1))};
+const daysIn=ym=>{const[y,m]=ym.split('-').map(Number);return new Date(y,m,0).getDate()};
+const iso=(ym,d)=>ym+'-'+String(d).padStart(2,'0');
+const fmtDate=s=>{if(!s)return '—';const d=new Date(s+'T00:00');return isNaN(d)?s:d.getDate()+' '+MON[d.getMonth()].slice(0,3)+' '+d.getFullYear()};
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const TODAY=new Date(); const CUR=ymOf(TODAY);
+const clone=o=>JSON.parse(JSON.stringify(o||{}));
+function words(n){n=Math.round(n);if(n<=0)return 'Zero';const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'],b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+ const two=x=>x<20?a[x]:b[Math.floor(x/10)]+(x%10?' '+a[x%10]:'');const three=x=>(x>=100?a[Math.floor(x/100)]+' Hundred'+(x%100?' ':''):'')+(x%100?two(x%100):'');
+ let s='';const cr=Math.floor(n/1e7);n%=1e7;const l=Math.floor(n/1e5);n%=1e5;const t=Math.floor(n/1e3);n%=1e3;
+ if(cr)s+=three(cr)+' Crore ';if(l)s+=two(l)+' Lakh ';if(t)s+=two(t)+' Thousand ';if(n)s+=three(n);return s.trim()}
+const ICON={
+ dash:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+ people:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.3c2.1.7 3.5 2.8 3.5 5.7"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ pay:'<rect x="2.5" y="6" width="19" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 9.5v6M18 9.5v6"/>',
+ leaf:'<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14Z"/><path d="M5 19 13 11"/>',
+ loan:'<path d="M3 10 12 4l9 6"/><path d="M5 10v9M19 10v9M9 10v9M15 10v9M3 21h18"/>',
+ shield:'<path d="M12 3 4 6v6c0 4.5 3.4 7.8 8 9 4.6-1.2 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>',
+ report:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ cog:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+ clip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/>',
+ file:'<path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8l-5-5Z"/><path d="M14 3v5h5"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>', down:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', play:'<path d="M7 4v16l13-8Z"/>', alert:'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/>', up:'<path d="M12 20V9M7 14l5-5 5 5M5 4h14"/>'
+};
+const ic=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+
+/* ============ statutory rules ============ */
+const PT_STATES={
+ 'Maharashtra':{fn:(g,m)=>g<=7500?0:g<=10000?175:(m===2?300:200),note:'Nil to ₹7,500 · ₹175 to ₹10,000 · ₹200 above (₹300 in Feb)'},
+ 'Karnataka':{fn:(g,m)=>g>=25000?(m===2?300:200):0,note:'₹200 from ₹25,000 gross (₹300 in Feb)'},
+ 'West Bengal':{fn:g=>g<=10000?0:g<=15000?110:g<=25000?130:g<=40000?150:200,note:'₹110 / ₹130 / ₹150 / ₹200 by slab above ₹10,000'},
+ 'Telangana':{fn:g=>g<=15000?0:g<=20000?150:200,note:'₹150 for ₹15,001–20,000 · ₹200 above'},
+ 'Andhra Pradesh':{fn:g=>g<=15000?0:g<=20000?150:200,note:'₹150 for ₹15,001–20,000 · ₹200 above'},
+ 'Gujarat':{fn:g=>g<12000?0:200,note:'₹200 from ₹12,000 gross'},
+ 'Delhi':{fn:()=>0,note:'No professional tax'},
+ 'Uttar Pradesh':{fn:()=>0,note:'No professional tax'},
+ 'Haryana':{fn:()=>0,note:'No professional tax'},
+ 'Rajasthan':{fn:()=>0,note:'No professional tax'},
+ 'Punjab':{fn:g=>g*12>250000?200:0,note:'₹200 when annual income exceeds ₹2.5 L'},
+ 'Other':{fn:()=>0,note:'Set a per-employee PT amount if your state levies it'}
+};
+const STATES=Object.keys(PT_STATES);
+const DEFAULT_CFG={
+ company:{name:'Your Company Pvt. Ltd.',state:'Delhi',address:'',pan:'',tan:'',pfCode:'',esiCode:''},
+ admin:'HR Admin',
+ pf:{ee:12,er:12,ceiling:15000},
+ esi:{ee:0.75,er:3.25,limit:21000},
+ tds:{std:75000,rebate:1200000,cess:4,slabs:[[400000,0],[800000,5],[1200000,10],[1600000,15],[2000000,20],[2400000,25],[0,30]]},
+ structures:[{id:'std',name:'Standard',basic:50,hra:40,conv:1600},{id:'metro',name:'Metro (50% HRA)',basic:50,hra:50,conv:1600},{id:'contract',name:'Contract / Consultant',basic:100,hra:0,conv:0}],
+ shifts:[{id:'gen',name:'General',start:'09:00',end:'18:00',brk:60},{id:'mor',name:'Morning',start:'06:00',end:'14:00',brk:30},{id:'eve',name:'Evening',start:'14:00',end:'22:00',brk:30},{id:'ngt',name:'Night',start:'22:00',end:'06:00',brk:30}],
+ defaultShift:'gen'
+};
+const DOC_TYPES=[['photo','Passport-size photo',1],['pan','PAN card',1],['aadhaar','Aadhaar card',1],['bank','Cancelled cheque or bank proof',1],['address','Address proof',0],['edu','Education certificates',0],['exp','Experience or relieving letter',0],['offer','Signed offer letter',0],['other','Other documents',0]];
+const REQ_DOCS=DOC_TYPES.filter(d=>d[2]).map(d=>d[0]);
+const pendingDocs=e=>REQ_DOCS.filter(k=>!(e.docs||[]).some(d=>d.type===k));
+const WEEKDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const OB_STEPS=['Personal details','Job & salary','Statutory & bank','Documents'];
+const LEAVE_TYPES={CL:'Casual leave',SL:'Sick leave',EL:'Earned leave',LWP:'Leave without pay'};
+const LOAN_TYPES=['Salary advance','Personal loan','Emergency loan','Education loan','Vehicle loan'];
+const CODES={P:'Present',A:'Absent',HD:'Half day',L:'Paid leave',LW:'Leave w/o pay',WO:'Week off',H:'Holiday'};
+const CYCLE=['P','A','HD','L','LW','H','WO'];
+
+/* ============ state ============ */
+const isoD=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const mondayOf=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
+const S={db:null,dl:null,assets:null,live:false,canEdit:true,cfg:clone(DEFAULT_CFG),emps:{},att:{},runs:{},leaves:{},loans:{},filings:{},roster:{},
+ loaded:{},route:'dashboard',month:CUR,ui:{q:'',loc:'',leaveTab:'all',reportMonth:CUR,attTab:'grid',week:isoD(mondayOf(TODAY))},inputs:{}};
+function mergeCfg(c){const d=clone(DEFAULT_CFG);c=c||{};return {...d,...c,company:{...d.company,...(c.company||{})},pf:{...d.pf,...(c.pf||{})},esi:{...d.esi,...(c.esi||{})},tds:{...d.tds,...(c.tds||{})},structures:c.structures||d.structures,shifts:(c.shifts&&c.shifts.length)?c.shifts:d.shifts,defaultShift:c.defaultShift||d.defaultShift}}
+const KEY={employees:'emps',attendance:'att',runs:'runs',leaves:'leaves',loans:'loans',filings:'filings',roster:'roster'};
+const isAct=e=>!e.status||e.status==='active';
+const obCount=()=>Object.values(S.emps).filter(e=>e.status==='onboarding').length;
+async function put(col,id,data){
+ if(col==='config')S.cfg=mergeCfg(data);else S[KEY[col]][id]=data;
+ render();
+ if(S.db){try{await S.db.doc(col+'/'+id).set(data)}catch(e){fail(e)}}
+}
+async function del(col,id){
+ delete S[KEY[col]][id];render();
+ if(S.db){try{await S.db.doc(col+'/'+id).delete()}catch(e){fail(e)}}
+}
+function fail(e){toast(e&&e.code==='invalid_argument'?'You have view-only access, so this change was not saved.':e&&e.code==='quota_exceeded'?'Storage is full. Delete old records to add more.':'Could not save: '+(e&&e.message||'try again'),'bad')}
+let tT;function toast(m,k){const t=$('#toast');t.textContent=m;t.className='toast'+(k?' '+k:'');t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,3200)}
+async function download(filename,data){
+ if(!S.dl){toast('Downloads are not available in this view.','bad');return}
+ try{await S.dl.save({filename,data});toast('Saved '+filename)}catch(e){if(e&&e.code!=='declined')toast('Could not save the file: '+(e.message||e.code),'bad')}
+}
+const csv=rows=>rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\n');
+
+/* ============ payroll engine ============ */
+const fixedGross=e=>N(e.basic)+N(e.hra)+N(e.conv)+N(e.special);
+const empList=()=>Object.entries(S.emps).map(([id,e])=>({...e,id})).sort((a,b)=>String(a.code).localeCompare(String(b.code),'en',{numeric:true}));
+const activeIn=ym=>empList().filter(e=>isAct(e)&&(!e.doj||e.doj<=iso(ym,daysIn(ym))));
+const weekOffOf=e=>e.weekOff===''||e.weekOff==null?0:+e.weekOff;
+const shiftById=id=>S.cfg.shifts.find(s=>s.id===id);
+const defShiftOf=e=>shiftById(e.shift)?e.shift:(shiftById(S.cfg.defaultShift)?S.cfg.defaultShift:S.cfg.shifts[0].id);
+function rosterDefault(e,ym,d){const[y,mo]=ym.split('-').map(Number);return new Date(y,mo-1,d).getDay()===weekOffOf(e)?'OFF':defShiftOf(e)}
+function rosterOf(e,ym,d){const r=S.roster[ym]&&S.roster[ym].a&&S.roster[ym].a[e.id];const v=r&&r[d];if(v==='OFF'||(v&&shiftById(v)))return v;return rosterDefault(e,ym,d)}
+const baseCode=(e,ym,d)=>rosterOf(e,ym,d)==='OFF'?'WO':'P';
+function code(e,ym,d){
+ const k=iso(ym,d);if(e.doj&&k<e.doj)return 'NJ';
+ const m=S.att[ym]&&S.att[ym].marks&&S.att[ym].marks[e.id];if(m&&m[d])return m[d];
+ return baseCode(e,ym,d);
+}
+function shiftHours(s){if(!s)return 0;const p=t=>{const[h,m]=String(t||'0:0').split(':').map(Number);return h*60+(m||0)};let m=p(s.end)-p(s.start);if(m<=0)m+=1440;return Math.max(0,m-N(s.brk))/60}
+function attSummary(e,ym){const D=daysIn(ym);let lop=0,c={};for(let d=1;d<=D;d++){const x=code(e,ym,d);c[x]=(c[x]||0)+1;if(x==='A'||x==='LW'||x==='NJ')lop+=1;else if(x==='HD')lop+=.5}return{D,lop,paid:D-lop,c}}
+function annualTax(t){const c=S.cfg.tds;let tax=0,prev=0;for(const[upto,rate]of c.slabs){const top=N(upto)||Infinity;if(t>prev)tax+=(Math.min(t,top)-prev)*N(rate)/100;prev=top;if(t<=top)break}
+ if(t<=N(c.rebate))tax=0;else tax=Math.min(tax,t-N(c.rebate));return Math.round(tax*(1+N(c.cess)/100))}
+function monthlyTDS(e){if(e.tdsOverride!==''&&e.tdsOverride!=null)return N(e.tdsOverride);const t=fixedGross(e)*12-N(S.cfg.tds.std);return t>0?Math.round(annualTax(t)/12):0}
+function ptFor(e,gross,ym){if(e.ptOverride!==''&&e.ptOverride!=null)return N(e.ptOverride);const r=PT_STATES[e.state]||PT_STATES.Other;return r.fn(gross,+ym.split('-')[1])}
+function loansFor(e,ym){return Object.entries(S.loans).filter(([,l])=>l.empId===e.id&&l.status==='approved'&&N(l.balance)>0&&(l.start||'')<=ym&&!(l.paidMonths||[]).includes(ym)).map(([id,l])=>({id,amt:Math.min(N(l.emi),N(l.balance))}))}
+function calc(e,ym,ex){
+ ex=ex||{};const a=attSummary(e,ym),f=a.paid/a.D,c=S.cfg;
+ const basic=Math.round(N(e.basic)*f),hra=Math.round(N(e.hra)*f),conv=Math.round(N(e.conv)*f),special=Math.round(N(e.special)*f),bonus=N(ex.bonus);
+ const gross=basic+hra+conv+special+bonus,fg=fixedGross(e);
+ const pfW=e.pf?Math.min(basic,N(c.pf.ceiling)):0,pfEE=Math.round(pfW*N(c.pf.ee)/100),pfER=Math.round(pfW*N(c.pf.er)/100),eps=Math.round(Math.min(pfW,15000)*.0833);
+ const esiOn=fg>0&&fg<=N(c.esi.limit),esiEE=esiOn?Math.ceil(gross*N(c.esi.ee)/100):0,esiER=esiOn?Math.ceil(gross*N(c.esi.er)/100):0;
+ const pt=gross>0?ptFor(e,gross,ym):0,tds=Math.min(monthlyTDS(e),Math.max(0,gross-pfEE-esiEE-pt));
+ const loanParts=loansFor(e,ym),loan=loanParts.reduce((s,x)=>s+x.amt,0),other=N(ex.other);
+ const ded=pfEE+esiEE+pt+tds+loan+other;
+ return{empId:e.id,code:e.code,name:e.name,designation:e.designation||'',dept:e.dept||'',state:e.state||'',pan:e.pan||'',uan:e.uan||'',bankName:e.bankName||'',account:e.account||'',ifsc:e.ifsc||'',
+  D:a.D,paid:a.paid,lop:a.lop,basic,hra,conv,special,bonus,gross,pfW,pfEE,pfER,eps,epfER:pfER-eps,esiEE,esiER,pt,tds,loan,loanParts,other,ded,net:gross-ded,ctc:gross+pfER+esiER}
+}
+function totals(rows){const t={count:rows.length};['gross','net','pfEE','pfER','esiEE','esiER','pt','tds','loan','other','ded','ctc','bonus'].forEach(k=>t[k]=rows.reduce((s,r)=>s+N(r[k]),0));return t}
+function preview(ym){return activeIn(ym).map(e=>calc(e,ym,(S.inputs[ym]||{})[e.id]))}
+function monthData(ym){const r=S.runs[ym];if(r)return{processed:true,rows:r.rows||[],t:r.totals||totals(r.rows||[]),run:r};const rows=preview(ym);return{processed:false,rows,t:totals(rows)}}
+
+/* ============ routing / chrome ============ */
+const ROUTES=[['dashboard','Dashboard','dash'],['employees','Employees','people'],['onboarding','Onboarding','clip'],['attendance','Attendance & roster','cal'],['payroll','Run payroll','pay'],['leave','Leave','leaf'],['loans','Loans & advances','loan'],['compliance','Compliance','shield'],['reports','Reports','report'],['settings','Settings','cog']];
+function nav(){
+ const pend=Object.values(S.leaves).filter(l=>l.status==='pending').length+Object.values(S.loans).filter(l=>l.status==='pending').length;
+ $('#nav').innerHTML=ROUTES.map(([k,l,i],n)=>(n===1?'<div class="grp">People</div>':n===4?'<div class="grp">Payroll</div>':n===7?'<div class="grp">Statutory</div>':'')+
+  `<a href="#${k}" ${S.route===k?'aria-current="page"':''}>${ic(i)}<span>${l}</span>${(k==='leave'||k==='loans')&&pend?`<span class="badge">${k==='leave'?Object.values(S.leaves).filter(l=>l.status==='pending').length||'':Object.values(S.loans).filter(l=>l.status==='pending').length||''}</span>`:k==='onboarding'&&obCount()?`<span class="badge">${obCount()}</span>`:''}</a>`).join('').replace(/<span class="badge"><\/span>/g,'');
+ $('#crumb').innerHTML=`${esc(S.cfg.company.name)} <span aria-hidden="true">/</span> <b>${(ROUTES.find(r=>r[0]===S.route)||ROUTES[0])[1]}</b>`;
+ $('#coName').textContent=S.cfg.company.name;
+ $('#whoName').textContent=S.cfg.admin||'HR Admin';$('#whoAv').textContent=(S.cfg.admin||'H').trim().charAt(0).toUpperCase();
+ $('#whoRole').textContent=S.canEdit?'Payroll admin':'View only';$('#roChip').hidden=S.canEdit;
+}
+function route(){const h=(location.hash||'').slice(1);S.route=ROUTES.some(r=>r[0]===h)?h:'dashboard';$('#side').classList.remove('open');render();window.scrollTo(0,0)}
+let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;draw()})}
+function draw(){
+ const a=document.activeElement,aid=a&&a.id,sel=a&&a.selectionStart;
+ nav();
+ const v=VIEWS[S.route]||VIEWS.dashboard;
+ $('#view').innerHTML=connBar()+v();
+ if(aid){const el=document.getElementById(aid);if(el&&el!==document.activeElement&&el.closest('#view')){el.focus();try{if(sel!=null)el.setSelectionRange(sel,sel)}catch(_){}}}
+}
+function connBar(){return S.live?'':`<div class="conn off"><span class="dot off"></span>${S.db===null&&S.loaded.tried?'Offline preview: changes here are not saved. Open the app in Claude to keep your data.':'Connecting to your payroll data…'}</div>`}
+const ro=()=>S.canEdit?'':'disabled title="View-only access"';
+const empty=(t,s,btn)=>`<div class="empty"><b>${t}</b><span>${s}</span>${btn||''}</div>`;
+const nameOf=id=>(S.emps[id]&&S.emps[id].name)||'Former employee';
+
+/* ============ views ============ */
+const VIEWS={};
+VIEWS.dashboard=()=>{
+ const ym=CUR,md=monthData(ym),t=md.t,act=empList().filter(isAct);
+ const hr=TODAY.getHours(),greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+ const next=ymShift(ym,1),due=d=>{const[y,m]=next.split('-').map(Number);const dt=new Date(y,m-1,d);return{d,mon:MON[m-1].slice(0,3),left:Math.ceil((dt-new Date(TODAY.toDateString()))/864e5)}};
+ const pfTot=t.pfEE+t.pfER,esiTot=t.esiEE+t.esiER;
+ const depts={};act.forEach(e=>{const k=e.dept||'Unassigned';depts[k]=(depts[k]||0)+1});
+ const noPan=act.filter(e=>!e.pan).length,noUan=act.filter(e=>e.pf&&!e.uan).length,noBank=act.filter(e=>!e.account||!e.ifsc).length,noDocs=act.filter(e=>pendingDocs(e).length).length;
+ const pLeaves=Object.entries(S.leaves).filter(([,l])=>l.status==='pending'),pLoans=Object.entries(S.loans).filter(([,l])=>l.status==='pending');
+ const runs=Object.keys(S.runs).sort().reverse().slice(0,3);
+ const cal=[['TDS deposit','Challan ITNS 281',t.tds,due(7),'tds'],['PF remittance','ECR upload · EPFO',pfTot,due(15),'pf'],['ESI contribution','ESIC portal',esiTot,due(15),'esi']];
+ const fl=S.filings[ym]||{};
+ const todo=[];
+ if(pLeaves.length)todo.push(['leaf','Leave requests to approve',pLeaves.slice(0,2).map(([,l])=>nameOf(l.empId)).join(', ')+(pLeaves.length>2?' and more':''),pLeaves.length,'#leave']);
+ if(pLoans.length)todo.push(['loan','Loan requests to review','Awaiting approval',pLoans.length,'#loans']);
+ if(obCount())todo.push(['clip','Onboarding in progress',empList().filter(e=>e.status==='onboarding').slice(0,2).map(e=>e.name).join(', '),obCount(),'#onboarding']);
+ if(!md.processed&&act.length)todo.push(['play','Run payroll for '+MON[TODAY.getMonth()],'Not yet processed','→','#payroll',1]);
+ const inc=act.filter(e=>!e.pan||!e.account||!e.ifsc||(e.pf&&!e.uan)).length;
+ if(inc)todo.push(['alert','Employee records incomplete','Missing PAN, UAN or bank details',inc,'#employees',1]);
+ return `
+ <div class="head"><div><h1>${greet}, ${esc((S.cfg.admin||'').split(' ')[0]||'there')}</h1><p>${TODAY.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p></div>
+ <div class="row"><button class="btn" type="button" data-act="obNew" ${ro()}>${ic('clip')}Onboard employee</button><a class="btn primary" href="#payroll">${ic('play')}Run payroll</a></div></div>
+ ${act.length?`
+ <section class="hero ${md.processed?'done':''}" aria-label="This month's payroll">
+  <div><div class="stat ${md.processed?'ok':''}"><span class="dot"></span>${md.processed?'Payroll processed':'Payroll pending'}</div>
+  <div class="big num">${lakh(t.net)}</div>
+  <div class="muted">${md.processed?'Net paid to':'Estimated net for'} ${t.count} employee${t.count===1?'':'s'} · ${ymLabel(ym)}</div>
+  <div class="row small muted" style="gap:18px;margin-top:4px"><span>Gross <b style="color:var(--fg)">${inr(t.gross)}</b></span><span>Cost to company <b style="color:var(--fg)">${inr(t.ctc)}</b></span></div>
+  ${md.processed?'':'<div class="small" style="color:var(--mari)">Not yet run. Figures are an estimate from current salary structures and attendance.</div>'}</div>
+  <div class="quad"><div><small>Provident fund</small><b>${inr(pfTot)}</b><span>${inr(t.pfEE)} employee + ${inr(t.pfER)} employer</span></div>
+  <div><small>ESI</small><b>${esiTot?inr(esiTot):'—'}</b><span>${esiTot?inr(t.esiEE)+' employee + '+inr(t.esiER)+' employer':'No one under the ESI limit'}</span></div>
+  <div><small>TDS</small><b>${inr(t.tds)}</b><span>New regime estimate</span></div>
+  <div><small>Professional tax</small><b>${t.pt?inr(t.pt):'—'}</b><span>${t.pt?'By work-location state':'Not levied for current locations'}</span></div></div>
+ </section>
+ <div class="cols"><div class="wide">
+  <section class="card"><div class="card-h"><h2>Statutory calendar</h2><small>for ${MON[TODAY.getMonth()]} liabilities</small></div>
+  <div class="list">${cal.map(([n,s,amt,d,k])=>`<div><div class="date"><b>${d.d}</b><small>${d.mon}</small></div><div class="grow"><b>${n}</b><span class="small muted">${s}</span></div><div class="right"><b class="num">${inr(amt)}</b><div class="small">${fl[k]?'<span class="chip ok">Paid</span>':`<span class="muted">in ${d.left}d</span>`}</div></div></div>`).join('')}
+  <div><div class="date"><b>—</b><small>State</small></div><div class="grow"><b>Professional tax</b><span class="small muted">Due date varies by state</span></div><div class="right"><b class="num">${t.pt?inr(t.pt):'—'}</b><div class="small">${fl.pt?'<span class="chip ok">Paid</span>':''}</div></div></div></div>
+  <a class="btn link" href="#compliance" style="margin-top:8px">Open compliance →</a></section>
+  <section class="card"><div class="card-h"><h2>Recent payroll runs</h2><a class="btn link small" href="#payroll">All runs</a></div>
+  ${runs.length?`<div class="kpis">${runs.map(k=>{const r=S.runs[k];return `<div class="kpi"><small>${ymLabel(k)}</small><b>${lakh(r.totals.net)}</b><div class="small muted">${r.totals.count} employees · ${fmtDate((r.processedAt||'').slice(0,10))}</div></div>`}).join('')}</div>`:'<p class="muted small" style="margin:0">Processed months will show here. Your first run will be '+ymLabel(ym)+'.</p>'}</section>
+ </div><div class="narrow">
+  <section class="card"><h2>Workforce</h2><div style="display:flex;align-items:baseline;gap:8px;margin:8px 0 12px"><span class="num" style="font-family:var(--f-display);font-size:34px;font-weight:800">${act.length}</span><span class="muted">active</span></div>
+  <div style="display:flex;flex-direction:column;gap:10px">${Object.entries(depts).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600"><span>${esc(k)}</span><span class="num">${n}</span></div><div class="bar"><i style="width:${n/act.length*100}%"></i></div></div>`).join('')}</div></section>
+  ${noPan+noUan+noBank+noDocs?`<section class="card warn"><h2>Needs attention</h2><div class="list" style="margin-top:4px">
+   ${noDocs?`<div><div class="grow"><b>${noDocs} with documents pending</b><span class="small" style="color:var(--mari)">PAN, Aadhaar, photo or bank proof not uploaded</span></div></div>`:''}
+   ${noPan?`<div><div class="grow"><b>${noPan} without PAN</b><span class="small" style="color:var(--mari)">TDS return will reject; 20% TDS applies</span></div></div>`:''}
+   ${noUan?`<div><div class="grow"><b>${noUan} on PF without UAN</b><span class="small" style="color:var(--mari)">ECR upload will fail</span></div></div>`:''}
+   ${noBank?`<div><div class="grow"><b>${noBank} without bank details</b><span class="small" style="color:var(--mari)">Cannot pay by NEFT</span></div></div>`:''}</div>
+   <a class="btn link" href="#employees">Fix in employees →</a></section>`:''}
+  <section class="card"><div class="card-h"><h2>To do</h2>${todo.length?`<span class="chip acc">${todo.length}</span>`:''}</div>
+  ${todo.length?`<div class="list">${todo.map(([i,a,b,c,h,w])=>`<div><div class="icon ${w?'w':''}">${ic(i)}</div><div class="grow"><a href="${h}" style="color:var(--fg);text-decoration:none"><b>${a}</b></a><span class="small muted">${esc(b)}</span></div><b class="num" style="color:${w?'var(--mari)':'var(--accent)'}">${c}</b></div>`).join('')}</div>`:'<p class="muted small" style="margin:0">All caught up.</p>'}</section>
+ </div></div>`:`<section class="card">${empty('Add your first employee','Payroll, attendance and compliance all start from the employee list.',`<button class="btn primary" type="button" data-act="addEmp" ${ro()}>${ic('plus')}Add employee</button>`)}</section>`}`;
+};
+
+VIEWS.employees=()=>{
+ const q=S.ui.q.toLowerCase(),loc=S.ui.loc;
+ const all=empList(),locs=[...new Set(all.map(e=>e.state).filter(Boolean))].sort();
+ const list=all.filter(e=>(!loc||e.state===loc)&&(!q||[e.name,e.code,e.dept,e.designation,e.state,e.email].join(' ').toLowerCase().includes(q)));
+ return `<div class="head"><div><h1>Employees</h1><p>${all.filter(isAct).length} active · ${obCount()} onboarding · ${all.filter(e=>e.status==='inactive').length} inactive</p></div>
+ <div class="row"><button class="btn primary" type="button" data-act="obNew" ${ro()}>${ic('clip')}Onboard employee</button><button class="btn" type="button" data-act="addEmp" ${ro()}>${ic('plus')}Quick add</button><button class="btn" type="button" data-act="importEmp" ${ro()}>${ic('up')}Import CSV</button></div></div>
+ <div class="toolbar"><input class="input" id="empQ" type="search" placeholder="Search by name, code, department or location" value="${esc(S.ui.q)}" aria-label="Search employees">
+ <select class="input" id="empLoc" aria-label="Filter by location"><option value="">All locations</option>${locs.map(l=>`<option ${l===loc?'selected':''}>${esc(l)}</option>`).join('')}</select></div>
+ ${all.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Code</th><th>Name</th><th>Role</th><th>Location</th><th class="n">Gross / mo</th><th class="n">Net (est.)</th><th>PF</th><th>PT</th><th>Status</th><th class="n">Actions</th></tr></thead><tbody>
+ ${list.map(e=>{const r=calc(e,CUR,{});const miss=!e.pan||!e.account||(e.pf&&!e.uan);return `<tr class="${e.status==='inactive'?'inactive':''}">
+  <td class="num">${esc(e.code)}</td><td><b>${esc(e.name)}</b>${e.sample?' <span class="chip">Sample</span>':''}<small>${esc(e.email||'—')}</small></td>
+  <td>${esc(e.designation||'—')}<small>${esc(e.dept||'')}</small></td><td>${esc(e.state||'—')}</td>
+  <td class="n">${inr(fixedGross(e))}</td><td class="n" style="color:var(--ok);font-weight:700">${inr(r.net)}</td>
+  <td>${e.pf?`<span class="chip ok">PF ${inr(r.pfEE)}</span>`:'<span class="chip">No PF</span>'}</td>
+  <td>${r.pt?`<span class="chip plum">PT ${inr(r.pt)}</span>`:'<span class="chip">PT nil</span>'}</td>
+  <td>${e.status==='onboarding'?`<span class="chip info">Onboarding ${Math.min(4,(e.onboarding&&e.onboarding.step)||1)}/4</span>`:e.status==='inactive'?'<span class="chip">Inactive</span>':miss?'<span class="chip warn">Incomplete</span>':'<span class="chip ok">Active</span>'}</td>
+  <td><div class="acts">${e.status==='onboarding'?`<button class="btn sm primary" type="button" data-act="obGo" data-id="${e.id}" data-step="${Math.min(4,(e.onboarding&&e.onboarding.step)||1)}" ${ro()}>Continue</button>`:`<button class="btn sm" type="button" data-act="obGo" data-id="${e.id}" data-step="1" ${ro()}>Edit</button>`}
+  <button class="btn sm" type="button" data-act="docs" data-id="${e.id}" title="${pendingDocs(e).length?'Pending: '+pendingDocs(e).map(k=>DOC_TYPES.find(d=>d[0]===k)[1]).join(', '):'All required documents uploaded'}">${ic('file')}${(e.docs||[]).length}${pendingDocs(e).length?` <span class="warn-t">·${pendingDocs(e).length} due</span>`:''}</button>
+  ${e.status==='onboarding'?'':`<button class="btn sm" type="button" data-act="slip" data-id="${e.id}" data-ym="${CUR}">Slip</button>
+  <button class="btn sm ${e.status==='inactive'?'':'danger'}" type="button" data-act="toggleEmp" data-id="${e.id}" ${ro()}>${e.status==='inactive'?'Reactivate':'Deactivate'}</button>`}</div></td></tr>`}).join('')||`<tr><td colspan="10">${empty('No matches','Try a different name, code or location.')}</td></tr>`}
+ </tbody></table></div>`:`<section class="card">${empty('No employees yet','Add people one at a time, or import a CSV from your current payroll sheet.',`<div class="row"><button class="btn primary" type="button" data-act="addEmp" ${ro()}>Add employee</button><button class="btn" type="button" data-act="importEmp" ${ro()}>Import CSV</button></div>`)}</section>`}`;
+};
+
+const attTabs=()=>`<div class="tabs" role="group" aria-label="Attendance sections">${[['grid','Attendance'],['roster','Roster'],['shifts','Shifts']].map(([k,l])=>`<button type="button" data-act="attTab" data-k="${k}" aria-pressed="${S.ui.attTab===k}">${l}</button>`).join('')}</div>`;
+VIEWS.attendance=()=>S.ui.attTab==='roster'?rosterView():S.ui.attTab==='shifts'?shiftsView():attGrid();
+function attGrid(){
+ const ym=S.month,D=daysIn(ym),[y,m]=ym.split('-').map(Number),emps=activeIn(ym),locked=!!S.runs[ym];
+ const days=[...Array(D)].map((_,i)=>i+1),isT=d=>ym===CUR&&d===TODAY.getDate();
+ let tot=0;
+ return attTabs()+`<div class="head"><div><h1>Attendance</h1><p>Click a day to change it. Unmarked days follow the roster: rostered shifts count as present, rostered offs as week off.</p></div>
+ <div class="row"><button class="btn sm" type="button" data-act="month" data-k="-1" aria-label="Previous month">‹</button><b style="min-width:130px;text-align:center">${ymLabel(ym)}</b><button class="btn sm" type="button" data-act="month" data-k="1" aria-label="Next month">›</button>
+ <button class="btn" type="button" data-act="clearAtt" ${locked||!S.canEdit?'disabled':''}>Mark all present</button>
+ <button class="btn" type="button" data-act="dlAtt">${ic('down')}Export</button></div></div>
+ <div class="legend">${Object.entries(CODES).map(([k,v])=>`<span><b class="c-${k}">${k}</b>${v}</span>`).join('')}</div>
+ ${locked?`<div class="note">Payroll for ${ymLabel(ym)} is processed, so attendance is locked. Reopen the run on the payroll page to make changes.</div>`:''}
+ ${emps.length?`<div class="att-wrap"><table class="att"><thead><tr><th class="who-c">Employee (${emps.length})</th>${days.map(d=>`<th class="${isT(d)?'today':''}">${d}<small>${'SMTWTFS'[new Date(y,m-1,d).getDay()]}</small></th>`).join('')}<th class="sum">Paid · LOP</th></tr></thead><tbody>
+ ${emps.map(e=>{const s=attSummary(e,ym);tot+=s.lop;return `<tr><td class="who-c"><b>${esc(e.name)}</b><small>${esc(e.code)} · ${esc(e.dept||'')}</small></td>${days.map(d=>{const c=code(e,ym,d);return `<td><button type="button" class="c c-${c}" data-act="cell" data-id="${e.id}" data-d="${d}" ${c==='NJ'||locked||!S.canEdit?'disabled':''} aria-label="${esc(e.name)}, ${d} ${MON[m-1]}: ${CODES[c]||'Not joined'}">${c==='NJ'?'–':c==='P'?'·':c}</button></td>`}).join('')}
+ <td class="sum num"><b>${s.paid}</b> / ${s.D}${s.lop?` <span class="chip bad">${s.lop} LOP</span>`:''}</td></tr>`}).join('')}
+ </tbody></table></div><p class="small muted" style="margin:0">Total loss-of-pay days this month: <b>${tot}</b>. Approved leave requests are marked here automatically.</p>`:`<section class="card">${empty('No active employees for '+ymLabel(ym),'Add employees first; attendance starts from their joining date.')}</section>`}`;
+};
+
+VIEWS.payroll=()=>{
+ const ym=S.month,md=monthData(ym),t=md.t,runs=Object.keys(S.runs).sort().reverse();
+ const rows=md.rows;
+ const warn=[];if(!md.processed){const e=activeIn(ym);const nb=e.filter(x=>!x.account||!x.ifsc).length,np=e.filter(x=>!x.pan).length,nu=e.filter(x=>x.pf&&!x.uan).length;
+  if(nb)warn.push(nb+' without bank details');if(np)warn.push(np+' without PAN');if(nu)warn.push(nu+' on PF without UAN');
+  if(ym>CUR)warn.push('this month has not started yet');}
+ return `<div class="head"><div><h1>Run payroll</h1><p>Loss of pay comes from attendance, PT from each employee's state, and loan EMIs from approved loans. Add bonus or other deductions before processing.</p></div>
+ <div class="row"><button class="btn sm" type="button" data-act="month" data-k="-1" aria-label="Previous month">‹</button><b style="min-width:130px;text-align:center">${ymLabel(ym)}</b><button class="btn sm" type="button" data-act="month" data-k="1" aria-label="Next month">›</button></div></div>
+ ${rows.length?`
+ <section class="card"><div class="card-h"><div><h2>Payroll · ${ymLabel(ym)}</h2><small>${md.processed?'Processed '+fmtDate((md.run.processedAt||'').slice(0,10))+' · '+t.count+' employees':'Draft · '+t.count+' employees'}</small></div>
+ <div class="right"><small class="muted">Total net payout</small><div class="num" style="font-family:var(--f-display);font-size:26px;font-weight:800;color:var(--ok)">${inr(t.net)}</div></div></div>
+ <div class="kpis"><div class="kpi"><small>Gross</small><b>${inr(t.gross)}</b></div><div class="kpi ok"><small>PF (employee)</small><b>${inr(t.pfEE)}</b></div><div class="kpi"><small>ESI (employee)</small><b>${inr(t.esiEE)}</b></div><div class="kpi warn"><small>TDS</small><b>${inr(t.tds)}</b></div><div class="kpi bad"><small>LOP days</small><b>${rows.reduce((s,r)=>s+r.lop,0)}</b></div><div class="kpi"><small>Cost to company</small><b>${inr(t.ctc)}</b></div></div>
+ <div class="row" style="margin-top:14px">${md.processed?`
+  <button class="btn" type="button" data-act="dlReg" data-ym="${ym}">${ic('down')}Payroll register</button><button class="btn" type="button" data-act="dlBank" data-ym="${ym}">${ic('down')}Bank transfer file</button><button class="btn" type="button" data-act="dlEcr" data-ym="${ym}">${ic('down')}PF ECR file</button>
+  <span class="grow"></span><button class="btn danger" type="button" data-act="reopen" data-ym="${ym}" ${ro()}>Reopen run</button>`:`
+  <button class="btn primary" type="button" data-act="process" data-ym="${ym}" ${ro()}>${ic('play')}Process payroll</button>${warn.length?`<span class="chip warn">Pre-check: ${esc(warn.join(' · '))}</span>`:'<span class="chip ok">Pre-check passed</span>'}`}</div></section>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Employee</th><th class="n">Paid days</th><th class="n">Gross</th><th class="n">Bonus / OT</th><th class="n">PF</th><th class="n">ESI</th><th class="n">PT</th><th class="n">TDS</th><th class="n">Loan EMI</th><th class="n">Other ded.</th><th class="n">Net pay</th><th class="n">Slip</th></tr></thead><tbody>
+ ${rows.map(r=>`<tr><td><b>${esc(r.name)}</b><small>${esc(r.code)} · ${esc(r.designation)}</small></td><td class="n">${r.paid}/${r.D}${r.lop?`<small style="color:var(--bad)">${r.lop} LOP</small>`:''}</td><td class="n">${inr(r.gross)}</td>
+  <td class="n">${md.processed?inr(r.bonus):`<input class="cell" id="b-${r.empId}" type="number" min="0" step="1" value="${r.bonus||''}" placeholder="0" data-inp="bonus" data-id="${r.empId}" aria-label="Bonus for ${esc(r.name)}" ${ro()}>`}</td>
+  <td class="n">${r.pfEE?inr(r.pfEE):'—'}</td><td class="n">${r.esiEE?inr(r.esiEE):'—'}</td><td class="n">${r.pt?inr(r.pt):'—'}</td><td class="n">${r.tds?inr(r.tds):'—'}</td><td class="n">${r.loan?inr(r.loan):'—'}</td>
+  <td class="n">${md.processed?(r.other?inr(r.other):'—'):`<input class="cell" id="o-${r.empId}" type="number" min="0" step="1" value="${r.other||''}" placeholder="0" data-inp="other" data-id="${r.empId}" aria-label="Other deduction for ${esc(r.name)}" ${ro()}>`}</td>
+  <td class="n" style="font-weight:800;color:var(--ok)">${inr(r.net)}</td><td class="n"><button class="btn sm" type="button" data-act="slip" data-id="${r.empId}" data-ym="${ym}">View</button></td></tr>`).join('')}
+ </tbody><tfoot><tr><td>Total</td><td></td><td class="n">${inr(t.gross)}</td><td class="n">${inr(t.bonus)}</td><td class="n">${inr(t.pfEE)}</td><td class="n">${inr(t.esiEE)}</td><td class="n">${inr(t.pt)}</td><td class="n">${inr(t.tds)}</td><td class="n">${inr(t.loan)}</td><td class="n">${inr(t.other)}</td><td class="n">${inr(t.net)}</td><td></td></tr></tfoot></table></div>`
+ :`<section class="card">${empty('Nobody to pay for '+ymLabel(ym),'Payroll includes active employees who joined on or before the last day of the month.')}</section>`}
+ <section class="card"><div class="card-h"><h2>Past runs</h2><small>${runs.length} processed</small></div>
+ ${runs.length?`<div class="tbl-wrap" style="border:none"><table class="tbl"><thead><tr><th>Month</th><th class="n">Employees</th><th class="n">Gross</th><th class="n">Net</th><th>Processed</th><th class="n"></th></tr></thead><tbody>${runs.map(k=>{const r=S.runs[k];return `<tr><td><b>${ymLabel(k)}</b></td><td class="n">${r.totals.count}</td><td class="n">${inr(r.totals.gross)}</td><td class="n">${inr(r.totals.net)}</td><td>${fmtDate((r.processedAt||'').slice(0,10))}</td><td class="n"><button class="btn sm" type="button" data-act="goMonth" data-ym="${k}">Open</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="muted small" style="margin:0">No runs yet.</p>'}</section>`;
+};
+
+VIEWS.leave=()=>{
+ const L=Object.entries(S.leaves).sort((a,b)=>(b[1].from||'').localeCompare(a[1].from||'')),tab=S.ui.leaveTab;
+ const cnt=s=>L.filter(([,l])=>l.status===s).length,thisM=L.filter(([,l])=>(l.from||'').slice(0,7)===CUR).length;
+ const list=L.filter(([,l])=>tab==='all'||l.status===tab);
+ return `<div class="head"><div><h1>Leave</h1><p>Approving a request marks it on the attendance grid. Leave without pay counts as loss of pay.</p></div><button class="btn primary" type="button" data-act="applyLeave" ${ro()}>${ic('plus')}Apply leave</button></div>
+ <div class="kpis"><div class="kpi warn"><small>Pending</small><b>${cnt('pending')}</b></div><div class="kpi ok"><small>Approved</small><b>${cnt('approved')}</b></div><div class="kpi bad"><small>Rejected</small><b>${cnt('rejected')}</b></div><div class="kpi"><small>This month</small><b>${thisM}</b></div></div>
+ <div class="tabs" role="group" aria-label="Filter">${['all','pending','approved','rejected'].map(k=>`<button type="button" data-act="leaveTab" data-k="${k}" aria-pressed="${tab===k}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div>
+ ${L.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th class="n">Days</th><th>Reason</th><th>Status</th><th class="n">Actions</th></tr></thead><tbody>
+ ${list.map(([id,l])=>`<tr><td><b>${esc(nameOf(l.empId))}</b></td><td><span class="chip ${l.type==='LWP'?'plum':'info'}">${esc(LEAVE_TYPES[l.type]||l.type)}</span></td><td>${fmtDate(l.from)}</td><td>${fmtDate(l.to)}</td><td class="n">${l.days}</td><td>${esc(l.reason||'—')}</td>
+ <td><span class="chip ${l.status==='approved'?'ok':l.status==='rejected'?'bad':'warn'}">${l.status}</span></td>
+ <td><div class="acts">${l.status==='pending'?`<button class="btn sm" type="button" data-act="leaveOk" data-id="${id}" ${ro()}>Approve</button><button class="btn sm danger" type="button" data-act="leaveNo" data-id="${id}" ${ro()}>Reject</button>`:`<button class="btn sm" type="button" data-act="leaveDel" data-id="${id}" ${ro()}>Delete</button>`}</div></td></tr>`).join('')||`<tr><td colspan="8">${empty('Nothing here','No '+tab+' requests.')}</td></tr>`}
+ </tbody></table></div>`:`<section class="card">${empty('No leave requests yet','Apply leave on behalf of an employee to start the register.')}</section>`}`;
+};
+
+VIEWS.loans=()=>{
+ const L=Object.entries(S.loans).sort((a,b)=>(b[1].created||'').localeCompare(a[1].created||''));
+ const out=L.filter(([,l])=>l.status==='approved').reduce((s,[,l])=>s+N(l.balance),0);
+ return `<div class="head"><div><h1>Loans & advances</h1><p>Approved loans are recovered as an EMI through payroll, starting from the month you choose.</p></div><button class="btn primary" type="button" data-act="newLoan" ${ro()}>${ic('plus')}New loan</button></div>
+ <div class="kpis"><div class="kpi warn"><small>Pending</small><b>${L.filter(([,l])=>l.status==='pending').length}</b></div><div class="kpi"><small>Active</small><b>${L.filter(([,l])=>l.status==='approved').length}</b></div><div class="kpi ok"><small>Outstanding</small><b>${inr(out)}</b></div><div class="kpi"><small>Closed</small><b>${L.filter(([,l])=>l.status==='closed').length}</b></div></div>
+ ${L.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Employee</th><th>Type</th><th class="n">Amount</th><th class="n">EMI</th><th class="n">Tenure</th><th>Starts</th><th class="n">Balance</th><th>Status</th><th class="n">Actions</th></tr></thead><tbody>
+ ${L.map(([id,l])=>`<tr><td><b>${esc(nameOf(l.empId))}</b><small>${esc(l.reason||'')}</small></td><td><span class="chip info">${esc(l.type)}</span></td><td class="n">${inr(l.amount)}</td><td class="n">${inr(l.emi)}</td><td class="n">${l.tenure} mo</td><td>${ymLabel(l.start||CUR)}</td>
+ <td class="n" style="color:${N(l.balance)>0?'var(--mari)':'var(--ok)'};font-weight:700">${inr(l.status==='pending'?l.amount:l.balance)}<small>${(l.paidMonths||[]).length} EMI${(l.paidMonths||[]).length===1?'':'s'} paid</small></td>
+ <td><span class="chip ${l.status==='approved'?'ok':l.status==='rejected'?'bad':l.status==='closed'?'':'warn'}">${l.status==='approved'?'Active':l.status}</span></td>
+ <td><div class="acts">${l.status==='pending'?`<button class="btn sm" type="button" data-act="loanOk" data-id="${id}" ${ro()}>Approve</button><button class="btn sm danger" type="button" data-act="loanNo" data-id="${id}" ${ro()}>Reject</button>`:l.status==='approved'?`<button class="btn sm" type="button" data-act="loanClose" data-id="${id}" ${ro()}>Mark settled</button>`:`<button class="btn sm" type="button" data-act="loanDel" data-id="${id}" ${ro()}>Delete</button>`}</div></td></tr>`).join('')}
+ </tbody></table></div>`:`<section class="card">${empty('No loans or advances','Record a salary advance or loan and its EMI will be deducted automatically.')}</section>`}`;
+};
+
+VIEWS.compliance=()=>{
+ const c=S.cfg,fy=TODAY.getMonth()>=3?TODAY.getFullYear():TODAY.getFullYear()-1;
+ const months=[ymShift(CUR,-1),CUR];
+ const item=(ym,k,n,day,sub,amt)=>{const nx=ymShift(ym,1),[y,m]=nx.split('-').map(Number),dt=new Date(y,m-1,day),left=Math.ceil((dt-new Date(TODAY.toDateString()))/864e5),done=(S.filings[ym]||{})[k];
+  return `<div><div class="date"><b>${day}</b><small>${MON[m-1].slice(0,3)}</small></div><div class="grow"><b>${n}</b><span class="small muted">${sub} · for ${ymLabel(ym)}</span></div><div class="right"><b class="num">${inr(amt)}</b><div class="small">${done?'<span class="chip ok">Paid</span>':left<0?'<span class="chip bad">Overdue '+(-left)+'d</span>':'<span class="muted">in '+left+'d</span>'}</div></div>
+  <button class="btn sm" type="button" data-act="filing" data-ym="${ym}" data-k="${k}" ${ro()}>${done?'Undo':'Mark paid'}</button></div>`};
+ const q=[['Q1 (Apr–Jun)','31 Jul '+fy],['Q2 (Jul–Sep)','31 Oct '+fy],['Q3 (Oct–Dec)','31 Jan '+(fy+1)],['Q4 (Jan–Mar)','31 May '+(fy+1)]];
+ return `<div class="head"><div><h1>Compliance</h1><p>Statutory rates used in every payroll run, and the deposits each month creates. Rates are editable in Settings; confirm them with your CA.</p></div></div>
+ <section class="card"><div class="card-h"><h2>Deposits due</h2><small>from processed or estimated payroll</small></div><div class="list">
+ ${months.map(ym=>{const t=monthData(ym).t;return item(ym,'tds','TDS deposit','7','Challan ITNS 281',t.tds)+item(ym,'pf','PF remittance','15','ECR upload · EPFO',t.pfEE+t.pfER)+item(ym,'esi','ESI contribution','15','ESIC portal',t.esiEE+t.esiER)}).join('')}
+ </div></section>
+ <div class="grid">
+  <section class="card"><h2>Provident fund</h2><p class="small muted">EPF & MP Act, 1952</p>
+   <div class="rate"><span>Employee contribution</span><b>${c.pf.ee}% of basic</b></div><div class="rate"><span>Employer: EPS</span><b>8.33% (max ₹1,250)</b></div><div class="rate"><span>Employer: EPF</span><b>${(c.pf.er-8.33).toFixed(2)}%</b></div><div class="rate"><span>Wage ceiling</span><b>${inr(c.pf.ceiling)} / month</b></div><div class="rate"><span>Due</span><b>15th of next month</b></div></section>
+  <section class="card"><h2>ESI</h2><p class="small muted">ESI Act, 1948</p>
+   <div class="rate"><span>Employee</span><b>${c.esi.ee}% of gross</b></div><div class="rate"><span>Employer</span><b>${c.esi.er}% of gross</b></div><div class="rate"><span>Applies up to</span><b>${inr(c.esi.limit)} gross / month</b></div><div class="rate"><span>Due</span><b>15th of next month</b></div>
+   <p class="small muted" style="margin:8px 0 0">${activeIn(CUR).filter(e=>fixedGross(e)<=c.esi.limit).length} of ${activeIn(CUR).length} employees covered</p></section>
+  <section class="card"><h2>TDS on salary</h2><p class="small muted">New regime · FY ${fy}-${String(fy+1).slice(2)}</p>
+   ${c.tds.slabs.map((s,i)=>{const from=i?N(c.tds.slabs[i-1][0]):0;return `<div class="rate"><span>${N(s[0])?lakh(from)+' – '+lakh(N(s[0])):'Above '+lakh(from)}</span><b>${s[1]}%</b></div>`}).join('')}
+   <p class="small muted" style="margin:8px 0 0">Standard deduction ${inr(c.tds.std)}, rebate up to ${lakh(c.tds.rebate)} taxable, ${c.tds.cess}% cess.</p></section>
+  <section class="card"><h2>Professional tax</h2><p class="small muted">Monthly, by work-location state</p>
+   ${[...new Set(activeIn(CUR).map(e=>e.state||'Other'))].map(s=>`<div class="rate"><span>${esc(s)}</span><b class="small" style="font-weight:600">${esc((PT_STATES[s]||PT_STATES.Other).note)}</b></div>`).join('')||'<p class="muted small">Add employees to see their states.</p>'}</section>
+ </div>
+ <section class="card"><div class="card-h"><h2>Quarterly TDS returns (Form 24Q)</h2><small>FY ${fy}-${String(fy+1).slice(2)}</small></div>
+ <div class="kpis">${q.map(([a,b])=>`<div class="kpi"><small>${a}</small><b style="font-size:17px">${b}</b></div>`).join('')}</div>
+ <p class="small muted" style="margin:10px 0 0">Form 16 to employees by 15 June. Labour Welfare Fund, where your state levies it, is not calculated here.</p></section>`;
+};
+
+VIEWS.reports=()=>{
+ const ym=S.ui.reportMonth,runs=Object.keys(S.runs).sort().reverse();
+ const R=[['Employee master','Every employee with salary structure, statutory IDs and bank details','repMaster'],['Payroll register','Month-wise earnings, deductions and net pay','dlReg'],['Bank transfer file','NEFT upload sheet: name, account, IFSC, amount','dlBank'],['PF ECR file','EPFO ECR text file for the selected month','dlEcr'],['Attendance register','Day-by-day attendance with LOP','dlAtt'],['Leave register','All leave requests and their status','repLeave'],['Loan statement','Loans, EMIs and outstanding balances','repLoan'],['CTC report','Annual cost to company per employee','repCtc'],['Department summary','Headcount and monthly payroll cost by department','repDept']];
+ return `<div class="head"><div><h1>Reports</h1><p>Each report downloads as a CSV you can open in Excel or Google Sheets.</p></div>
+ <div class="row"><label class="small muted" for="repM">Month</label><select class="input" id="repM" style="width:auto">${[...new Set([CUR,...runs,ymShift(CUR,-1)])].sort().reverse().map(k=>`<option value="${k}" ${k===ym?'selected':''}>${ymLabel(k)}${S.runs[k]?'':' (estimate)'}</option>`).join('')}</select></div></div>
+ ${S.dl?'':'<div class="note warn">Downloads are not available in this view, so report buttons are turned off.</div>'}
+ <div class="grid">${R.map(([n,d,a])=>`<section class="card" style="display:flex;flex-direction:column;gap:8px"><h2>${n}</h2><p class="small muted" style="margin:0;flex:1">${d}</p><div><button class="btn sm" type="button" data-act="${a}" data-ym="${ym}" ${S.dl?'':'disabled'}>${ic('down')}CSV</button></div></section>`).join('')}</div>`;
+};
+
+VIEWS.settings=()=>{
+ const c=S.cfg,co=c.company;
+ return `<div class="head"><div><h1>Settings</h1><p>These apply to every payroll run that has not been processed yet.</p></div></div>
+ <form class="card" id="fCompany" style="display:flex;flex-direction:column;gap:14px"><h2>Company</h2><div class="fgrid">
+  <div class="field"><label for="s_name">Company name</label><input id="s_name" name="name" value="${esc(co.name)}" required ${ro()}></div>
+  <div class="field"><label for="s_admin">Your name</label><input id="s_admin" name="admin" value="${esc(c.admin)}" ${ro()}></div>
+  <div class="field"><label for="s_state">Registered state</label><select id="s_state" name="state" ${ro()}>${STATES.map(s=>`<option ${s===co.state?'selected':''}>${s}</option>`).join('')}</select></div>
+  <div class="field"><label for="s_pan">Company PAN</label><input id="s_pan" name="pan" value="${esc(co.pan)}" maxlength="10" ${ro()}></div>
+  <div class="field"><label for="s_tan">TAN</label><input id="s_tan" name="tan" value="${esc(co.tan)}" maxlength="10" ${ro()}></div>
+  <div class="field"><label for="s_pf">PF establishment code</label><input id="s_pf" name="pfCode" value="${esc(co.pfCode)}" ${ro()}></div>
+  <div class="field"><label for="s_esi">ESIC code</label><input id="s_esi" name="esiCode" value="${esc(co.esiCode)}" ${ro()}></div>
+  <div class="field" style="grid-column:1/-1"><label for="s_addr">Address (shown on payslips)</label><input id="s_addr" name="address" value="${esc(co.address)}" ${ro()}></div>
+ </div><div><button class="btn primary" type="submit" ${ro()}>Save company</button></div></form>
+ <form class="card" id="fRates" style="display:flex;flex-direction:column;gap:14px"><h2>Statutory rates</h2><div class="fgrid">
+  <div class="field"><label for="r_pfee">PF employee %</label><input id="r_pfee" name="pfee" type="number" step="0.01" value="${c.pf.ee}" ${ro()}></div>
+  <div class="field"><label for="r_pfer">PF employer %</label><input id="r_pfer" name="pfer" type="number" step="0.01" value="${c.pf.er}" ${ro()}></div>
+  <div class="field"><label for="r_pfc">PF wage ceiling ₹</label><input id="r_pfc" name="pfc" type="number" value="${c.pf.ceiling}" ${ro()}></div>
+  <div class="field"><label for="r_esee">ESI employee %</label><input id="r_esee" name="esee" type="number" step="0.01" value="${c.esi.ee}" ${ro()}></div>
+  <div class="field"><label for="r_eser">ESI employer %</label><input id="r_eser" name="eser" type="number" step="0.01" value="${c.esi.er}" ${ro()}></div>
+  <div class="field"><label for="r_esl">ESI gross limit ₹</label><input id="r_esl" name="esl" type="number" value="${c.esi.limit}" ${ro()}></div>
+  <div class="field"><label for="r_std">Standard deduction ₹</label><input id="r_std" name="std" type="number" value="${c.tds.std}" ${ro()}></div>
+  <div class="field"><label for="r_reb">Rebate limit (taxable) ₹</label><input id="r_reb" name="reb" type="number" value="${c.tds.rebate}" ${ro()}></div>
+  <div class="field"><label for="r_cess">Cess %</label><input id="r_cess" name="cess" type="number" step="0.1" value="${c.tds.cess}" ${ro()}></div>
+  <div class="fsec">New-regime slabs (upper limit ₹ · rate %, leave the last limit 0 for "above")</div>
+  ${c.tds.slabs.map((s,i)=>`<div class="field"><label for="sl_${i}">Slab ${i+1}</label><div class="row" style="flex-wrap:nowrap"><input class="input" id="sl_${i}" name="sl_${i}" type="number" value="${s[0]}" aria-label="Slab ${i+1} upper limit" ${ro()}><input class="input" style="width:80px" id="sr_${i}" name="sr_${i}" type="number" step="0.1" value="${s[1]}" aria-label="Slab ${i+1} rate" ${ro()}></div></div>`).join('')}
+ </div><div><button class="btn primary" type="submit" ${ro()}>Save rates</button></div></form>
+ <form class="card" id="fStruct" style="display:flex;flex-direction:column;gap:14px"><h2>Salary structures</h2><p class="small muted" style="margin:-6px 0 0">When you add an employee, pick a structure and enter monthly gross. Basic is a % of gross, HRA a % of basic, conveyance a fixed amount, and the rest becomes special allowance.</p>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Name</th><th class="n">Basic % of gross</th><th class="n">HRA % of basic</th><th class="n">Conveyance ₹</th></tr></thead><tbody>
+ ${c.structures.map((s,i)=>`<tr><td><input class="input" name="sn_${i}" value="${esc(s.name)}" aria-label="Structure ${i+1} name" ${ro()}></td><td class="n"><input class="cell" name="sb_${i}" type="number" value="${s.basic}" aria-label="Basic %" ${ro()}></td><td class="n"><input class="cell" name="sh_${i}" type="number" value="${s.hra}" aria-label="HRA %" ${ro()}></td><td class="n"><input class="cell" name="sc_${i}" type="number" value="${s.conv}" aria-label="Conveyance" ${ro()}></td></tr>`).join('')}
+ </tbody></table></div><div><button class="btn primary" type="submit" ${ro()}>Save structures</button></div></form>
+ <section class="card" style="display:flex;flex-direction:column;gap:12px"><h2>Backup & restore</h2>
+ <p class="small muted" style="margin:0">${S.local?'This copy of the app keeps its data in this browser only. Clearing site data or switching device loses it, so download a backup regularly.':'Download every record as one file, for safekeeping or to move to another copy of the app.'} Uploaded documents are not included in the backup file.</p>
+ <div class="row"><button class="btn" type="button" data-act="backup" ${S.dl?'':'disabled'}>${ic('down')}Download backup</button>
+ <label class="btn ${S.canEdit?'':'disabled'}">${ic('up')}Restore from backup<input class="vh" type="file" id="restoreFile" accept="application/json,.json" ${ro()}></label></div></section>`;
+};
+
+/* ============ onboarding ============ */
+VIEWS.onboarding=()=>{
+ const all=empList(),prog=all.filter(e=>e.status==='onboarding'),done=all.filter(e=>e.onboarding&&e.onboarding.completed).sort((a,b)=>b.onboarding.completed.localeCompare(a.onboarding.completed));
+ const pend=all.filter(e=>isAct(e)&&pendingDocs(e).length),docName=k=>DOC_TYPES.find(d=>d[0]===k)[1];
+ return `<div class="head"><div><h1>Onboarding</h1><p>Collect a new joiner's details, salary, statutory IDs and documents in four steps. They join payroll once onboarding is complete.</p></div>
+ <button class="btn primary" type="button" data-act="obNew" ${ro()}>${ic('plus')}Start onboarding</button></div>
+ <div class="kpis"><div class="kpi warn"><small>In progress</small><b>${prog.length}</b></div><div class="kpi ok"><small>Completed</small><b>${done.length}</b></div><div class="kpi bad"><small>Documents pending</small><b>${pend.length+prog.filter(e=>pendingDocs(e).length).length}</b></div><div class="kpi"><small>Total employees</small><b>${all.filter(e=>e.status!=='inactive').length}</b></div></div>
+ <section class="card"><div class="card-h"><h2>In progress</h2><small>${prog.length} joiner${prog.length===1?'':'s'}</small></div>
+ ${prog.length?`<div class="tbl-wrap" style="border:none"><table class="tbl"><thead><tr><th>Joiner</th><th>Role</th><th>Joining</th><th>Progress</th><th>Documents</th><th class="n">Actions</th></tr></thead><tbody>
+ ${prog.map(e=>{const st=Math.min(4,(e.onboarding&&e.onboarding.step)||1),pd=pendingDocs(e);return `<tr><td><b>${esc(e.name||'Unnamed')}</b><small>${esc(e.code||'')} · started ${fmtDate(((e.onboarding&&e.onboarding.started)||'').slice(0,10))}</small></td><td>${esc(e.designation||'—')}<small>${esc(e.dept||'')}</small></td><td>${fmtDate(e.doj)}</td>
+ <td style="min-width:150px"><div class="small" style="margin-bottom:4px">Step ${st} of 4 · ${OB_STEPS[st-1]}</div><div class="bar"><i style="width:${(st-1)/4*100}%"></i></div></td>
+ <td>${pd.length?`<span class="chip warn">${REQ_DOCS.length-pd.length} of ${REQ_DOCS.length} required</span>`:'<span class="chip ok">All required</span>'}</td>
+ <td><div class="acts"><button class="btn sm primary" type="button" data-act="obGo" data-id="${e.id}" data-step="${st}" ${ro()}>Continue</button><button class="btn sm danger" type="button" data-act="obDiscard" data-id="${e.id}" ${ro()}>Discard</button></div></td></tr>`}).join('')}</tbody></table></div>`
+ :empty('No onboarding in progress','Start one for a new joiner. You can save at any step and continue later.',`<button class="btn primary" type="button" data-act="obNew" ${ro()}>Start onboarding</button>`)}</section>
+ ${pend.length?`<section class="card"><div class="card-h"><h2>Documents still needed</h2><small>active employees</small></div><div class="list">${pend.map(e=>`<div><div class="icon w">${ic('file')}</div><div class="grow"><b>${esc(e.name)}</b><span class="small muted">${pendingDocs(e).map(docName).join(' · ')}</span></div><button class="btn sm" type="button" data-act="docs" data-id="${e.id}">Upload</button></div>`).join('')}</div></section>`:''}
+ ${done.length?`<section class="card"><div class="card-h"><h2>Recently completed</h2></div><div class="list">${done.slice(0,6).map(e=>`<div><div class="icon">${ic('clip')}</div><div class="grow"><b>${esc(e.name)}</b><span class="small muted">${esc(e.designation||'')} · joined ${fmtDate(e.doj)}</span></div><span class="small muted">${fmtDate(e.onboarding.completed.slice(0,10))}</span></div>`).join('')}</div></section>`:''}`;
+};
+const shiftOpts=()=>S.cfg.shifts.map(s=>[s.id,s.name+' ('+s.start+'–'+s.end+')']);
+const offOpts=()=>[...WEEKDAYS.map((w,i)=>[i,w]),[-1,'No fixed weekly off']];
+function bindSplit(f){
+ if(!f.struct)return;const st=S.cfg.structures,upd=()=>{$('#grossOut').textContent=inr(['basic','hra','conv','special'].reduce((s,k)=>s+N(f[k].value),0))};
+ const split=()=>{const s=st.find(x=>x.id===f.struct.value),g=N(f.mgross.value);if(!s||!g)return;const b=Math.round(g*s.basic/100),h=Math.round(b*s.hra/100),cv=Math.min(N(s.conv),Math.max(0,g-b-h));f.basic.value=b;f.hra.value=h;f.conv.value=cv;f.special.value=Math.max(0,g-b-h-cv);upd()};
+ f.struct.addEventListener('change',split);f.mgross.addEventListener('input',split);['basic','hra','conv','special'].forEach(k=>f[k].addEventListener('input',upd));
+}
+function wizard(id,step){
+ step=+step||1;const isNew=!id,e=id?(S.emps[id]||{}):{pf:true,state:S.cfg.company.state,doj:TODAY.toISOString().slice(0,10),weekOff:0,shift:S.cfg.defaultShift,empType:'Permanent'};
+ const editing=id&&e.status!=='onboarding',last=step===4;
+ let b=`<ol class="steps">${OB_STEPS.map((s,i)=>`<li class="${i+1<step?'done':i+1===step?'cur':''}"><b>${i+1<step?'✓':i+1}</b><span>${s}</span></li>`).join('')}</ol>`;
+ if(step===1)b+=`<div class="fgrid">${fld('code','Employee code',e.code,{req:1,ph:'EMP006'})}${fld('name','Full name',e.name,{req:1,ph:'As on PAN'})}${fld('email','Personal or work email',e.email,{type:'email'})}${fld('phone','Mobile',e.phone,{type:'tel',req:1,ph:'10 digits'})}
+  ${fld('dob','Date of birth',e.dob,{type:'date'})}${fld('gender','Gender',e.gender,{sel:['','Female','Male','Other']})}${fld('father',"Father's or spouse's name",e.father)}${fld('marital','Marital status',e.marital,{sel:['','Single','Married','Other']})}
+  ${fld('aadhaar','Aadhaar number',e.aadhaar,{max:14,ph:'XXXX XXXX XXXX'})}${fld('blood','Blood group',e.blood,{sel:['','A+','A−','B+','B−','AB+','AB−','O+','O−']})}${fld('address','Current address',e.address,{full:1})}
+  ${fld('emName','Emergency contact name',e.emName)}${fld('emPhone','Emergency contact phone',e.emPhone,{type:'tel'})}</div>`;
+ if(step===2)b+=`<div class="fgrid">${fld('designation','Designation',e.designation,{req:1})}${fld('dept','Department',e.dept,{req:1})}${fld('doj','Date of joining',e.doj,{type:'date',req:1})}${fld('empType','Employment type',e.empType,{sel:['Permanent','Probation','Contract','Intern']})}
+  ${fld('manager','Reporting manager',e.manager)}${fld('state','Work location (state)',e.state,{sel:STATES,hint:'Sets professional tax'})}${fld('shift','Default shift',defShiftOf(e),{sel:shiftOpts()})}${fld('weekOff','Weekly off',weekOffOf(e),{sel:offOpts()})}
+  ${editing?fld('status','Status',e.status||'active',{sel:[['active','Active'],['inactive','Inactive']]}):''}
+  <div class="fsec">Monthly salary</div>${fld('struct','Fill from structure','',{sel:[['','Enter components myself'],...S.cfg.structures.map(s=>[s.id,s.name])]})}${fld('mgross','Monthly gross ₹','',{type:'number',hint:'With a structure picked, this splits into the fields below'})}
+  ${fld('basic','Basic',e.basic,{type:'number'})}${fld('hra','HRA',e.hra,{type:'number'})}${fld('conv','Conveyance',e.conv,{type:'number'})}${fld('special','Special allowance',e.special,{type:'number'})}
+  <div class="field"><label>Monthly gross</label><b id="grossOut" class="num" style="font-size:18px;padding-top:6px">${inr(fixedGross(e))}</b></div></div>`;
+ if(step===3)b+=`<div class="fgrid"><div class="check"><input type="checkbox" id="pf" name="pf" ${e.pf?'checked':''}><label for="pf">Deduct PF</label></div>
+  ${fld('uan','UAN',e.uan,{max:12,hint:'Leave blank for a first job; add once EPFO allots it'})}${fld('pan','PAN',e.pan,{max:10,ph:'ABCDE1234F'})}
+  ${fld('tdsOverride','TDS per month ₹ (optional)',e.tdsOverride,{type:'number',hint:'Leave blank to estimate under the new regime'})}${fld('ptOverride','PT per month ₹ (optional)',e.ptOverride,{type:'number',hint:'Leave blank to use the state rule'})}
+  <div class="fsec">Bank account for salary</div>${fld('bankName','Bank name',e.bankName)}${fld('account','Account number',e.account)}${fld('ifsc','IFSC',e.ifsc,{max:11,ph:'HDFC0001234'})}</div>`;
+ if(step===4)b+=`<div id="docsBox">${docsPanel(id)}</div>`;
+ const foot=`${step>1?`<button class="btn" type="button" data-act="obBack" data-id="${id||''}" data-step="${step-1}">Back</button>`:''}<span class="grow"></span><button class="btn" type="button" data-act="obSave" data-id="${id||''}" data-step="${step}">Save & close</button><button class="btn primary" type="submit">${last?(editing?'Done':'Complete onboarding'):'Next'}</button>`;
+ modal(editing?'Edit '+esc(e.name):isNew?'Onboard a new employee':'Onboarding · '+esc(e.name||''),b,{foot,submit:f=>obSubmit(f,id,step)});
+ if(step===2)bindSplit($('#mForm'));
+}
+function obCollect(f){
+ const d=Object.fromEntries(new FormData(f)),o={};
+ for(const[k,v]of Object.entries(d)){if(k==='struct'||k==='mgross'||k==='pf')continue;
+  o[k]=['basic','hra','conv','special'].includes(k)?N(v):(k==='tdsOverride'||k==='ptOverride')?(v===''?'':N(v)):k==='weekOff'?+v:String(v).trim()}
+ if(f.querySelector('#pf'))o.pf=!!d.pf;if(o.pan)o.pan=o.pan.toUpperCase();if(o.ifsc)o.ifsc=o.ifsc.toUpperCase();return o;
+}
+function obValidate(o,id,step){
+ if(step===1){if(!o.code||!o.name)return 'Fill in the employee code and full name.';if(!/^\d{10}$/.test((o.phone||'').replace(/\D/g,'').slice(-10))||!o.phone)return 'Enter a 10-digit mobile number.';
+  if(Object.entries(S.emps).some(([k,x])=>k!==id&&String(x.code).toLowerCase()===o.code.toLowerCase()))return 'Another employee already uses code '+o.code+'.';
+  if(o.aadhaar&&o.aadhaar.replace(/\s/g,'').length!==12)return 'Aadhaar should be 12 digits.'}
+ if(step===2){if(!o.designation||!o.dept||!o.doj)return 'Fill in designation, department and date of joining.';if(o.basic+o.hra+o.conv+o.special<=0)return 'Enter the salary, or pick a structure and a monthly gross.'}
+ if(step===3){if(o.pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(o.pan))return 'PAN should look like ABCDE1234F.';if(o.ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(o.ifsc))return 'IFSC should be 11 characters, like HDFC0001234.'}
+ return '';
+}
+function obStore(o,id,step){
+ const now=new Date().toISOString(),nid=id||uid('e'),base=id?S.emps[id]:{status:'onboarding',docs:[],onboarding:{started:now}};
+ const rec={...base,...o,updated:now};
+ if(rec.status==='onboarding')rec.onboarding={...(base.onboarding||{}),step:Math.max(step,(base.onboarding&&base.onboarding.step)||1)};
+ put('employees',nid,rec);return nid;
+}
+function obSubmit(f,id,step){
+ const o=obCollect(f),err=obValidate(o,id,step);if(err)return mErr(err);
+ const nid=obStore(o,id,step+(step<4?1:0));
+ if(step<4){wizard(nid,step+1);return false}
+ const e=S.emps[nid];
+ if(e.status==='onboarding'){const miss=[];if(!e.code||!e.name)miss.push('personal details');if(!e.doj||fixedGross(e)<=0)miss.push('job & salary');
+  if(miss.length){mErr('Complete '+miss.join(' and ')+' before finishing.');return false}
+  put('employees',nid,{...e,status:'active',onboarding:{...e.onboarding,step:4,completed:new Date().toISOString()}});
+  const pd=pendingDocs(e).length;toast(e.name+' is onboarded'+(pd?'; '+pd+' document'+(pd===1?'':'s')+' still pending':''))}
+ else toast('Saved '+e.name);
+ return true;
+}
+function docsPanel(id){
+ S.docsOpen=id;const e=S.emps[id]||{},docs=e.docs||[],can=!!(S.assets&&S.canEdit);
+ return `${can?'':`<div class="note warn">${S.canEdit?'File uploads are not available in this view. Open the app in Claude to upload documents.':'You have view-only access, so you can see documents but not upload them.'}</div>`}
+ <p class="small muted" style="margin:0">PDF, JPG, PNG or WEBP, up to 20 MB each. Required documents are marked *.</p>
+ <div class="docs">${DOC_TYPES.map(([k,label,req])=>{const mine=docs.filter(d=>d.type===k),multi=['edu','exp','other','address'].includes(k);
+  return `<div class="doc"><div class="grow"><b>${label}${req?' *':''}</b>${mine.length?mine.map(d=>{const u=fileUrl(d.id);return `<div class="file">${String(d.ct).startsWith('image/')&&u?`<img src="${esc(u)}" alt="${esc(label)}">`:`<span class="pdf">${String(d.ct).startsWith('image/')?'IMG':'PDF'}</span>`}<span class="grow small">${esc(d.name)}<br><span class="muted">${Math.max(1,Math.round(N(d.size)/1024))} KB · ${fmtDate((d.at||'').slice(0,10))}</span></span>
+   ${u?`<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">View</a>`:''}${S.dl?`<button class="btn sm" type="button" data-act="docDl" data-id="${id}" data-doc="${esc(d.id)}">Download</button>`:''}${can?`<button class="btn sm danger" type="button" data-act="docDel" data-id="${id}" data-doc="${esc(d.id)}">Remove</button>`:''}</div>`}).join(''):`<div class="small ${req?'warn-t':'muted'}" style="margin-top:2px">${req?'Pending':'Optional'}</div>`}</div>
+  ${can&&(!mine.length||multi)?`<label class="btn sm">${ic('up')}${mine.length?'Add another':'Upload'}<input class="vh" type="file" data-up="${k}" data-id="${id}" accept="application/pdf,image/png,image/jpeg,image/webp"></label>`:''}</div>`}).join('')}</div>`;
+}
+const refreshDocs=id=>{const b=document.getElementById('docsBox');if(b)b.innerHTML=docsPanel(id)};
+async function uploadDoc(id,type,file){
+ const types={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp'};
+ const ct=Object.values(types).includes(file.type)?file.type:types[(file.name.split('.').pop()||'').toLowerCase()];
+ if(!ct)return toast('Upload a PDF, JPG, PNG or WEBP file.','bad');
+ if(file.size>20*1024*1024)return toast(file.name+' is over 20 MB. Compress it and try again.','bad');
+ if(!S.assets)return toast('File uploads are not available in this view.','bad');
+ toast('Uploading '+file.name+'…');
+ try{const r=await S.assets.upload(file,{type:ct});const e=S.emps[id];if(!e)return;
+  const docs=[...(e.docs||[]),{id:r.id,type,name:file.name,size:r.sizeBytes,ct:r.contentType,at:new Date().toISOString()}];
+  await put('employees',id,{...e,docs});refreshDocs(id);toast('Uploaded '+file.name)}
+ catch(err){const c=err&&err.code;toast(c==='too_large'?'That file is too large.':c==='unsupported_type'?'That file type is not supported.':c==='quota_or_state'?'Document storage is full. Remove old files first.':c==='rate_limited'?'Too many uploads at once. Wait a moment and try again.':'Upload failed: '+((err&&err.message)||'try again'),'bad')}
+}
+
+/* ============ roster & shifts ============ */
+const weekDays=()=>{const s=new Date(S.ui.week+'T00:00');return[...Array(7)].map((_,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);return d})};
+function rosterView(){
+ const days=weekDays(),sh=S.cfg.shifts,emps=empList().filter(isAct),tIso=isoD(TODAY),cls=v=>v==='OFF'?'shOFF':'sh'+(Math.max(0,sh.findIndex(s=>s.id===v))%6);
+ const label=`${days[0].getDate()} ${MON[days[0].getMonth()].slice(0,3)} – ${days[6].getDate()} ${MON[days[6].getMonth()].slice(0,3)} ${days[6].getFullYear()}`;
+ const cov=days.map(()=>({}));
+ const rows=emps.map(e=>{let hrs=0,off=0;const cells=days.map((d,i)=>{const ym=ymOf(d),dd=d.getDate(),ds=isoD(d);
+  if(e.doj&&ds<e.doj)return '<td class="day"><span class="small muted">Not joined</span></td>';
+  const v=rosterOf(e,ym,dd);if(v==='OFF')off++;else{hrs+=shiftHours(shiftById(v));cov[i][v]=(cov[i][v]||0)+1}
+  const changed=!!(S.roster[ym]&&S.roster[ym].a&&S.roster[ym].a[e.id]&&S.roster[ym].a[e.id][dd]);
+  return `<td class="day"><select class="${cls(v)}" ${changed?'style="border-color:var(--fg)"':''} data-ros="${e.id}" data-date="${ds}" aria-label="${esc(e.name)}, ${WEEKDAYS[d.getDay()]} ${dd} ${MON[d.getMonth()]}" ${S.canEdit?'':'disabled'}>${sh.map(s=>`<option value="${s.id}" ${s.id===v?'selected':''}>${esc(s.name)}</option>`).join('')}<option value="OFF" ${v==='OFF'?'selected':''}>Week off</option></select></td>`}).join('');
+  return `<tr><td><b>${esc(e.name)}</b><small>${esc(e.code)} · ${esc(e.dept||'')}</small></td>${cells}<td class="n num"><b>${hrs.toFixed(1)} h</b><small>${off} off</small></td></tr>`}).join('');
+ return attTabs()+`<div class="head"><div><h1>Roster</h1><p>Pick a shift or week off for each person and day. Untouched days follow each employee's default shift and weekly off; outlined cells were changed.</p></div>
+ <div class="row"><button class="btn sm" type="button" data-act="week" data-k="-1" aria-label="Previous week">‹</button><b style="min-width:170px;text-align:center">${label}</b><button class="btn sm" type="button" data-act="week" data-k="1" aria-label="Next week">›</button><button class="btn sm" type="button" data-act="weekNow">This week</button></div></div>
+ <div class="row"><button class="btn" type="button" data-act="copyWeek" ${ro()}>Copy previous week</button><button class="btn" type="button" data-act="resetWeek" ${ro()}>Reset week to defaults</button><button class="btn" type="button" data-act="dlRoster">${ic('down')}Export month</button>
+ <span class="grow"></span><div class="legend">${sh.map((s,i)=>`<span class="chip sh${i%6}">${esc(s.name)} ${s.start}–${s.end}</span>`).join('')}<span class="chip shOFF">Week off</span></div></div>
+ ${emps.length?`<div class="tbl-wrap"><table class="tbl ros"><thead><tr><th>Employee (${emps.length})</th>${days.map(d=>`<th class="day ${isoD(d)===tIso?'today':''}">${WEEKDAYS[d.getDay()].slice(0,3)}<br>${d.getDate()} ${MON[d.getMonth()].slice(0,3)}</th>`).join('')}<th class="n">Week</th></tr></thead>
+ <tbody>${rows}</tbody><tfoot><tr><td>On shift</td>${cov.map(c=>`<td class="day cov">${sh.map(s=>`${esc(s.name)} ${c[s.id]||0}`).join('<br>')}</td>`).join('')}<td></td></tr></tfoot></table></div>`
+ :`<section class="card">${empty('No active employees','Add employees to build a roster.')}</section>`}`;
+}
+function shiftsView(){
+ const sh=S.cfg.shifts,emps=empList().filter(isAct);
+ return attTabs()+`<div class="head"><div><h1>Shifts</h1><p>Shift timings used in the roster. Each employee's default shift and weekly off are set in their profile.</p></div><button class="btn primary" type="button" data-act="shiftEdit" ${ro()}>${ic('plus')}Add shift</button></div>
+ <div class="grid">${sh.map((s,i)=>`<section class="card shift"><div class="card-h" style="margin:0"><h2>${esc(s.name)}</h2>${s.id===S.cfg.defaultShift?'<span class="chip acc">Default</span>':''}</div>
+  <div class="t"><span class="chip sh${i%6}" style="font-size:16px;padding:4px 12px">${esc(s.start)} – ${esc(s.end)}</span></div>
+  <div class="small muted">${shiftHours(s).toFixed(1)} working hours · ${N(s.brk)} min break${s.end<=s.start?' · ends next day':''}</div>
+  <div class="small">${emps.filter(e=>defShiftOf(e)===s.id).length} employee${emps.filter(e=>defShiftOf(e)===s.id).length===1?'':'s'} by default</div>
+  <div class="row">${s.id!==S.cfg.defaultShift?`<button class="btn sm" type="button" data-act="shiftDef" data-id="${s.id}" ${ro()}>Make default</button>`:''}<button class="btn sm" type="button" data-act="shiftEdit" data-id="${s.id}" ${ro()}>Edit</button>${s.id!==S.cfg.defaultShift&&sh.length>1?`<button class="btn sm danger" type="button" data-act="shiftDel" data-id="${s.id}" ${ro()}>Delete</button>`:''}</div></section>`).join('')}</div>
+ <section class="card"><div class="card-h"><h2>Defaults by employee</h2><small>used wherever the roster is untouched</small></div>
+ ${emps.length?`<div class="tbl-wrap" style="border:none"><table class="tbl"><thead><tr><th>Employee</th><th>Default shift</th><th>Weekly off</th><th class="n"></th></tr></thead><tbody>${emps.map(e=>`<tr><td><b>${esc(e.name)}</b><small>${esc(e.code)} · ${esc(e.dept||'')}</small></td><td>${esc(shiftById(defShiftOf(e)).name)}</td><td>${weekOffOf(e)<0?'None':WEEKDAYS[weekOffOf(e)]}</td><td class="n"><button class="btn sm" type="button" data-act="obGo" data-id="${e.id}" data-step="2" ${ro()}>Change</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted small" style="margin:0">No active employees yet.</p>'}</section>`;
+}
+function rosterWrite(changes){
+ const docs={};changes.forEach(([e,date,v])=>{const ym=ymOf(date),dd=date.getDate(),doc=docs[ym]||(docs[ym]=clone(S.roster[ym]));doc.a=doc.a||{};doc.a[e.id]=doc.a[e.id]||{};
+  if(v==null||v===rosterDefault(e,ym,dd))delete doc.a[e.id][dd];else doc.a[e.id][dd]=v});
+ Object.entries(docs).forEach(([ym,doc])=>put('roster',ym,doc));
+}
+function shiftForm(id){
+ const s=id?S.cfg.shifts.find(x=>x.id===id):{name:'',start:'09:00',end:'18:00',brk:60};
+ modal(id?'Edit shift':'Add shift',`<div class="fgrid">${fld('sName','Shift name',s.name,{req:1,full:1,ph:'e.g. Early morning'})}${fld('sStart','Starts',s.start,{type:'time'})}${fld('sEnd','Ends',s.end,{type:'time',hint:'An end before the start runs past midnight'})}${fld('sBrk','Break (minutes)',s.brk,{type:'number'})}</div>`,{sm:'Save shift',submit:f=>{
+  const n=f.sName.value.trim();if(!n)return mErr('Give the shift a name.');if(!f.sStart.value||!f.sEnd.value)return mErr('Set a start and end time.');
+  const c=clone(S.cfg),rec={id:id||uid('s'),name:n,start:f.sStart.value,end:f.sEnd.value,brk:N(f.sBrk.value)};
+  c.shifts=id?c.shifts.map(x=>x.id===id?rec:x):[...c.shifts,rec];put('config','main',c);toast('Saved '+n);return true}});
+}
+Object.assign(VIEWS,{});
+const A2={
+ obNew:()=>wizard(null,1),
+ obGo:d=>wizard(d.id,+d.step||1),
+ obBack:d=>{const f=$('#mForm');if(d.id&&f&&+d.step<3){obStore(obCollect(f),d.id,+d.step+1)}wizard(d.id||null,+d.step)},
+ obSave:d=>{const f=$('#mForm'),o=f?obCollect(f):{};if(!d.id&&(!o.code||!o.name))return mErr('Add at least the employee code and name to save a draft.');
+  if(!d.id&&Object.values(S.emps).some(x=>String(x.code).toLowerCase()===String(o.code).toLowerCase()))return mErr('Another employee already uses code '+o.code+'.');
+  obStore(o,d.id||null,+d.step);closeModal();toast('Saved. Continue anytime from Onboarding.')},
+ obDiscard:d=>{const e=S.emps[d.id];confirmBox('Discard onboarding for '+esc(e.name||'this joiner')+'?','Their details and uploaded documents are deleted.','Discard',()=>{const ids=(e.docs||[]).map(x=>x.id);del('employees',d.id);if(S.assets)ids.forEach(x=>S.assets.delete(x).catch(()=>{}));toast('Onboarding discarded')})},
+ docs:d=>{const e=S.emps[d.id];modal('Documents · '+esc(e.name),`<div id="docsBox">${docsPanel(d.id)}</div>`,{foot:'<button class="btn primary" type="button" data-act="close">Done</button>'})},
+ docDl:d=>{const e=S.emps[d.id],doc=(e.docs||[]).find(x=>x.id===d.doc);if(!doc)return;getFile(doc.id).then(b=>download(doc.name,b)).catch(()=>toast('Could not fetch that file.','bad'))},
+ docDel:async d=>{const e=S.emps[d.id];const docs=(e.docs||[]).filter(x=>x.id!==d.doc);await put('employees',d.id,{...e,docs});refreshDocs(d.id);if(S.assets)S.assets.delete(d.doc).catch(()=>{});toast('Document removed')},
+ attTab:d=>{S.ui.attTab=d.k;render()},
+ week:d=>{const s=new Date(S.ui.week+'T00:00');s.setDate(s.getDate()+7*(+d.k));S.ui.week=isoD(s);render()},
+ weekNow:()=>{S.ui.week=isoD(mondayOf(TODAY));render()},
+ copyWeek:()=>{const days=weekDays(),ch=[];empList().filter(isAct).forEach(e=>days.forEach(d=>{if(e.doj&&isoD(d)<e.doj)return;const p=new Date(d);p.setDate(p.getDate()-7);ch.push([e,d,rosterOf(e,ymOf(p),p.getDate())])}));rosterWrite(ch);toast('Copied last week’s roster')},
+ resetWeek:()=>confirmBox('Reset this week?','Every day goes back to each employee’s default shift and weekly off.','Reset week',()=>{const ch=[];empList().filter(isAct).forEach(e=>weekDays().forEach(d=>ch.push([e,d,null])));rosterWrite(ch);toast('Week reset')}),
+ dlRoster:()=>{const ym=ymOf(weekDays()[0]),D=daysIn(ym),em=empList().filter(isAct),nm=v=>v==='OFF'?'Week off':(shiftById(v)||{}).name;
+  download(`Roster-${ym}.csv`,csv([['Code','Name',...[...Array(D)].map((_,i)=>i+1)],...em.map(e=>[e.code,e.name,...[...Array(D)].map((_,i)=>e.doj&&iso(ym,i+1)<e.doj?'':nm(rosterOf(e,ym,i+1)))])]))},
+ shiftEdit:d=>shiftForm(d.id),
+ shiftDef:d=>{const c=clone(S.cfg);c.defaultShift=d.id;put('config','main',c);toast('Default shift updated')},
+ shiftDel:d=>{const s=shiftById(d.id);confirmBox('Delete '+esc(s.name)+'?','Anyone rostered on it goes back to their default shift.','Delete shift',()=>{const c=clone(S.cfg);c.shifts=c.shifts.filter(x=>x.id!==d.id);put('config','main',c);toast('Shift deleted')})}
+};
+
+/* ============ modals ============ */
+let onSubmit=null;
+function modal(title,body,{submit,sm,foot}={}){
+ const m=$('#modal');onSubmit=submit||null;
+ m.innerHTML=`<div class="dialog ${sm?'sm':''}" role="dialog" aria-modal="true" aria-labelledby="mTitle"><header><h2 id="mTitle">${title}</h2><button class="x" type="button" data-act="close" aria-label="Close">×</button></header>
+ <form id="mForm" style="display:contents" novalidate><div class="body">${body}<p class="note warn" id="mErr" hidden></p></div>
+ <footer>${foot||`<button class="btn" type="button" data-act="close">Cancel</button>${submit?`<button class="btn primary" type="submit">${typeof sm==='string'?sm:'Save'}</button>`:''}`}</footer></form></div>`;
+ m.hidden=false;setTimeout(()=>{const f=m.querySelector('input:not([type=hidden]),select,textarea,button.primary');f&&f.focus()},30);
+}
+const closeModal=()=>{$('#modal').hidden=true;$('#modal').innerHTML='';onSubmit=null;S.docsOpen=null};
+const mErr=t=>{const e=$('#mErr');e.textContent=t;e.hidden=false};
+function confirmBox(title,msg,label,fn){modal(title,`<p style="margin:0">${msg}</p>`,{sm:label,submit:()=>{fn();return true}})}
+
+const fld=(id,label,val,opt={})=>`<div class="field" ${opt.full?'style="grid-column:1/-1"':''}><label for="${id}">${label}${opt.req?' *':''}</label>${opt.sel?`<select id="${id}" name="${id}">${opt.sel.map(o=>{const[v,t]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}" ${String(v)===String(val??'')?'selected':''}>${esc(t)}</option>`}).join('')}</select>`:`<input id="${id}" name="${id}" type="${opt.type||'text'}" value="${esc(val??'')}" ${opt.ph?`placeholder="${esc(opt.ph)}"`:''} ${opt.step?`step="${opt.step}"`:''} ${opt.max?`maxlength="${opt.max}"`:''}>`}${opt.hint?`<span class="hint">${opt.hint}</span>`:''}</div>`;
+
+function empForm(id){
+ const e=id?S.emps[id]:{status:'active',pf:true,state:S.cfg.company.state,doj:TODAY.toISOString().slice(0,10)};
+ const st=S.cfg.structures;
+ modal(id?'Edit '+esc(e.name):'Add employee',`<div class="fgrid">
+  <div class="fsec">Personal</div>
+  ${fld('code','Employee code',e.code,{req:1,ph:'EMP006'})}${fld('name','Full name',e.name,{req:1})}${fld('email','Work email',e.email,{type:'email'})}${fld('phone','Mobile',e.phone,{type:'tel'})}
+  ${fld('dob','Date of birth',e.dob,{type:'date'})}${fld('gender','Gender',e.gender,{sel:['','Female','Male','Other']})}
+  <div class="fsec">Job</div>
+  ${fld('designation','Designation',e.designation)}${fld('dept','Department',e.dept)}${fld('doj','Date of joining',e.doj,{type:'date',req:1})}${fld('state','Work location (state)',e.state,{sel:STATES,hint:'Sets professional tax'})}${fld('shift','Default shift',defShiftOf(e),{sel:shiftOpts()})}${fld('weekOff','Weekly off',weekOffOf(e),{sel:offOpts()})}${fld('status','Status',e.status,{sel:[['active','Active'],['inactive','Inactive']]})}
+  <div class="fsec">Salary (monthly)</div>
+  ${fld('struct','Fill from structure','',{sel:[['','Enter components myself'],...st.map(s=>[s.id,s.name])]})}${fld('mgross','Monthly gross ₹','',{type:'number',hint:'With a structure picked, this splits into the fields below'})}
+  ${fld('basic','Basic',e.basic,{type:'number'})}${fld('hra','HRA',e.hra,{type:'number'})}${fld('conv','Conveyance',e.conv,{type:'number'})}${fld('special','Special allowance',e.special,{type:'number'})}
+  <div class="field"><label>Monthly gross</label><b id="grossOut" class="num" style="font-size:18px;padding-top:6px">${inr(fixedGross(e))}</b></div>
+  <div class="fsec">Statutory & tax</div>
+  <div class="check"><input type="checkbox" id="pf" name="pf" ${e.pf?'checked':''}><label for="pf">Deduct PF</label></div>
+  ${fld('uan','UAN',e.uan,{max:12})}${fld('pan','PAN',e.pan,{max:10,ph:'ABCDE1234F'})}
+  ${fld('tdsOverride','TDS per month ₹ (optional)',e.tdsOverride,{type:'number',hint:'Leave blank to estimate under the new regime'})}${fld('ptOverride','PT per month ₹ (optional)',e.ptOverride,{type:'number',hint:'Leave blank to use the state rule'})}
+  <div class="fsec">Bank</div>
+  ${fld('bankName','Bank name',e.bankName)}${fld('account','Account number',e.account)}${fld('ifsc','IFSC',e.ifsc,{max:11})}
+ </div>`,{submit:f=>{
+  const d=Object.fromEntries(new FormData(f));
+  if(!d.code.trim()||!d.name.trim()||!d.doj)return mErr('Fill in employee code, full name and date of joining.');
+  if(Object.entries(S.emps).some(([k,x])=>k!==id&&String(x.code).toLowerCase()===d.code.trim().toLowerCase()))return mErr('Another employee already uses code '+d.code+'.');
+  if(d.pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/i.test(d.pan.trim()))return mErr('PAN should look like ABCDE1234F.');
+  if(d.ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(d.ifsc.trim()))return mErr('IFSC should be 11 characters, like HDFC0001234.');
+  const out={...(id?S.emps[id]:{}),code:d.code.trim(),name:d.name.trim(),email:d.email.trim(),phone:d.phone.trim(),dob:d.dob,gender:d.gender,designation:d.designation.trim(),dept:d.dept.trim(),doj:d.doj,state:d.state,status:d.status,shift:d.shift,weekOff:+d.weekOff,
+   basic:N(d.basic),hra:N(d.hra),conv:N(d.conv),special:N(d.special),pf:!!d.pf,uan:d.uan.trim(),pan:d.pan.trim().toUpperCase(),tdsOverride:d.tdsOverride===''?'':N(d.tdsOverride),ptOverride:d.ptOverride===''?'':N(d.ptOverride),
+   bankName:d.bankName.trim(),account:d.account.trim(),ifsc:d.ifsc.trim().toUpperCase(),updated:new Date().toISOString()};
+  if(out.basic+out.hra+out.conv+out.special<=0)return mErr('Enter the salary, or pick a structure and a monthly gross.');
+  put('employees',id||uid('e'),out);toast(id?'Saved '+out.name:'Added '+out.name);return true}});
+ const f=$('#mForm'),upd=()=>{$('#grossOut').textContent=inr(['basic','hra','conv','special'].reduce((s,k)=>s+N(f[k].value),0))};
+ const split=()=>{const s=st.find(x=>x.id===f.struct.value),g=N(f.mgross.value);if(!s||!g)return;const b=Math.round(g*s.basic/100),h=Math.round(b*s.hra/100),cv=Math.min(N(s.conv),Math.max(0,g-b-h));f.basic.value=b;f.hra.value=h;f.conv.value=cv;f.special.value=Math.max(0,g-b-h-cv);upd()};
+ f.struct.addEventListener('change',split);f.mgross.addEventListener('input',split);['basic','hra','conv','special'].forEach(k=>f[k].addEventListener('input',upd));
+}
+
+function importForm(){
+ const head='code,name,email,phone,dob,doj,designation,department,state,basic,hra,conveyance,special,pf,uan,pan,bank,account,ifsc';
+ modal('Import employees',`<p class="small muted" style="margin:0">Paste rows or choose a CSV file. Required columns: <b>code, name, doj</b> and either <b>basic</b> (with hra, conveyance, special) or <b>gross</b>. Dates as YYYY-MM-DD; pf as Y or N. Existing codes are updated.</p>
+ <div class="row"><input type="file" id="csvFile" accept=".csv,text/csv" aria-label="Choose CSV file"><button class="btn sm" type="button" data-act="tplCsv">${ic('down')}Template</button></div>
+ <div class="field"><label for="csvText">CSV rows (with header)</label><textarea id="csvText" name="csv" placeholder="${head}"></textarea></div>`,{sm:'Import',submit:f=>{
+  const lines=f.csv.value.trim().split(/\r?\n/).filter(Boolean);if(lines.length<2)return mErr('Add a header row and at least one employee row.');
+  const parse=l=>{const o=[];let cur='',q=false;for(const ch of l){if(ch==='"'){q=!q}else if(ch===','&&!q){o.push(cur);cur=''}else cur+=ch}o.push(cur);return o.map(s=>s.trim())};
+  const h=parse(lines[0]).map(x=>x.toLowerCase());const ix=k=>h.indexOf(k);
+  if(ix('code')<0||ix('name')<0)return mErr('The header needs at least code and name columns.');
+  let n=0,bad=[];const byCode={};Object.entries(S.emps).forEach(([k,e])=>byCode[String(e.code).toLowerCase()]=k);
+  lines.slice(1).forEach((l,i)=>{const r=parse(l),g=k=>ix(k)>=0?r[ix(k)]||'':'';if(!g('code')||!g('name')){bad.push(i+2);return}
+   let basic=N(g('basic')),hra=N(g('hra')),conv=N(g('conveyance')||g('conv')),special=N(g('special'));
+   if(!basic&&N(g('gross'))){const s=S.cfg.structures[0],gr=N(g('gross'));basic=Math.round(gr*s.basic/100);hra=Math.round(basic*s.hra/100);conv=Math.min(N(s.conv),gr-basic-hra);special=gr-basic-hra-conv}
+   const st=STATES.find(s=>s.toLowerCase()===g('state').toLowerCase())||S.cfg.company.state;
+   const id=byCode[g('code').toLowerCase()]||uid('e');
+   put('employees',id,{...(S.emps[id]||{status:'active'}),code:g('code'),name:g('name'),email:g('email'),phone:g('phone'),dob:g('dob'),doj:g('doj')||TODAY.toISOString().slice(0,10),designation:g('designation'),dept:g('department')||g('dept'),state:st,basic,hra,conv,special,pf:!/^n/i.test(g('pf')),uan:g('uan'),pan:g('pan').toUpperCase(),bankName:g('bank'),account:g('account'),ifsc:g('ifsc').toUpperCase(),tdsOverride:'',ptOverride:'',updated:new Date().toISOString()});n++});
+  toast(`Imported ${n} employee${n===1?'':'s'}`+(bad.length?`; skipped rows ${bad.join(', ')}`:''));return true}});
+ $('#csvFile').addEventListener('change',ev=>{const fl=ev.target.files[0];if(!fl)return;const rd=new FileReader();rd.onload=()=>{$('#csvText').value=rd.result};rd.readAsText(fl)});
+}
+
+function slipHTML(r,ym,standalone){
+ const co=S.cfg.company,earn=[['Basic',r.basic],['HRA',r.hra],['Conveyance',r.conv],['Special allowance',r.special],['Bonus / OT',r.bonus]].filter(x=>x[1]),
+ ded=[['Provident fund',r.pfEE],['ESI',r.esiEE],['Professional tax',r.pt],['TDS',r.tds],['Loan EMI',r.loan],['Other deductions',r.other]].filter(x=>x[1]);
+ const inner=`<div class="slip"><div class="sh"><div><b style="font-family:var(--f-display);font-size:18px">${esc(co.name)}</b><div class="small muted">${esc(co.address||'')}</div></div><div class="right"><b>Payslip</b><div class="small muted">${ymLabel(ym)}</div></div></div>
+ <div class="meta"><div><small>Employee</small>${esc(r.name)}</div><div><small>Code</small>${esc(r.code)}</div><div><small>Designation</small>${esc(r.designation||'—')}</div><div><small>Department</small>${esc(r.dept||'—')}</div><div><small>PAN</small>${esc(r.pan||'—')}</div><div><small>UAN</small>${esc(r.uan||'—')}</div><div><small>Paid days</small>${r.paid} of ${r.D}</div><div><small>LOP days</small>${r.lop}</div><div><small>Bank account</small>${r.account?'••••'+esc(String(r.account).slice(-4)):'—'}</div></div>
+ <div class="two"><div><h3>Earnings</h3>${earn.map(([k,v])=>`<div class="ln"><span>${k}</span><span>${inr(v)}</span></div>`).join('')}<div class="ln t"><span>Gross earnings</span><span>${inr(r.gross)}</span></div></div>
+ <div><h3>Deductions</h3>${ded.map(([k,v])=>`<div class="ln"><span>${k}</span><span>${inr(v)}</span></div>`).join('')||'<div class="ln muted"><span>None</span><span></span></div>'}<div class="ln t"><span>Total deductions</span><span>${inr(r.ded)}</span></div></div></div>
+ <div class="net"><span>Net pay<br><small class="muted" style="font-weight:500">Rupees ${words(r.net)} only</small></span><b>${inr(r.net)}</b></div></div>`;
+ if(!standalone)return inner;
+ return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Payslip ${esc(r.name)} ${ymLabel(ym)}</title><style>:root{--f-display:Georgia,serif;--line:#d6dcd9;--muted:#5a6762;--surface-2:#f1f4f2;--accent-soft:#e3f0ea}body{font-family:Arial,Helvetica,sans-serif;color:#14211d;max-width:760px;margin:32px auto;padding:0 16px;font-size:14px}h3{font-size:14px;margin:0 0 6px}.muted{color:var(--muted)}.small{font-size:12px}.right{text-align:right}
+ .slip{border:1px solid var(--line);border-radius:8px;overflow:hidden}.sh{padding:16px 18px;background:var(--surface-2);display:flex;justify-content:space-between}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 16px;padding:14px 18px}.meta small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase}.two{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}.two>div{padding:12px 18px}.two>div+div{border-left:1px solid var(--line)}.ln{display:flex;justify-content:space-between;padding:4px 0}.ln.t{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-weight:700}.net{display:flex;justify-content:space-between;padding:14px 18px;background:var(--accent-soft);font-weight:700}.net b{font-size:20px}</style></head><body>${inner}<p class="small muted">This is a computer-generated payslip and does not need a signature.</p></body></html>`;
+}
+function showSlip(empId,ym){
+ const run=S.runs[ym];let r=run&&(run.rows||[]).find(x=>x.empId===empId);
+ if(!r){const e=S.emps[empId];if(!e)return;r=calc({...e,id:empId},ym,(S.inputs[ym]||{})[empId])}
+ modal('Payslip · '+esc(r.name),(run?'':`<div class="note warn">Draft: ${ymLabel(ym)} payroll is not processed yet, so these figures may change.</div>`)+slipHTML(r,ym),
+  {foot:`<button class="btn" type="button" data-act="close">Close</button>${S.dl?`<button class="btn primary" type="button" data-act="dlSlip" data-id="${empId}" data-ym="${ym}">${ic('down')}Download</button>`:''}`});
+}
+
+/* ============ actions ============ */
+function rowsFor(ym){return monthData(ym).rows}
+const A={
+ close:closeModal,
+ addEmp:()=>empForm(),editEmp:d=>empForm(d.id),importEmp:importForm,
+ tplCsv:()=>download('employee-import-template.csv','code,name,email,phone,dob,doj,designation,department,state,basic,hra,conveyance,special,pf,uan,pan,bank,account,ifsc\nEMP101,Asha Rao,asha@company.com,9876543210,1995-04-12,2026-10-01,Analyst,Finance,Karnataka,20000,8000,1600,10400,Y,,ABCDE1234F,HDFC Bank,50100012345678,HDFC0001234\n'),
+ toggleEmp:d=>{const e=S.emps[d.id];if(e.status==='inactive'){put('employees',d.id,{...e,status:'active'});toast(e.name+' reactivated')}else confirmBox('Deactivate '+esc(e.name)+'?','They will be left out of future payroll runs and attendance. Past payslips stay available.','Deactivate',()=>{put('employees',d.id,{...e,status:'inactive'});toast(e.name+' deactivated')})},
+ slip:d=>showSlip(d.id,d.ym),
+ dlSlip:d=>{const run=S.runs[d.ym];let r=run&&run.rows.find(x=>x.empId===d.id);if(!r)r=calc({...S.emps[d.id],id:d.id},d.ym,(S.inputs[d.ym]||{})[d.id]);download(`Payslip-${r.code}-${d.ym}.html`,slipHTML(r,d.ym,true))},
+ month:d=>{S.month=ymShift(S.month,+d.k);render()},goMonth:d=>{S.month=d.ym;render();window.scrollTo(0,0)},
+ cell:d=>{const ym=S.month,e=S.emps[d.id];if(!e)return;const cur=code({...e,id:d.id},ym,+d.d),nxt=CYCLE[(CYCLE.indexOf(cur)+1)%CYCLE.length];
+  const doc=clone(S.att[ym]);doc.marks=doc.marks||{};doc.marks[d.id]=doc.marks[d.id]||{};
+  const def=baseCode({...e,id:d.id},ym,+d.d);
+  if(nxt===def)delete doc.marks[d.id][d.d];else doc.marks[d.id][d.d]=nxt;put('attendance',ym,doc)},
+ clearAtt:()=>confirmBox('Mark everyone present?',`This clears every mark for ${ymLabel(S.month)}, so rostered working days count as present and rostered offs as week off.`,'Clear marks',()=>put('attendance',S.month,{marks:{}})),
+ dlAtt:d=>{const ym=d.ym||S.month,D=daysIn(ym),em=activeIn(ym);download(`Attendance-${ym}.csv`,csv([['Code','Name',...[...Array(D)].map((_,i)=>i+1),'Paid days','LOP days'],...em.map(e=>{const s=attSummary(e,ym);return[e.code,e.name,...[...Array(D)].map((_,i)=>code(e,ym,i+1)),s.paid,s.lop]})]))},
+ process:d=>{const ym=d.ym,rows=preview(ym);if(!rows.length)return;
+  confirmBox('Process payroll for '+ymLabel(ym)+'?',`This locks ${rows.length} payslips totalling <b>${inr(totals(rows).net)}</b> net, locks attendance for the month and records loan EMIs. You can reopen it later.`,'Process payroll',async()=>{
+   rows.forEach(r=>r.loanParts.forEach(p=>{const l=S.loans[p.id];if(!l)return;const bal=N(l.balance)-p.amt;put('loans',p.id,{...l,balance:bal,paidMonths:[...(l.paidMonths||[]),ym],status:bal<=0?'closed':'approved'})}));
+   await put('runs',ym,{ym,processedAt:new Date().toISOString(),rows,totals:totals(rows)});delete S.inputs[ym];toast('Payroll processed for '+ymLabel(ym))})},
+ reopen:d=>confirmBox('Reopen '+ymLabel(d.ym)+'?','The run goes back to draft, loan EMIs from this month are reversed and attendance unlocks. Download anything you need first.','Reopen run',()=>{
+  const run=S.runs[d.ym];(run.rows||[]).forEach(r=>(r.loanParts||[]).forEach(p=>{const l=S.loans[p.id];if(!l||!(l.paidMonths||[]).includes(d.ym))return;put('loans',p.id,{...l,balance:N(l.balance)+p.amt,paidMonths:l.paidMonths.filter(x=>x!==d.ym),status:'approved'})}));
+  S.inputs[d.ym]={};(run.rows||[]).forEach(r=>{if(r.bonus||r.other)S.inputs[d.ym][r.empId]={bonus:r.bonus,other:r.other}});del('runs',d.ym);toast(ymLabel(d.ym)+' reopened')}),
+ dlReg:d=>{const r=rowsFor(d.ym);download(`Payroll-register-${d.ym}.csv`,csv([['Code','Name','Designation','Department','State','Days','Paid days','LOP','Basic','HRA','Conveyance','Special','Bonus','Gross','PF (EE)','ESI (EE)','PT','TDS','Loan EMI','Other','Total deductions','Net pay','PF (ER)','ESI (ER)','CTC'],...r.map(x=>[x.code,x.name,x.designation,x.dept,x.state,x.D,x.paid,x.lop,x.basic,x.hra,x.conv,x.special,x.bonus,x.gross,x.pfEE,x.esiEE,x.pt,x.tds,x.loan,x.other,x.ded,x.net,x.pfER,x.esiER,x.ctc])]))},
+ dlBank:d=>{const r=rowsFor(d.ym);download(`Bank-transfer-${d.ym}.csv`,csv([['Beneficiary name','Account number','IFSC','Bank','Amount','Narration'],...r.map(x=>[x.name,x.account,x.ifsc,x.bankName,x.net,'Salary '+ymLabel(d.ym)])]))},
+ dlEcr:d=>{const r=rowsFor(d.ym).filter(x=>x.pfW>0);if(!r.length){toast('No one is on PF for '+ymLabel(d.ym)+'.','bad');return}
+  download(`ECR-${d.ym}.txt`,r.map(x=>[x.uan||'',x.name.toUpperCase(),x.gross,x.pfW,Math.min(x.pfW,15000),Math.min(x.pfW,15000),x.pfEE,x.eps,x.pfEE-x.eps,Math.round(x.lop),0].join('#~#')).join('\n'))},
+ repMaster:()=>download('Employee-master.csv',csv([['Code','Name','Email','Phone','DOB','DOJ','Designation','Department','State','Status','Basic','HRA','Conveyance','Special','Gross','PF','UAN','PAN','Bank','Account','IFSC'],...empList().map(e=>[e.code,e.name,e.email,e.phone,e.dob,e.doj,e.designation,e.dept,e.state,e.status,e.basic,e.hra,e.conv,e.special,fixedGross(e),e.pf?'Y':'N',e.uan,e.pan,e.bankName,e.account,e.ifsc])])),
+ repLeave:()=>download('Leave-register.csv',csv([['Employee','Type','From','To','Days','Reason','Status'],...Object.values(S.leaves).map(l=>[nameOf(l.empId),LEAVE_TYPES[l.type]||l.type,l.from,l.to,l.days,l.reason,l.status])])),
+ repLoan:()=>download('Loan-statement.csv',csv([['Employee','Type','Amount','EMI','Tenure (months)','Start','EMIs paid','Balance','Status'],...Object.values(S.loans).map(l=>[nameOf(l.empId),l.type,l.amount,l.emi,l.tenure,l.start,(l.paidMonths||[]).length,l.status==='pending'?l.amount:l.balance,l.status])])),
+ repCtc:()=>download('CTC-report.csv',csv([['Code','Name','Department','Monthly gross','Employer PF','Employer ESI','Monthly CTC','Annual CTC'],...activeIn(CUR).map(e=>{const r=calc(e,CUR,{});const g=fixedGross(e),pf=e.pf?Math.round(Math.min(N(e.basic),N(S.cfg.pf.ceiling))*N(S.cfg.pf.er)/100):0,es=g<=N(S.cfg.esi.limit)?Math.ceil(g*N(S.cfg.esi.er)/100):0;return[e.code,e.name,e.dept,g,pf,es,g+pf+es,(g+pf+es)*12]})])),
+ repDept:d=>{const r=rowsFor(d.ym),m={};r.forEach(x=>{const k=x.dept||'Unassigned';m[k]=m[k]||{n:0,g:0,net:0,ctc:0};m[k].n++;m[k].g+=x.gross;m[k].net+=x.net;m[k].ctc+=x.ctc});download(`Department-summary-${d.ym}.csv`,csv([['Department','Headcount','Gross','Net pay','CTC'],...Object.entries(m).map(([k,v])=>[k,v.n,v.g,v.net,v.ctc])]))},
+ leaveTab:d=>{S.ui.leaveTab=d.k;render()},
+ applyLeave:()=>{const em=empList().filter(isAct);if(!em.length){toast('Add an employee first.','bad');return}
+  modal('Apply leave',`<div class="fgrid">${fld('lEmp','Employee','',{sel:em.map(e=>[e.id,e.name+' ('+e.code+')']),full:1})}${fld('lType','Leave type','CL',{sel:Object.entries(LEAVE_TYPES)})}<div></div>${fld('lFrom','From',TODAY.toISOString().slice(0,10),{type:'date',req:1})}${fld('lTo','To',TODAY.toISOString().slice(0,10),{type:'date',req:1})}${fld('lReason','Reason','',{full:1,ph:'Brief reason'})}</div>`,{sm:'Submit',submit:f=>{
+   const d=Object.fromEntries(new FormData(f));if(!d.lFrom||!d.lTo||d.lTo<d.lFrom)return mErr('The end date must be on or after the start date.');
+   let days=0;for(let t=new Date(d.lFrom+'T00:00');t<=new Date(d.lTo+'T00:00');t.setDate(t.getDate()+1))if(t.getDay()!==0)days++;
+   if(!days)return mErr('Those dates are all Sundays.');
+   put('leaves',uid('l'),{empId:d.lEmp,type:d.lType,from:d.lFrom,to:d.lTo,days,reason:d.lReason.trim(),status:'pending',created:new Date().toISOString()});toast('Leave request added');return true}})},
+ leaveOk:d=>{const l=S.leaves[d.id],e=S.emps[l.empId];const by={};
+  for(let t=new Date(l.from+'T00:00');t<=new Date(l.to+'T00:00');t.setDate(t.getDate()+1)){if(e&&rosterOf({...e,id:l.empId},ymOf(t),t.getDate())==='OFF')continue;const ym=ymOf(t);if(S.runs[ym])continue;(by[ym]=by[ym]||[]).push(t.getDate())}
+  Object.entries(by).forEach(([ym,ds])=>{const doc=clone(S.att[ym]);doc.marks=doc.marks||{};doc.marks[l.empId]=doc.marks[l.empId]||{};ds.forEach(x=>doc.marks[l.empId][x]=l.type==='LWP'?'LW':'L');put('attendance',ym,doc)});
+  put('leaves',d.id,{...l,status:'approved',decided:new Date().toISOString()});toast('Approved'+(e?' for '+e.name:''))},
+ leaveNo:d=>{put('leaves',d.id,{...S.leaves[d.id],status:'rejected',decided:new Date().toISOString()});toast('Rejected')},
+ leaveDel:d=>confirmBox('Delete this leave record?','Attendance marks already made stay as they are.','Delete',()=>del('leaves',d.id)),
+ newLoan:()=>{const em=empList().filter(isAct);if(!em.length){toast('Add an employee first.','bad');return}
+  modal('New loan or advance',`<div class="fgrid">${fld('nEmp','Employee','',{sel:em.map(e=>[e.id,e.name+' ('+e.code+')']),full:1})}${fld('nType','Type',LOAN_TYPES[0],{sel:LOAN_TYPES})}${fld('nAmt','Amount ₹','',{type:'number',req:1})}${fld('nTen','Tenure (months)','3',{type:'number',req:1})}${fld('nStart','First EMI month',CUR,{type:'month'})}${fld('nReason','Purpose','',{full:1})}</div><p class="small muted" id="emiOut" style="margin:0">EMI: —</p>`,{sm:'Submit',submit:f=>{
+   const a=N(f.nAmt.value),t=Math.round(N(f.nTen.value));if(a<=0||t<=0)return mErr('Enter an amount and a tenure of at least one month.');
+   put('loans',uid('n'),{empId:f.nEmp.value,type:f.nType.value,amount:a,tenure:t,emi:Math.ceil(a/t),start:f.nStart.value||CUR,reason:f.nReason.value.trim(),status:'pending',balance:a,paidMonths:[],created:new Date().toISOString()});toast('Loan request added');return true}});
+  const f=$('#mForm'),u=()=>{const a=N(f.nAmt.value),t=N(f.nTen.value);$('#emiOut').textContent=a&&t?'EMI: '+inr(Math.ceil(a/t))+' per month for '+t+' months':'EMI: —'};f.nAmt.addEventListener('input',u);f.nTen.addEventListener('input',u)},
+ loanOk:d=>{const l=S.loans[d.id];put('loans',d.id,{...l,status:'approved',balance:N(l.amount)});toast('Loan approved')},
+ loanNo:d=>{put('loans',d.id,{...S.loans[d.id],status:'rejected'});toast('Loan rejected')},
+ loanClose:d=>confirmBox('Mark this loan settled?','Remaining balance is cleared and no more EMIs will be deducted.','Mark settled',()=>put('loans',d.id,{...S.loans[d.id],status:'closed',balance:0})),
+ loanDel:d=>confirmBox('Delete this loan record?','This removes it from the loan statement.','Delete',()=>del('loans',d.id)),
+ filing:d=>{const f=clone(S.filings[d.ym]);f[d.k]=!f[d.k];put('filings',d.ym,f)}
+};
+Object.assign(A,A2);
+document.addEventListener('click',ev=>{
+ const b=ev.target.closest('[data-act]');
+ if(!b){if(ev.target===$('#modal'))closeModal();return}
+ if(b.disabled)return;ev.preventDefault();const fn=A[b.dataset.act];fn&&fn(b.dataset);
+});
+document.addEventListener('submit',ev=>{
+ ev.preventDefault();const f=ev.target;
+ if(f.id==='mForm'){if(!onSubmit){closeModal();return}const ok=onSubmit(f);if(ok===true)closeModal();return}
+ if(!S.canEdit)return;const d=Object.fromEntries(new FormData(f));const c=clone(S.cfg);
+ if(f.id==='fCompany'){if(!d.name.trim())return toast('Company name is required.','bad');c.company={...c.company,name:d.name.trim(),state:d.state,pan:d.pan.trim().toUpperCase(),tan:d.tan.trim().toUpperCase(),pfCode:d.pfCode.trim(),esiCode:d.esiCode.trim(),address:d.address.trim()};c.admin=d.admin.trim()||'HR Admin'}
+ if(f.id==='fRates'){c.pf={ee:N(d.pfee),er:N(d.pfer),ceiling:N(d.pfc)};c.esi={ee:N(d.esee),er:N(d.eser),limit:N(d.esl)};c.tds={...c.tds,std:N(d.std),rebate:N(d.reb),cess:N(d.cess),slabs:c.tds.slabs.map((_,i)=>[N(d['sl_'+i]),N(d['sr_'+i])])}}
+ if(f.id==='fStruct'){c.structures=c.structures.map((s,i)=>({...s,name:(d['sn_'+i]||s.name).trim(),basic:N(d['sb_'+i]),hra:N(d['sh_'+i]),conv:N(d['sc_'+i])}))}
+ put('config','main',c);toast('Settings saved');
+});
+document.addEventListener('input',ev=>{
+ const t=ev.target;
+ if(t.id==='empQ'){S.ui.q=t.value;render()}
+ if(t.dataset&&t.dataset.inp){const ym=S.month;S.inputs[ym]=S.inputs[ym]||{};S.inputs[ym][t.dataset.id]={...(S.inputs[ym][t.dataset.id]||{}),[t.dataset.inp]:N(t.value)};clearTimeout(t._t);t._t=setTimeout(render,450)}
+});
+const BK=['employees','attendance','runs','leaves','loans','filings','roster'];
+A.backup=()=>{const o={app:'vetan',version:1,exported:new Date().toISOString(),config:S.cfg};BK.forEach(c=>o[c]=S[KEY[c]]);download(`vetan-backup-${isoD(new Date())}.json`,JSON.stringify(o,null,1))};
+function restore(file){const r=new FileReader();r.onload=()=>{let o;try{o=JSON.parse(r.result)}catch(_){return toast('That file is not a Vetan backup.','bad')}
+ if(!o||o.app!=='vetan')return toast('That file is not a Vetan backup.','bad');
+ const n=Object.keys(o.employees||{}).length;
+ confirmBox('Restore this backup?',`It has ${n} employee${n===1?'':'s'}, exported ${fmtDate((o.exported||'').slice(0,10))}. Records with the same ID are replaced; others stay.`,'Restore',()=>{
+  if(o.config)put('config','main',o.config);BK.forEach(c=>Object.entries(o[c]||{}).forEach(([id,d])=>put(c,id,d)));toast('Backup restored')})};r.readAsText(file)}
+document.addEventListener('change',ev=>{const t=ev.target;
+ if(t.id==='restoreFile'){const fl=t.files&&t.files[0];if(fl)restore(fl);t.value='';return}
+ if(t.dataset&&t.dataset.up){const fl=t.files&&t.files[0];if(fl)uploadDoc(t.dataset.id,t.dataset.up,fl);t.value='';return}
+ if(t.dataset&&t.dataset.ros){const e=S.emps[t.dataset.ros];if(e)rosterWrite([[{...e,id:t.dataset.ros},new Date(t.dataset.date+'T00:00'),t.value]]);return}if(t.id==='empLoc'){S.ui.loc=t.value;render()}if(t.id==='repM'){S.ui.reportMonth=t.value;render()}});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!$('#modal').hidden)closeModal()});
+$('#menuBtn').addEventListener('click',()=>$('#side').classList.toggle('open'));
+window.addEventListener('hashchange',route);
+
+/* ============ standalone mode (any web host, e.g. GitHub Pages) ============ */
+function localDB(){
+ const P='vetan:',subs=[];
+ const load=c=>{try{return JSON.parse(localStorage.getItem(P+c)||'{}')}catch(_){return{}}};
+ const save=(c,o)=>{try{localStorage.setItem(P+c,JSON.stringify(o))}catch(_){toast('This browser blocked saving. Check that site storage is allowed.','bad')}};
+ const notify=c=>subs.filter(s=>s.c===c).forEach(s=>s.fire());
+ window.addEventListener('storage',ev=>{if(ev.key&&ev.key.startsWith(P))notify(ev.key.slice(P.length))});
+ const sub=(c,fire)=>{const s={c,fire};subs.push(s);setTimeout(fire,0);return()=>{const i=subs.indexOf(s);if(i>=0)subs.splice(i,1)}};
+ const docRef=(c,id)=>({
+  set:async d=>{const o=load(c);o[id]=JSON.parse(JSON.stringify(d));save(c,o);notify(c)},
+  delete:async()=>{const o=load(c);delete o[id];save(c,o);notify(c)},
+  onSnapshot:cb=>sub(c,()=>{const o=load(c);cb({exists:id in o,data:()=>o[id]})})});
+ return{collection:c=>({onSnapshot:cb=>sub(c,()=>{const o=load(c);cb({docs:Object.entries(o).map(([id,d])=>({id,exists:true,data:()=>d}))})})}),doc:p=>{const[c,id]=p.split('/');return docRef(c,id)}};
+}
+const localDownloads={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data]),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),10000);return{status:'saved'}}};
+function localAssets(){
+ const open=()=>new Promise((res,rej)=>{const r=indexedDB.open('vetan-files',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+ const tx=(mode,fn)=>open().then(db=>new Promise((res,rej)=>{const t=db.transaction('f',mode),q=fn(t.objectStore('f'));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)}));
+ return{upload:async(file,o)=>{const blob=new Blob([file],{type:(o&&o.type)||file.type}),id=uid('f');await tx('readwrite',s=>s.put(blob,id));return{id,url:URL.createObjectURL(blob),sizeBytes:blob.size,contentType:blob.type}},
+  get:id=>tx('readonly',s=>s.get(id)),delete:async id=>{await tx('readwrite',s=>s.delete(id));return{deleted:true}}};
+}
+const blobCache={};
+function fileUrl(id){
+ if(!S.local)return '/_blob/'+id;
+ if(blobCache[id])return blobCache[id];
+ if(blobCache[id]===undefined){blobCache[id]=null;S.assets.get(id).then(b=>{if(b){blobCache[id]=URL.createObjectURL(b);if(S.docsOpen)refreshDocs(S.docsOpen)}}).catch(()=>{})}
+ return '';
+}
+const getFile=id=>S.local?S.assets.get(id).then(b=>{if(!b)throw 0;return b}):fetch('/_blob/'+id).then(r=>{if(!r.ok)throw 0;return r.blob()});
+
+/* ============ boot ============ */
+route();
+(async()=>{
+ const inClaude=!!(window.claude&&window.claude.use);
+ const use=n=>inClaude?window.claude.use(n).catch(()=>null):Promise.resolve(null);
+ let[db,dl,user,assets]=await Promise.all([use('db'),use('downloads'),use('user'),use('assets')]);
+ if(!inClaude){S.local=true;db=localDB();dl=localDownloads;try{assets=window.indexedDB?localAssets():null}catch(_){assets=null}}
+ S.dl=dl;S.assets=assets;S.loaded.tried=true;
+ if(user){try{S.canEdit=await user.canEdit()}catch(_){}}
+ if(!db){$('#connLabel').innerHTML='<span class="dot off"></span>Offline preview';render();return}
+ S.db=db;let pending=8;const ready=()=>{if(--pending===0){S.live=true;$('#connLabel').innerHTML=S.local?'<span class="dot"></span>Saved in this browser':'<span class="dot"></span>Saved to your data';}render()};
+ const once=f=>{let d=false;return(...a)=>{f(...a);if(!d){d=true;ready()}}};
+ const err=e=>{if(e&&e.code==='revoked'){S.live=false;S.canEdit=false;render()}};
+ [['employees','emps'],['attendance','att'],['runs','runs'],['leaves','leaves'],['loans','loans'],['filings','filings'],['roster','roster']].forEach(([c,k])=>db.collection(c).onSnapshot(once(q=>{const o={};q.docs.forEach(x=>o[x.id]=x.data());S[k]=o;render()}),err));
+ db.doc('config/main').onSnapshot(once(s=>{S.cfg=mergeCfg(s.exists?s.data():null);render()}),err);
+})();
+</script>
+
+</body>
+</html>
