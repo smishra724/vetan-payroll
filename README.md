@@ -8,7 +8,7 @@ Payroll and HR for small Indian companies, in a single web page. No server, no b
 - **Employees**: quick add, CSV import, edit, deactivate, payslip preview.
 - **Onboarding**: a four-step form for new joiners (personal details → job & salary → statutory & bank → documents) with uploads for photo, PAN, Aadhaar, bank proof, certificates and more. Drafts can be saved and continued later; joiners enter payroll only once onboarding is complete.
 - **Attendance**: monthly grid (Present, Absent, Half day, Paid leave, Leave without pay, Holiday, Week off) with automatic loss-of-pay days.
-- **Roster & shifts**: weekly shift roster with coverage counts and weekly hours. Any day can take a custom time from 12:00 AM to 11:59 PM (overnight shifts included). Import the roster from Excel or CSV, download it as Excel, copy last week or reset. Rostered offs feed attendance.
+- **Roster & shifts**: weekly shift roster with coverage counts and weekly hours. Type each day's timing as 24-hour clock numbers from 00:00 to 23:59, e.g. 09:00-18:00 (overnight shifts included), or OFF. Import the roster from Excel or CSV, download it as Excel, copy last week or reset. Rostered offs feed attendance.
 - **Run payroll**: pro-rated earnings, PF (12% of basic up to the ₹15,000 ceiling), ESI (0.75% / 3.25% up to ₹21,000 gross), state professional tax, new-regime TDS estimate with the ₹12 L rebate and marginal relief, loan EMIs, bonus and other deductions. Processing locks the month; runs can be reopened.
 - **Downloads**: payroll register, NEFT bank transfer sheet, EPFO ECR text file, payslips, and reports (employee master, attendance, roster, leave, loans, CTC, department summary).
 - **Leave and loans**: requests, approvals, automatic attendance marking and EMI recovery.

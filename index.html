@@ -237,7 +237,9 @@ label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 .sh0{background:var(--accent-soft);color:var(--accent)} .sh1{background:var(--info-bg);color:var(--info)} .sh2{background:var(--mari-bg);color:var(--mari)} .sh3{background:var(--plum-bg);color:var(--plum)} .sh4{background:var(--ok-bg);color:var(--ok)} .sh5{background:var(--bad-bg);color:var(--bad)}
 .shOFF{background:var(--surface-2);color:var(--muted)}
 .shC{background:var(--surface);color:var(--fg);border-color:var(--line)!important}
-.ros select{min-width:122px}
+.tcell{width:112px;border:1px solid transparent;border-radius:6px;padding:6px 4px;font:600 12.5px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-align:center;font-variant-numeric:tabular-nums}
+.tcell:hover{border-color:var(--accent)}.tcell:focus{background:var(--surface);color:var(--fg);border-color:var(--accent)}
+.tcell.bad{border-color:var(--bad)!important;background:var(--bad-bg)}
 .imp-out{font-size:13px;display:flex;flex-direction:column;gap:6px}
 .imp-out ul{margin:0;padding-left:18px;max-height:120px;overflow:auto}
 .cov{font-size:11px;color:var(--muted);line-height:1.5}
@@ -387,9 +389,10 @@ const fmt12=t=>{let[h,m]=String(t||'0:0').split(':').map(Number);const ap=h<12?'
 const isCustom=v=>/^T\d{4}-\d{4}$/.test(v||'');
 const customOf=v=>({id:v,name:'Custom',start:v.slice(1,3)+':'+v.slice(3,5),end:v.slice(6,8)+':'+v.slice(8,10),brk:0});
 const slotOf=v=>v==='OFF'?null:isCustom(v)?customOf(v):shiftById(v);
+const numText=v=>{const s=slotOf(v);return s?s.start+'-'+s.end:'OFF'};
 const slotText=v=>{const s=slotOf(v);return !s?'Week off':isCustom(v)?fmt12(s.start)+' - '+fmt12(s.end):s.name};
 function timeVal(start,end){const hit=S.cfg.shifts.find(s=>s.start===start&&s.end===end);return hit?hit.id:'T'+start.replace(':','')+'-'+end.replace(':','')}
-function parseTime(s){const m=String(s).trim().toLowerCase().replace(/\s+/g,'').replace(/\./g,':').match(/^(\d{1,2})(?::(\d{2}))?(am|pm|a|p)?$/);if(!m)return null;let h=+m[1],mi=+(m[2]||0);const ap=m[3];
+function parseTime(s){let x=String(s).trim().toLowerCase().replace(/\s+/g,'').replace(/\./g,':');if(/^\d{3,4}$/.test(x))x=x.slice(0,-2)+':'+x.slice(-2);const m=x.match(/^(\d{1,2})(?::(\d{2}))?(am|pm|a|p)?$/);if(!m)return null;let h=+m[1],mi=+(m[2]||0);const ap=m[3];
  if(ap){if(h<1||h>12)return null;h=h%12+(ap[0]==='p'?12:0)}if(h===24&&mi===0){h=23;mi=59}if(h>23||mi>59)return null;return String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')}
 function parseRosterVal(raw){
  if(raw==null||typeof raw==='number')return null;const s=String(raw).trim(),l=s.toLowerCase();
@@ -790,13 +793,14 @@ function rosterView(){
   const v=rosterOf(e,ym,dd);if(v==='OFF')off++;else{hrs+=shiftHours(slotOf(v));const k=isCustom(v)?'custom':v;cov[i][k]=(cov[i][k]||0)+1}
   const changed=!!(S.roster[ym]&&S.roster[ym].a&&S.roster[ym].a[e.id]&&S.roster[ym].a[e.id][dd]);
   const s=slotOf(v);
-  return `<td class="day"><select class="${cls(v)}" ${changed&&!isCustom(v)?'style="border-color:var(--fg)"':''} data-ros="${e.id}" data-date="${ds}" title="${s?esc(fmt12(s.start)+' – '+fmt12(s.end)):'Week off'}" aria-label="${esc(e.name)}, ${WEEKDAYS[d.getDay()]} ${dd} ${MON[d.getMonth()]}" ${S.canEdit?'':'disabled'}>${sh.map(x=>`<option value="${x.id}" ${x.id===v?'selected':''}>${esc(x.name)}</option>`).join('')}${isCustom(v)?`<option value="${v}" selected>${esc(fmt12(s.start)+'–'+fmt12(s.end))}</option>`:''}<option value="OFF" ${v==='OFF'?'selected':''}>Week off</option><option value="__custom">Custom time…</option></select></td>`}).join('');
+  return `<td class="day"><input class="tcell ${cls(v)}" ${changed?'style="border-color:var(--fg)"':''} id="r-${e.id}-${ds}" list="rosOpts" value="${numText(v)}" data-rosin="${e.id}" data-date="${ds}" maxlength="13" autocomplete="off" spellcheck="false" title="${s?esc(s.name==='Custom'?'Custom time':s.name):'Week off'}" aria-label="${esc(e.name)}, ${WEEKDAYS[d.getDay()]} ${dd} ${MON[d.getMonth()]}: start-end in 24-hour time, or OFF" ${S.canEdit?'':'disabled'}></td>`}).join('');
   return `<tr><td><b>${esc(e.name)}</b><small>${esc(e.code)} · ${esc(e.dept||'')}</small></td>${cells}<td class="n num"><b>${hrs.toFixed(1)} h</b><small>${off} off</small></td></tr>`}).join('');
  const anyCustom=cov.some(c=>c.custom);
- return attTabs()+`<div class="head"><div><h1>Roster</h1><p>Pick a shift, a week off, or any custom time from 12:00 AM to 11:59 PM for each person and day. Untouched days follow each employee's default shift and weekly off; outlined cells were changed.</p></div>
+ return attTabs()+`<div class="head"><div><h1>Roster</h1><p>Type each day's start and end in 24-hour clock numbers, from 00:00 to 23:59, like 09:00-18:00 or 22:00-06:00 for overnight. Type OFF for a week off. Untouched days follow each employee's default shift and weekly off; outlined cells were changed.</p></div>
  <div class="row"><button class="btn sm" type="button" data-act="week" data-k="-1" aria-label="Previous week">‹</button><b style="min-width:170px;text-align:center">${label}</b><button class="btn sm" type="button" data-act="week" data-k="1" aria-label="Next week">›</button><button class="btn sm" type="button" data-act="weekNow">This week</button></div></div>
  <div class="row"><button class="btn primary" type="button" data-act="rosterImport" ${ro()}>${ic('up')}Import from Excel</button><button class="btn" type="button" data-act="dlRoster">${ic('down')}Download Excel</button><button class="btn" type="button" data-act="copyWeek" ${ro()}>Copy previous week</button><button class="btn" type="button" data-act="resetWeek" ${ro()}>Reset week</button></div>
- <div class="legend">${sh.map((s,i)=>`<span class="chip sh${i%6}">${esc(s.name)} ${fmt12(s.start)} – ${fmt12(s.end)}</span>`).join('')}<span class="chip shOFF">Week off</span><span class="chip shC" style="border:1px solid var(--line)">Custom time</span></div>
+ <div class="legend">${sh.map((s,i)=>`<span class="chip sh${i%6}">${esc(s.name)} ${s.start}-${s.end}</span>`).join('')}<span class="chip shOFF">OFF = week off</span><span class="chip shC" style="border:1px solid var(--line)">Custom time</span></div>
+ <datalist id="rosOpts">${sh.map(s=>`<option value="${s.start}-${s.end}">${esc(s.name)}</option>`).join('')}<option value="OFF">Week off</option></datalist>
  ${emps.length?`<div class="tbl-wrap"><table class="tbl ros"><thead><tr><th>Employee (${emps.length})</th>${days.map(d=>`<th class="day ${isoD(d)===tIso?'today':''}">${WEEKDAYS[d.getDay()].slice(0,3)}<br>${d.getDate()} ${MON[d.getMonth()].slice(0,3)}</th>`).join('')}<th class="n">Week</th></tr></thead>
  <tbody>${rows}</tbody><tfoot><tr><td>On shift</td>${cov.map(c=>`<td class="day cov">${sh.map(s=>`${esc(s.name)} ${c[s.id]||0}`).join('<br>')}${anyCustom?`<br>Custom ${c.custom||0}`:''}</td>`).join('')}<td></td></tr></tfoot></table></div>`
  :`<section class="card">${empty('No active employees','Add employees to build a roster.')}</section>`}`;
@@ -843,7 +847,7 @@ async function parseRosterFile(file){
 }
 function rosterImportForm(){
  S._rimp=null;
- modal('Import roster from Excel',`<p class="small muted" style="margin:0">Use an Excel (.xlsx, .xls) or CSV file with one row per employee: a <b>Code</b> column, then one column per date. In each cell write a shift name, <b>Week off</b>, or a time range such as <b>9:00 AM - 6:00 PM</b> or <b>22:00-06:00</b>. Empty cells keep what is already rostered.</p>
+ modal('Import roster from Excel',`<p class="small muted" style="margin:0">Use an Excel (.xlsx, .xls) or CSV file with one row per employee: a <b>Code</b> column, then one column per date. In each cell write the start and end in 24-hour numbers, such as <b>09:00-18:00</b> or <b>22:00-06:00</b>, or <b>OFF</b>. Empty cells keep what is already rostered.</p>
  <div class="row"><label class="btn">${ic('up')}Choose file<input class="vh" type="file" id="rosterFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"></label><button class="btn" type="button" data-act="dlRoster">${ic('down')}Download template</button></div>
  <div id="rImpOut" class="imp-out"><span class="muted">No file chosen yet.</span></div>`,{sm:'Import roster',submit:()=>{
   const r=S._rimp;if(!r)return mErr('Choose a file first.');if(!r.changes.length)return mErr('Nothing to import from this file.');
@@ -861,9 +865,9 @@ async function rosterExcel(){
  let X;try{X=await loadXLSX()}catch(_){return toast('Could not load the Excel library. Check your internet connection.','bad')}
  const ym=ymOf(weekDays()[0]),D=daysIn(ym),em=empList().filter(isAct);
  const head=['Code','Name',...[...Array(D)].map((_,i)=>iso(ym,i+1))];
- const rows=em.map(e=>[e.code,e.name,...[...Array(D)].map((_,i)=>e.doj&&iso(ym,i+1)<e.doj?'':slotText(rosterOf(e,ym,i+1)))]);
+ const rows=em.map(e=>[e.code,e.name,...[...Array(D)].map((_,i)=>e.doj&&iso(ym,i+1)<e.doj?'':numText(rosterOf(e,ym,i+1)))]);
  const ws=X.utils.aoa_to_sheet([head,...rows]);ws['!cols']=[{wch:10},{wch:22},...Array(D).fill({wch:19})];ws['!freeze']={xSplit:2,ySplit:1};
- const help=X.utils.aoa_to_sheet([['How to fill this roster'],[''],['One row per employee. Keep the Code column; Name is only for reference.'],['Column headings are dates (YYYY-MM-DD). Add or remove date columns as needed.'],['In each cell write a shift name, Week off, or a time range such as 9:00 AM - 6:00 PM or 22:00-06:00.'],['Times can be anything from 12:00 AM to 11:59 PM. An end before the start means the shift ends the next day.'],['Leave a cell empty to keep what is already in the roster.'],[''],['Shift','Starts','Ends'],...S.cfg.shifts.map(s=>[s.name,fmt12(s.start),fmt12(s.end)])]);
+ const help=X.utils.aoa_to_sheet([['How to fill this roster'],[''],['One row per employee. Keep the Code column; Name is only for reference.'],['Column headings are dates (YYYY-MM-DD). Add or remove date columns as needed.'],['In each cell write the start and end in 24-hour clock numbers, such as 09:00-18:00 or 22:00-06:00, or OFF for a week off.'],['Times can be anything from 00:00 to 23:59. An end before the start means the shift ends the next day.'],['Leave a cell empty to keep what is already in the roster.'],[''],['Shift','Starts','Ends'],...S.cfg.shifts.map(s=>[s.name,s.start,s.end])]);
  help['!cols']=[{wch:70},{wch:12},{wch:12}];
  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Roster');X.utils.book_append_sheet(wb,help,'How to fill');
  download(`Roster-${ym}.xlsx`,new Blob([X.write(wb,{type:'array',bookType:'xlsx'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
@@ -1092,6 +1096,9 @@ document.addEventListener('change',ev=>{const t=ev.target;
  if(t.id==='restoreFile'){const fl=t.files&&t.files[0];if(fl)restore(fl);t.value='';return}
  if(t.dataset&&t.dataset.up){const fl=t.files&&t.files[0];if(fl)uploadDoc(t.dataset.id,t.dataset.up,fl);t.value='';return}
  if(t.id==='rosterFile'){const fl=t.files&&t.files[0];if(fl)previewRosterFile(fl);return}
+ if(t.dataset&&t.dataset.rosin){const e=S.emps[t.dataset.rosin];if(!e)return;const raw=t.value.trim(),d=new Date(t.dataset.date+'T00:00');
+  const v=raw===''?null:parseRosterVal(raw);if(raw!==''&&v==null){t.classList.add('bad');toast('Use 24-hour times like 09:00-18:00, or OFF.','bad');return}
+  t.classList.remove('bad');rosterWrite([[{...e,id:t.dataset.rosin},d,v]]);return}
  if(t.dataset&&t.dataset.ros){if(t.value==='__custom'){customTimeForm(t.dataset.ros,t.dataset.date);return}const e=S.emps[t.dataset.ros];if(e)rosterWrite([[{...e,id:t.dataset.ros},new Date(t.dataset.date+'T00:00'),t.value]]);return}if(t.id==='empLoc'){S.ui.loc=t.value;render()}if(t.id==='repM'){S.ui.reportMonth=t.value;render()}});
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!$('#modal').hidden)closeModal()});
 $('#menuBtn').addEventListener('click',()=>$('#side').classList.toggle('open'));
