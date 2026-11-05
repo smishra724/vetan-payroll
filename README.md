@@ -5,7 +5,9 @@ Payroll and HR for small Indian companies, in a single web page. No server, no b
 ## What it does
 
 - **Dashboard**: this month's payroll (pending or processed), PF / ESI / TDS / PT totals, statutory due dates, workforce by department, records needing attention and a to-do list.
-- **Employees**: quick add, CSV import, edit, deactivate, payslip preview.
+- **Sign-in**: separate **Employer** and **Employee** logins. The employer creates a username and password on first use (with a recovery code). Employees sign in with their employee code; their first password is their date of birth as DDMMYYYY and they set their own on first sign-in. Employers can reset passwords or turn sign-in off per employee.
+- **Employee portal**: employees see their own profile, payslips, attendance and roster, apply for leave, request advances, upload their documents and change their password.
+- **Employees**: quick add, CSV import, edit, deactivate, payslip preview, and **add from PDF or photo**: upload PAN, Aadhaar, a cheque, an offer letter or a scanned employee list; text is read with OCR (Tesseract.js, on the device) and pre-filled for review.
 - **Onboarding**: a four-step form for new joiners (personal details → job & salary → statutory & bank → documents) with uploads for photo, PAN, Aadhaar, bank proof, certificates and more. Drafts can be saved and continued later; joiners enter payroll only once onboarding is complete.
 - **Attendance**: monthly grid (Present, Absent, Half day, Paid leave, Leave without pay, Holiday, Week off) with automatic loss-of-pay days.
 - **Roster & shifts**: weekly shift roster with coverage counts and weekly hours. Type each day's timing as 24-hour clock numbers from 00:00 to 23:59, e.g. 09:00-18:00 (overnight shifts included), or OFF. Import the roster from Excel or CSV, download it as Excel, copy last week or reset. Rostered offs feed attendance.
@@ -22,6 +24,7 @@ This version keeps everything **in the browser that uses it**:
 - Records are kept in `localStorage`; uploaded documents in `IndexedDB`.
 - Nothing is sent to any server, and GitHub never sees your data.
 - Data does **not** sync between devices or people, and is lost if the browser's site data is cleared.
+- Because of this, employees can only sign in on the device that holds the data. Passwords are stored as salted SHA-256 hashes, but the sign-in is an in-browser lock, not server-side security. For employees to sign in from their own phones, connect a hosted database and authentication (for example Firebase).
 
 Use **Settings → Backup & restore** to download a backup file regularly and to move data to another browser. Uploaded documents are not included in the backup file.
 
