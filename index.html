@@ -211,6 +211,7 @@ table.att{border-collapse:collapse;font-size:12px}
 .dialog.sm{width:min(460px,100%)}
 .dialog header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
 .dialog .body{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.dialog .body>*{flex-shrink:0}
 .dialog footer{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
 .x{background:none;border:none;font-size:22px;line-height:1;cursor:pointer;color:var(--muted);width:36px;height:36px;border-radius:8px}
 .x:hover{background:var(--surface-2)}
@@ -248,6 +249,7 @@ table.att{border-collapse:collapse;font-size:12px}
 .file{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .file img,.file .pdf{width:44px;height:44px;border-radius:6px;object-fit:cover;flex:none;border:1px solid var(--line);background:var(--surface-2)}
 .file .pdf{display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--bad);background:var(--bad-bg)}
+.file .pdf.img{color:var(--muted);background:var(--surface-2)}
 .file .grow{min-width:140px;word-break:break-word}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
@@ -365,6 +367,42 @@ label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 .cel{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none}.cel svg{width:17px;height:17px}
 .c-b{background:var(--rose-bg);color:var(--rose)}.c-a{background:var(--half-bg);color:var(--half)}
 .today-t{color:var(--rose)}
+/* candidate page */
+.login.joinmode{background:var(--bg);justify-content:flex-start;padding-block:0 40px}
+.jwrap{width:min(780px,100%);display:flex;flex-direction:column;gap:16px}
+.jhead{display:flex;align-items:baseline;gap:12px;padding:18px 4px 4px}
+.jhead b{font-family:var(--f-display);font-size:24px;font-weight:800;color:var(--fg)}.jhead b i{font-style:normal;color:var(--mari-dot)}
+.jhead span{color:var(--muted);font-weight:600}
+.jcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.jcard h1{font-size:24px}.jcard h2{font-size:16px;margin-top:6px}.jcard h2:first-child{margin-top:0}
+.jcard p{margin:0}
+.jsubmit{min-height:48px;font-size:15px}
+.jdone{align-items:flex-start}
+.jok{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--duty-bg);color:var(--duty-s)}.jok svg{width:30px;height:30px}
+.field.fixme input,.field.fixme select{border-color:var(--bad);background:var(--bad-bg)}
+.field.fixme label{color:var(--bad)}
+.doc.fixme{background:var(--bad-bg)}
+.docpick{border:1px solid var(--line);border-radius:10px;padding:8px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 12px;margin:0}
+.docpick legend{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.docpick .check{min-height:34px;font-size:13px}
+.rv-act{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end;flex:1 1 300px}
+.rv-reason{width:auto!important;flex:1 1 150px;min-height:32px!important;padding:5px 9px!important;font-size:12.5px}
+.rv-reason.bad{border-color:var(--bad)}
+.ap-ok{color:var(--ok)}.ap-ok:hover{border-color:var(--ok);color:var(--ok)}
+.doc.rv-rejected{background:var(--bad-bg)}.doc.rv-approved{background:color-mix(in srgb,var(--ok-bg) 60%,var(--surface))}
+.rvf{display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+/* camera */
+.cam{position:fixed;inset:0;z-index:80;background:rgba(5,14,12,.82);display:grid;place-items:center;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.cam-box{background:var(--surface);border-radius:16px;width:min(560px,100%);max-height:100%;overflow:auto;display:flex;flex-direction:column}
+.cam-h{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.cam-v{position:relative;background:#000;display:grid;place-items:center;aspect-ratio:4/3;overflow:hidden}
+.cam-v.pp{aspect-ratio:3/4}
+.cam-v video,.cam-v img{width:100%;height:100%;object-fit:cover;display:block}
+.cam-v video.mirror{transform:scaleX(-1)}
+.cam-v.pp img{object-fit:contain}
+.cam-guide{position:absolute;top:50%;left:50%;width:62%;aspect-ratio:35/45;transform:translate(-50%,-50%);border:3px dashed rgba(255,255,255,.85);border-radius:10px;box-shadow:0 0 0 2000px rgba(0,0,0,.35);pointer-events:none}
+.cam-msg{padding:10px 16px 0}
+.cam-a{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;padding:12px 16px 16px}
 /* bulk update */
 .bulk{border:1px dashed var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
 .bulk.on{border:1px solid var(--lv-s);background:var(--lv-bg);box-shadow:0 0 0 3px color-mix(in srgb,var(--lv-s) 15%,transparent)}
@@ -520,10 +558,10 @@ const CYCLE=['P','A','HD','L','LW','H','WO'];
 /* ============ state ============ */
 const isoD=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const mondayOf=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
-const S={db:null,dl:null,assets:null,live:false,canEdit:true,cfg:clone(DEFAULT_CFG),emps:{},att:{},runs:{},leaves:{},loans:{},filings:{},roster:{},
+const S={db:null,dl:null,assets:null,live:false,canEdit:true,cfg:clone(DEFAULT_CFG),emps:{},att:{},runs:{},leaves:{},loans:{},filings:{},roster:{},tpls:{},
  loaded:{},route:'dashboard',month:CUR,ui:{q:'',loc:'',leaveTab:'all',reportMonth:CUR,attTab:'grid',week:isoD(mondayOf(TODAY))},inputs:{}};
 function mergeCfg(c){const d=clone(DEFAULT_CFG);c=c||{};return {...d,...c,company:{...d.company,...(c.company||{})},pf:{...d.pf,...(c.pf||{})},esi:{...d.esi,...(c.esi||{})},tds:{...d.tds,...(c.tds||{})},structures:c.structures||d.structures,shifts:(c.shifts&&c.shifts.length)?c.shifts:d.shifts,defaultShift:c.defaultShift||d.defaultShift}}
-const KEY={employees:'emps',attendance:'att',runs:'runs',leaves:'leaves',loans:'loans',filings:'filings',roster:'roster'};
+const KEY={employees:'emps',attendance:'att',runs:'runs',leaves:'leaves',loans:'loans',filings:'filings',roster:'roster',templates:'tpls'};
 const isAct=e=>!e.status||e.status==='active';
 const obCount=()=>Object.values(S.emps).filter(e=>e.status==='onboarding').length;
 async function put(col,id,data){
@@ -611,10 +649,12 @@ function nav(){
  const cu=curUser(),nm=cu?cu.name:(S.cfg.admin||'HR Admin');$('#whoName').textContent=nm;$('#whoAv').textContent=String(nm).trim().charAt(0).toUpperCase();
  $('#whoRole').textContent=!S.canEdit?'View only':cu?((rolesAll()[cu.role]||{}).name||'User'):'Owner';$('#roChip').hidden=S.canEdit;
 }
-function route(){const h=(location.hash||'').slice(1),R=routesFor();S.route=R.some(r=>r[0]===h)?h:R[0][0];$('#side').classList.remove('open');render();window.scrollTo(0,0)}
+function route(){S.join=parseJoin(location.hash);if(S.join){render();return}if(S._lgKey&&String(S._lgKey).startsWith('join'))S._lgKey=null;const h=(location.hash||'').slice(1),R=routesFor();S.route=R.some(r=>r[0]===h)?h:R[0][0];$('#side').classList.remove('open');render();window.scrollTo(0,0)}
 let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;draw()})}
 function draw(){
  const a=document.activeElement,aid=a&&a.id,sel=a&&a.selectionStart;
+ if(S.join){const L=$('#login'),AR=$('#appRoot');AR.hidden=true;L.hidden=false;L.classList.add('joinmode');const key='join'+(S.jn&&S.jn.done?'done':'')+S.join.t;if(S._lgKey!==key){S._lgKey=key;L.innerHTML=joinView();joinAfterRender()}return}
+ $('#login').classList.remove('joinmode');
  const g=authGate(),L=$('#login'),AR=$('#appRoot');
  if(g){AR.hidden=true;L.hidden=false;if(g.key!==S._lgKey){S._lgKey=g.key;L.innerHTML=g.html;const fi=L.querySelector('input');if(fi&&g.key!=='load')setTimeout(()=>fi.focus(),0)}return}
  if(S._lgKey){S._lgKey=null;L.innerHTML=''}L.hidden=true;AR.hidden=false;
@@ -657,7 +697,7 @@ VIEWS.dashboard=()=>{
  const apCard=(cls,icn,title,n,href,body)=>`<section class="ap ${cls}"><div class="ap-h"><span class="ap-ic">${ic(icn)}</span><h2>${title}</h2><span class="ap-n">${n}</span></div><div class="ap-b">${body}</div>${href?`<a class="ap-more" href="${href}">View all →</a>`:''}</section>`;
  const leaveBody=pL.length?pL.slice(0,4).map(([id,l])=>`<div class="ap-row"><div class="grow"><b>${esc(nameOf(l.empId))}</b><span>${esc(LEAVE_TYPES[l.type]||l.type)} · ${sd(l.from)}${l.to!==l.from?' – '+sd(l.to):''} · ${l.days} day${l.days==1?'':'s'}</span></div><div class="ap-act"><button class="btn sm ap-yes" type="button" data-act="leaveOk" data-id="${id}" ${ro('leave','approve')}>Approve</button><button class="btn sm" type="button" data-act="leaveNo" data-id="${id}" ${ro('leave','approve')} aria-label="Reject leave for ${esc(nameOf(l.empId))}">Reject</button></div></div>`).join(''):ok('No leave waiting for approval');
  const loanBody=pN.length?pN.slice(0,4).map(([id,l])=>`<div class="ap-row"><div class="grow"><b>${esc(nameOf(l.empId))}</b><span>${esc(l.type)} · ${inr(l.amount)} · EMI ${inr(l.emi)} × ${l.tenure}</span></div><div class="ap-act"><button class="btn sm ap-yes" type="button" data-act="loanOk" data-id="${id}" ${ro('loans','approve')}>Approve</button><button class="btn sm" type="button" data-act="loanNo" data-id="${id}" ${ro('loans','approve')} aria-label="Reject request from ${esc(nameOf(l.empId))}">Reject</button></div></div>`).join(''):ok('No advance requests waiting');
- const obBody=obs.length?obs.slice(0,4).map(e=>{const st=Math.min(4,(e.onboarding&&e.onboarding.step)||1);return `<div class="ap-row"><div class="grow"><b>${esc(e.name||'Unnamed')}</b><span>Step ${st} of 4 · ${OB_STEPS[st-1]}</span><div class="mini-bar"><i style="width:${(st-1)/4*100}%"></i></div></div><div class="ap-act"><button class="btn sm ap-yes" type="button" data-act="obGo" data-id="${e.id}" data-step="${st}" ${ro('employees')}>Continue</button></div></div>`}).join(''):ok('No one being onboarded');
+ const obBody=obs.length?obs.slice(0,4).map(e=>{const st=Math.min(4,(e.onboarding&&e.onboarding.step)||1);return `<div class="ap-row"><div class="grow"><b>${esc(e.name||'Unnamed')}</b><span>${STAGE[(e.onboarding||{}).stage]?STAGE[e.onboarding.stage][0]:'Step '+st+' of 4 · '+OB_STEPS[st-1]}</span><div class="mini-bar"><i style="width:${(st-1)/4*100}%"></i></div></div><div class="ap-act"><button class="btn sm ap-yes" type="button" data-act="obGo" data-id="${e.id}" data-step="${st}" ${ro('employees')}>Continue</button></div></div>`}).join(''):ok('No one being onboarded');
  const docBody=docsDue.length?docsDue.slice(0,4).map(e=>`<div class="ap-row"><div class="grow"><b>${esc(e.name)}</b><span>${pendingDocs(e).map(k=>DOC_TYPES.find(d=>d[0]===k)[1].replace(/ card| or bank proof|Passport-size /g,'')).join(' · ')}</span></div><div class="ap-act"><button class="btn sm ap-yes" type="button" data-act="docs" data-id="${e.id}">${can('employees','edit')?'Upload':'View'}</button></div></div>`).join(''):ok('All required documents are in');
  /* shifts, celebrations, upcoming leave */
  const sh={};[...G.duty,...G.half].forEach(e=>{const v=rosterOf(e,ym,d0),s=slotOf(v),k=isCustom(v)?'custom':v;if(!sh[k])sh[k]={name:isCustom(v)?'Custom timings':s.name,time:isCustom(v)?'':s.start+'-'+s.end,n:0};sh[k].n++});
@@ -860,6 +900,8 @@ VIEWS.settings=()=>{
   <div class="field"><label for="s_tan">TAN</label><input id="s_tan" name="tan" value="${esc(co.tan)}" maxlength="10" ${ro()}></div>
   <div class="field"><label for="s_pf">PF establishment code</label><input id="s_pf" name="pfCode" value="${esc(co.pfCode)}" ${ro()}></div>
   <div class="field"><label for="s_esi">ESIC code</label><input id="s_esi" name="esiCode" value="${esc(co.esiCode)}" ${ro()}></div>
+  ${fld('hrEmail','HR email (shown to candidates)',co.hrEmail||'',{type:'email'})}${fld('hrPhone','HR WhatsApp number',co.hrPhone||'',{type:'tel'})}${fld('signName','Letter signatory name',co.signName||'')}${fld('signTitle','Signatory title',co.signTitle||'Director')}
+  ${fld('publicUrl','Public app address (for candidate links)',co.publicUrl||'',{ph:DEF_PUBLIC,hint:'Your GitHub Pages address. Leave blank to use '+DEF_PUBLIC})}
   <div class="field" style="grid-column:1/-1"><label for="s_addr">Address (shown on payslips)</label><input id="s_addr" name="address" value="${esc(co.address)}" ${ro()}></div>
  </div><div><button class="btn primary" type="submit" ${ro()}>Save company</button></div></form>
  <form class="card" id="fRates" style="display:flex;flex-direction:column;gap:14px"><h2>Statutory rates</h2><div class="fgrid">
@@ -883,6 +925,9 @@ VIEWS.settings=()=>{
  <p class="small muted" style="margin:0">${S.cfg.auth?`Signed in as <b>${esc(curAcct().user)}</b>. Enter your current password to change the username or password.`:'No employer login yet.'} Employees sign in with their employee code; manage them from Employees › Employee logins.</p>
  ${S.cfg.auth?`<div class="fgrid">${fld('auUser','Username',curAcct().user)}${fld('auCur','Current password','',{type:'password'})}${fld('auPw','New password','',{type:'password',hint:'Leave blank to keep the current one'})}${fld('auPw2','Confirm new password','',{type:'password'})}</div>
  <div class="row"><button class="btn primary" type="submit">Update login</button>${isOwner()?'<button class="btn" type="button" data-act="newRecovery">New recovery code</button>':''}<button class="btn" type="button" data-act="logout">Sign out</button></div>`:''}</form>
+ <section class="card" style="display:flex;flex-direction:column;gap:12px"><h2>Appointment letter template</h2>
+ <p class="small muted" style="margin:0">${tplRec()?`Using <b>${esc(tplRec().name)}</b>, uploaded ${fmtDate((tplRec().at||'').slice(0,10))}, with ${(tplRec().fields||[]).length} fields.`:'No template yet.'} Write fields in the Word file as &lt;&lt;FieldName&gt;&gt;. Vetan fills: ${TPL_FIELDS}.</p>
+ <div class="row"><button class="btn" type="button" data-act="tplPick" ${ro()}>${ic('up')}${tplRec()?'Replace template':'Upload template (.docx)'}</button></div></section>
  <section class="card" style="display:flex;flex-direction:column;gap:12px"><h2>Backup & restore</h2>
  <p class="small muted" style="margin:0">${S.local?'This copy of the app keeps its data in this browser only. Clearing site data or switching device loses it, so download a backup regularly.':'Download every record as one file, for safekeeping or to move to another copy of the app.'} Uploaded documents are not included in the backup file.</p>
  <div class="row"><button class="btn" type="button" data-act="backup" ${S.dl?'':'disabled'}>${ic('down')}Download backup</button>
@@ -893,15 +938,15 @@ VIEWS.settings=()=>{
 VIEWS.onboarding=()=>{
  const all=empList(),prog=all.filter(e=>e.status==='onboarding'),done=all.filter(e=>e.onboarding&&e.onboarding.completed).sort((a,b)=>b.onboarding.completed.localeCompare(a.onboarding.completed));
  const pend=all.filter(e=>isAct(e)&&pendingDocs(e).length),docName=k=>DOC_TYPES.find(d=>d[0]===k)[1];
- return `<div class="head"><div><h1>Onboarding</h1><p>Collect a new joiner's details, salary, statutory IDs and documents in four steps. They join payroll once onboarding is complete.</p></div>
- <div class="row"><button class="btn" type="button" data-act="scanStart" ${ro('employees')}>${ic('scan')}Add from PDF or photo</button><button class="btn primary" type="button" data-act="obNew" ${ro('employees')}>${ic('plus')}Start onboarding</button></div></div>
+ return `<div class="head"><div><h1>Onboarding</h1><p>Send a joining link so candidates fill in their own details and documents, review and approve them, then issue the appointment letter. They join payroll once onboarding is complete.</p></div>
+ <div class="row"><button class="btn primary" type="button" data-act="inviteNew" ${ro('employees')}>${ic('up')}Invite candidate</button><button class="btn" type="button" data-act="subImport" ${ro('employees')}>${ic('down')}Import submission</button><button class="btn" type="button" data-act="scanStart" ${ro('employees')}>${ic('scan')}Add from PDF or photo</button><button class="btn" type="button" data-act="obNew" ${ro('employees')}>${ic('plus')}Fill in myself</button></div></div>
  <div class="kpis"><div class="kpi warn"><small>In progress</small><b>${prog.length}</b></div><div class="kpi ok"><small>Completed</small><b>${done.length}</b></div><div class="kpi bad"><small>Documents pending</small><b>${pend.length+prog.filter(e=>pendingDocs(e).length).length}</b></div><div class="kpi"><small>Total employees</small><b>${all.filter(e=>e.status!=='inactive').length}</b></div></div>
  <section class="card"><div class="card-h"><h2>In progress</h2><small>${prog.length} joiner${prog.length===1?'':'s'}</small></div>
- ${prog.length?`<div class="tbl-wrap" style="border:none"><table class="tbl"><thead><tr><th>Joiner</th><th>Role</th><th>Joining</th><th>Progress</th><th>Documents</th><th class="n">Actions</th></tr></thead><tbody>
+ ${prog.length?`<div class="tbl-wrap" style="border:none"><table class="tbl"><thead><tr><th>Joiner</th><th>Role</th><th>Joining</th><th>Stage</th><th>Documents</th><th class="n">Actions</th></tr></thead><tbody>
  ${prog.map(e=>{const st=Math.min(4,(e.onboarding&&e.onboarding.step)||1),pd=pendingDocs(e);return `<tr><td><b>${esc(e.name||'Unnamed')}</b><small>${esc(e.code||'')} · started ${fmtDate(((e.onboarding&&e.onboarding.started)||'').slice(0,10))}</small></td><td>${esc(e.designation||'—')}<small>${esc(e.dept||'')}</small></td><td>${fmtDate(e.doj)}</td>
- <td style="min-width:150px"><div class="small" style="margin-bottom:4px">Step ${st} of 4 · ${OB_STEPS[st-1]}</div><div class="bar"><i style="width:${(st-1)/4*100}%"></i></div></td>
+ <td style="min-width:150px">${(()=>{const sg=STAGE[(e.onboarding||{}).stage];return sg?`<span class="chip ${sg[1]}">${sg[0]}</span><small>${(e.onboarding||{}).stage==='invited'?'Sent '+fmtDate(((e.onboarding.invite||{}).sentAt||'').slice(0,10)):(e.onboarding||{}).stage==='submitted'?'Submitted '+fmtDate(((e.onboarding||{}).submittedAt||'').slice(0,10)):''}</small>`:`<div class="small" style="margin-bottom:4px">Step ${st} of 4 · ${OB_STEPS[st-1]}</div><div class="bar"><i style="width:${(st-1)/4*100}%"></i></div>`})()}</td>
  <td>${pd.length?`<span class="chip warn">${REQ_DOCS.length-pd.length} of ${REQ_DOCS.length} required</span>`:'<span class="chip ok">All required</span>'}</td>
- <td><div class="acts"><button class="btn sm primary" type="button" data-act="obGo" data-id="${e.id}" data-step="${st}" ${ro('employees')}>Continue</button><button class="btn sm danger" type="button" data-act="obDiscard" data-id="${e.id}" ${ro()}>Discard</button></div></td></tr>`}).join('')}</tbody></table></div>`
+ <td><div class="acts">${(()=>{const sg=(e.onboarding||{}).stage,R=ro('employees');return (sg==='invited'||sg==='changes'?`<button class="btn sm" type="button" data-act="inviteSend" data-id="${e.id}" ${R}>Share link</button>`:'')+(sg==='submitted'||sg==='changes'?`<button class="btn sm primary" type="button" data-act="rvOpen" data-id="${e.id}" ${R}>Review</button>`:'')+(sg==='verified'||sg==='offered'?`<button class="btn sm ${sg==='verified'?'primary':''}" type="button" data-act="apptOpen" data-id="${e.id}" ${R}>${sg==='offered'?'Letter':'Appointment letter'}</button>`:'')+(sg==='verified'||sg==='offered'?`<button class="btn sm" type="button" data-act="rvOpen" data-id="${e.id}" ${R}>Review</button>`:'')})()}<button class="btn sm ${(e.onboarding||{}).stage?'':'primary'}" type="button" data-act="obGo" data-id="${e.id}" data-step="${st}" ${ro('employees')}>${(e.onboarding||{}).stage==='offered'?'Complete':'Continue'}</button><button class="btn sm danger" type="button" data-act="obDiscard" data-id="${e.id}" ${ro()}>Discard</button></div></td></tr>`}).join('')}</tbody></table></div>`
  :empty('No onboarding in progress','Start one for a new joiner. You can save at any step and continue later.',`<button class="btn primary" type="button" data-act="obNew" ${ro('employees')}>Start onboarding</button>`)}</section>
  ${pend.length?`<section class="card"><div class="card-h"><h2>Documents still needed</h2><small>active employees</small></div><div class="list">${pend.map(e=>`<div><div class="icon w">${ic('file')}</div><div class="grow"><b>${esc(e.name)}</b><span class="small muted">${pendingDocs(e).map(docName).join(' · ')}</span></div><button class="btn sm" type="button" data-act="docs" data-id="${e.id}">${can('employees','edit')?'Upload':'View'}</button></div>`).join('')}</div></section>`:''}
  ${done.length?`<section class="card"><div class="card-h"><h2>Recently completed</h2></div><div class="list">${done.slice(0,6).map(e=>`<div><div class="icon">${ic('clip')}</div><div class="grow"><b>${esc(e.name)}</b><span class="small muted">${esc(e.designation||'')} · joined ${fmtDate(e.doj)}</span></div><span class="small muted">${fmtDate(e.onboarding.completed.slice(0,10))}</span></div>`).join('')}</div></section>`:''}`;
@@ -973,9 +1018,9 @@ function docsPanel(id){
  return `${can?'':`<div class="note warn">${S.canEdit?'File uploads are not available in this view. Open the app in Claude to upload documents.':'You have view-only access, so you can see documents but not upload them.'}</div>`}
  <p class="small muted" style="margin:0">PDF, JPG, PNG or WEBP, up to 20 MB each. Required documents are marked *.</p>
  <div class="docs">${DOC_TYPES.map(([k,label,req])=>{const mine=docs.filter(d=>d.type===k),multi=['edu','exp','other','address'].includes(k);
-  return `<div class="doc"><div class="grow"><b>${label}${req?' *':''}</b>${mine.length?mine.map(d=>{const u=fileUrl(d.id);return `<div class="file">${String(d.ct).startsWith('image/')&&u?`<img src="${esc(u)}" alt="${esc(label)}">`:`<span class="pdf">${String(d.ct).startsWith('image/')?'IMG':'PDF'}</span>`}<span class="grow small">${esc(d.name)}<br><span class="muted">${Math.max(1,Math.round(N(d.size)/1024))} KB · ${fmtDate((d.at||'').slice(0,10))}</span></span>
+  return `<div class="doc"><div class="grow"><b>${label}${req?' *':''}</b>${mine.length?mine.map(d=>{const u=fileUrl(d.id);return `<div class="file">${String(d.ct).startsWith('image/')&&u?`<img src="${esc(u)}" alt="${esc(label)}">`:`<span class="pdf">${String(d.ct).startsWith('image/')?'IMG':'PDF'}</span>`}<span class="grow small">${esc(d.name)}${d.review==="pending"?' <span class="chip warn">To review</span>':d.review==="rejected"?' <span class="chip bad">Rejected</span>':d.review==="approved"?' <span class="chip ok">Approved</span>':""}<br><span class="muted">${Math.max(1,Math.round(N(d.size)/1024))} KB · ${fmtDate((d.at||'').slice(0,10))}</span></span>
    ${u?`<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">View</a>`:''}${S.dl?`<button class="btn sm" type="button" data-act="docDl" data-id="${id}" data-doc="${esc(d.id)}">Download</button>`:''}${can?`<button class="btn sm danger" type="button" data-act="docDel" data-id="${id}" data-doc="${esc(d.id)}">Remove</button>`:''}</div>`}).join(''):`<div class="small ${req?'warn-t':'muted'}" style="margin-top:2px">${req?'Pending':'Optional'}</div>`}</div>
-  ${can&&(!mine.length||multi)?`<label class="btn sm">${ic('up')}${mine.length?'Add another':'Upload'}<input class="vh" type="file" data-up="${k}" data-id="${id}" accept="application/pdf,image/png,image/jpeg,image/webp"></label>`:''}</div>`}).join('')}</div>`;
+  ${can&&(!mine.length||multi)?`<div class="row" style="gap:6px"><label class="btn sm">${ic('up')}${mine.length?'Add another':'Upload'}<input class="vh" type="file" data-up="${k}" data-id="${id}" accept="application/pdf,image/png,image/jpeg,image/webp"></label><button class="btn sm" type="button" data-act="docCam" data-id="${id}" data-type="${k}">${ic('scan')}${k==='photo'?'Take photo':'Camera'}</button></div>`:''}</div>`}).join('')}</div>`;
 }
 const refreshDocs=id=>{const b=document.getElementById('docsBox');if(b)b.innerHTML=docsPanel(id)};
 async function uploadDoc(id,type,file){
@@ -1141,7 +1186,7 @@ function modal(title,body,{submit,sm,foot}={}){
  <footer>${foot||`<button class="btn" type="button" data-act="close">Cancel</button>${submit?`<button class="btn primary" type="submit">${typeof sm==='string'?sm:'Save'}</button>`:''}`}</footer></form></div>`;
  m.hidden=false;setTimeout(()=>{const f=m.querySelector('input:not([type=hidden]),select,textarea,button.primary');f&&f.focus()},30);
 }
-const closeModal=()=>{if(S._scanCtl){S._scanCtl.abort();S._scanCtl=null}$('#modal').hidden=true;$('#modal').innerHTML='';onSubmit=null;S.docsOpen=null;render()};
+const closeModal=()=>{S._rvOpen=null;if(S._scanCtl){S._scanCtl.abort();S._scanCtl=null}$('#modal').hidden=true;$('#modal').innerHTML='';onSubmit=null;S.docsOpen=null;render()};
 const mErr=t=>{const e=$('#mErr');e.textContent=t;e.hidden=false};
 function confirmBox(title,msg,label,fn){modal(title,`<p style="margin:0">${msg}</p>`,{sm:label,submit:()=>{fn();return true}})}
 
@@ -1290,18 +1335,19 @@ document.addEventListener('submit',ev=>{
  if(f.id==='mForm'){if(!onSubmit){closeModal();return}const ok=onSubmit(f);if(ok===true)closeModal();return}
  if(f.id==='fRole'){if(isOwner())saveRole(f);return}
  if(!S.canEdit)return;if(!can('settings','edit')){toast(NOPE,'bad');return}const d=Object.fromEntries(new FormData(f));const c=clone(S.cfg);
- if(f.id==='fCompany'){if(!d.name.trim())return toast('Company name is required.','bad');c.company={...c.company,name:d.name.trim(),state:d.state,pan:d.pan.trim().toUpperCase(),tan:d.tan.trim().toUpperCase(),pfCode:d.pfCode.trim(),esiCode:d.esiCode.trim(),address:d.address.trim()};c.admin=d.admin.trim()||'HR Admin'}
+ if(f.id==='fCompany'){if(!d.name.trim())return toast('Company name is required.','bad');c.company={...c.company,name:d.name.trim(),state:d.state,pan:d.pan.trim().toUpperCase(),tan:d.tan.trim().toUpperCase(),pfCode:d.pfCode.trim(),esiCode:d.esiCode.trim(),address:d.address.trim(),hrEmail:(d.hrEmail||'').trim(),hrPhone:(d.hrPhone||'').replace(/\D/g,'').slice(-10),signName:(d.signName||'').trim(),signTitle:(d.signTitle||'').trim(),publicUrl:(d.publicUrl||'').trim()};c.admin=d.admin.trim()||'HR Admin'}
  if(f.id==='fRates'){c.pf={ee:N(d.pfee),er:N(d.pfer),ceiling:N(d.pfc)};c.esi={ee:N(d.esee),er:N(d.eser),limit:N(d.esl)};c.tds={...c.tds,std:N(d.std),rebate:N(d.reb),cess:N(d.cess),slabs:c.tds.slabs.map((_,i)=>[N(d['sl_'+i]),N(d['sr_'+i])])}}
  if(f.id==='fStruct'){c.structures=c.structures.map((s,i)=>({...s,name:(d['sn_'+i]||s.name).trim(),basic:N(d['sb_'+i]),hra:N(d['sh_'+i]),conv:N(d['sc_'+i])}))}
  put('config','main',c);toast('Settings saved');
 });
 document.addEventListener('input',ev=>{
  const t=ev.target;
+ if(S.join&&t.closest&&t.closest('#jForm')){joinSave();return}
  if(t.id==='empQ'){S.ui.q=t.value;render()}
  if(t.dataset&&t.dataset.inp&&!can('payroll','edit'))return;
  if(t.dataset&&t.dataset.inp){const ym=S.month;S.inputs[ym]=S.inputs[ym]||{};S.inputs[ym][t.dataset.id]={...(S.inputs[ym][t.dataset.id]||{}),[t.dataset.inp]:N(t.value)};clearTimeout(t._t);t._t=setTimeout(render,450)}
 });
-const BK=['employees','attendance','runs','leaves','loans','filings','roster'];
+const BK=['employees','attendance','runs','leaves','loans','filings','roster','templates'];
 A.backup=()=>{const o={app:'vetan',version:1,exported:new Date().toISOString(),config:S.cfg};BK.forEach(c=>o[c]=S[KEY[c]]);download(`vetan-backup-${isoD(new Date())}.json`,JSON.stringify(o,null,1))};
 function restore(file){const r=new FileReader();r.onload=()=>{let o;try{o=JSON.parse(r.result)}catch(_){return toast('That file is not a Vetan backup.','bad')}
  if(!o||o.app!=='vetan')return toast('That file is not a Vetan backup.','bad');
@@ -1309,6 +1355,9 @@ function restore(file){const r=new FileReader();r.onload=()=>{let o;try{o=JSON.p
  confirmBox('Restore this backup?',`It has ${n} employee${n===1?'':'s'}, exported ${fmtDate((o.exported||'').slice(0,10))}. Records with the same ID are replaced; others stay.`,'Restore',()=>{
   if(o.config)put('config','main',o.config);BK.forEach(c=>Object.entries(o[c]||{}).forEach(([id,d])=>put(c,id,d)));toast('Backup restored')})};r.readAsText(file)}
 document.addEventListener('change',ev=>{const t=ev.target;
+ if(S.join&&t.dataset&&t.dataset.jup){if(t.files&&t.files.length)joinAddFiles(t.dataset.jup,t.files);t.value='';return}
+ if(t.id==='subFile'){const fl=t.files&&t.files[0];if(fl)importSubmission(fl);t.value='';return}
+ if(t.dataset&&t.dataset.rvf){const e=S.emps[t.dataset.id];if(!e)return;const ob=e.onboarding||{},fx=new Set(ob.fixFields||[]);t.checked?fx.add(t.dataset.rvf):fx.delete(t.dataset.rvf);put('employees',t.dataset.id,{...e,onboarding:{...ob,fixFields:[...fx]}});const tr=t.closest('tr');if(tr)tr.classList.toggle('picked',t.checked);return}
  if(t.dataset&&(t.dataset.sel||t.dataset.selall||t.dataset.selby||t.dataset.bk)&&onSelChange(t))return;
  if(t.dataset&&t.dataset.pm&&t.closest&&t.closest('#fRole')){const f=t.closest('#fRole'),m=t.dataset.pm;if(t.dataset.pr!=='view'&&t.checked){const x=f.elements['p_'+m+'_view'];if(x)x.checked=true}if(t.dataset.pr==='view'&&!t.checked)['edit','approve'].forEach(r=>{const x=f.elements['p_'+m+'_'+r];if(x)x.checked=false});return}
  if(t.dataset&&t.dataset.up&&S.sess&&!(isEmp()?t.dataset.id===meId():can('employees','edit'))){toast(NOPE,'bad');t.value='';return}
@@ -1351,7 +1400,7 @@ const blobCache={};
 function fileUrl(id){
  if(!S.local)return '/_blob/'+id;
  if(blobCache[id])return blobCache[id];
- if(blobCache[id]===undefined){blobCache[id]=null;S.assets.get(id).then(b=>{if(b){blobCache[id]=URL.createObjectURL(b);if(S.docsOpen)refreshDocs(S.docsOpen)}}).catch(()=>{})}
+ if(blobCache[id]===undefined){blobCache[id]=null;S.assets.get(id).then(b=>{if(b){blobCache[id]=URL.createObjectURL(b);if(S.docsOpen)refreshDocs(S.docsOpen);if(S._rvOpen&&!$('#modal').hidden&&document.querySelector('[data-act=rvVerify]')){clearTimeout(S._rvT);S._rvT=setTimeout(()=>reviewCand(S._rvOpen),60)}}}).catch(()=>{})}
  return '';
 }
 const getFile=id=>S.local?S.assets.get(id).then(b=>{if(!b)throw 0;return b}):fetch('/_blob/'+id).then(r=>{if(!r.ok)throw 0;return r.blob()});
@@ -1749,7 +1798,7 @@ const ACT_PERM={addEmp:['employees','edit'],editEmp:['employees','edit'],importE
  backup:['settings','view'],newRecovery:['access','edit'],userAdd:['access','edit'],userEdit:['access','edit'],userToggle:['access','edit'],userDel:['access','edit'],roleSel:['access','edit'],roleNew:['access','edit'],roleDel:['access','edit'],rolePreset:['access','edit']};
 const EMP_ACTS=new Set(['applyLeave','newLoan','slip','dlSlip','meEdit','mePw','myLeaveCancel','logout','close','month','week','weekNow','docDl','docDel']);
 function allowed(act,d){
- if(!S.sess)return true;
+ if(S.join||!S.sess)return true;
  if(isEmp()){if(!EMP_ACTS.has(act))return !ACT_PERM[act];const me=meId();
   if((act==='slip'||act==='dlSlip'||act==='docDl'||act==='docDel')&&d.id!==me)return false;
   if((act==='applyLeave'||act==='newLoan')&&d.emp!==me)return false;return true}
@@ -1880,6 +1929,284 @@ function onSelChange(t){
 Object.assign(ACT_PERM,{bulkAtt:['attendance','edit'],bulkRos:['attendance','edit']});
 Object.assign(A,{bulkAtt,bulkRos});
 
+/* ============ appointment letter (.docx template fill) ============ */
+const escXml=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const phKey=k=>String(k).replace(/\s+/g,'').toLowerCase();
+function fillDocxXml(xml,vals){
+ const V={};Object.entries(vals).forEach(([k,v])=>V[phKey(k)]=v);
+ const re=/(<w:t(?:\s[^>]*)?>)([^<]*)(<\/w:t>)/g,nodes=[];let m;
+ while((m=re.exec(xml)))nodes.push({start:m.index,len:m[0].length,open:m[1],text:m[2],close:m[3]});
+ let full='';const offs=nodes.map(n=>{const o=full.length;full+=n.text;return o});
+ const T=nodes.map(n=>n.text),found=new Set(),missing=new Set();
+ const at=p=>{let lo=0,hi=nodes.length-1,r=-1;while(lo<=hi){const mid=(lo+hi)>>1;if(offs[mid]<=p){r=mid;lo=mid+1}else hi=mid-1}while(r>0&&offs[r]>p)r--;while(r<nodes.length-1&&p>=offs[r]+nodes[r].text.length)r++;return r};
+ const ph=/&lt;&lt;\s*([^&<>]+?)\s*&gt;&gt;/g,eds=[];
+ while((m=ph.exec(full)))eds.push({s:m.index,e:m.index+m[0].length,key:m[1]});
+ for(const ed of eds.reverse()){const k=phKey(ed.key);if(!(k in V)){missing.add(ed.key);continue}found.add(ed.key);
+  const v=escXml(V[k]),si=at(ed.s),ei=at(ed.e-1),so=ed.s-offs[si],eo=ed.e-offs[ei];
+  if(si===ei)T[si]=T[si].slice(0,so)+v+T[si].slice(eo);
+  else{T[si]=T[si].slice(0,so)+v;for(let i=si+1;i<ei;i++)T[i]='';T[ei]=T[ei].slice(eo)}}
+ let out=xml;for(let i=nodes.length-1;i>=0;i--){const n=nodes[i];if(T[i]===n.text)continue;let op=n.open;if(!/xml:space/.test(op))op=op.replace('<w:t','<w:t xml:space="preserve"');out=out.slice(0,n.start)+op+T[i]+n.close+out.slice(n.start+n.len)}
+ return{xml:out,found:[...found],missing:[...missing]};
+}
+function docxPlaceholders(xml){const t=[...xml.matchAll(/<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>/g)].map(x=>x[1]).join('');return [...new Set([...t.matchAll(/&lt;&lt;\s*([^&<>]+?)\s*&gt;&gt;/g)].map(x=>x[1]))]}
+
+/* ============ candidate invites, self-onboarding, review, appointment letter ============ */
+const J_FIELDS=[['name','Full name (as on PAN)',1],['father',"Father's or spouse's name",0],['dob','Date of birth',1,'date'],['gender','Gender',1,'sel',['','Female','Male','Other']],['marital','Marital status',0,'sel',['','Single','Married','Other']],['blood','Blood group',0,'sel',['','A+','A−','B+','B−','AB+','AB−','O+','O−']],
+ ['phone','Mobile number',1,'tel'],['email','Email',0,'email'],['address','Current address with PIN code',1],['emName','Emergency contact name',0],['emPhone','Emergency contact phone',0,'tel'],
+ ['pan','PAN',1],['aadhaar','Aadhaar number',1],['uan','UAN (only if you had PF before)',0],['bankName','Bank name',1],['account','Bank account number',1],['ifsc','IFSC code',1]];
+const J_SECTIONS=[['About you',['name','father','dob','gender','marital','blood']],['Contact',['phone','email','address','emName','emPhone']],['ID and bank',['pan','aadhaar','uan','bankName','account','ifsc']]];
+const CAND_DOCS=DOC_TYPES.filter(d=>d[0]!=='appt'&&d[0]!=='offer');
+const STAGE={invited:['Link sent','info'],submitted:['To review','warn'],changes:['Changes requested','plum'],verified:['Verified','ok'],offered:['Letter issued','acc']};
+const DEF_PUBLIC='https://smishra724.github.io/vetan-payroll/';
+const publicBase=()=>S.cfg.company.publicUrl||(S.local?location.origin+location.pathname:DEF_PUBLIC);
+const b64u=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb64u=s=>{try{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(decodeURIComponent(escape(atob(s))))}catch(_){return null}};
+function parseJoin(h){h=String(h||'');if(!h.startsWith('#join='))return null;const p=unb64u(h.slice(6));return p&&p.t?p:null}
+function inviteLink(id){const e=S.emps[id],ob=e.onboarding||{},inv=ob.invite||{},co=S.cfg.company;
+ return publicBase()+'#join='+b64u({v:1,t:inv.token,e:id,c:co.name,hr:{em:co.hrEmail||'',ph:co.hrPhone||''},n:e.name,em:e.email||'',ph:e.phone||'',d:e.designation||'',j:e.doj||'',req:inv.req||REQ_DOCS,fix:inv.fix||null,note:inv.note||''})}
+const toB64=blob=>new Promise((r,j)=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(',')[1]||'');f.onerror=()=>j(f.error);f.readAsDataURL(blob)});
+const fromB64=(b,ct)=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return new Blob([u],{type:ct||'application/octet-stream'})};
+const ddmmyy=s=>s?fmtDate(s):'';
+const longDate=s=>{const d=new Date(s+'T00:00');return isNaN(d)?s:d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()};
+
+/* ----- camera ----- */
+function cameraCapture(opts){opts=opts||{};return new Promise(resolve=>{
+ const fallback=()=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.setAttribute('capture',opts.passport?'user':'environment');i.style.display='none';document.body.appendChild(i);i.onchange=()=>{resolve(i.files[0]||null);i.remove()};i.click()};
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return fallback();
+ const ov=document.createElement('div');ov.className='cam';
+ ov.innerHTML=`<div class="cam-box" role="dialog" aria-modal="true" aria-label="${esc(opts.title||'Take a photo')}"><div class="cam-h"><b>${esc(opts.title||'Take a photo')}</b><button class="x" type="button" data-cam="close" aria-label="Close">×</button></div>
+ <div class="cam-v ${opts.passport?'pp':''}"><video playsinline autoplay muted></video>${opts.passport?'<div class="cam-guide" aria-hidden="true"></div>':''}<img alt="Captured photo" hidden></div>
+ <p class="small muted cam-msg">${opts.passport?'Look straight at the camera, face inside the frame, plain light background.':'Hold the document flat and fill the frame.'}</p>
+ <div class="cam-a"><button class="btn" type="button" data-cam="flip">Switch camera</button><button class="btn primary" type="button" data-cam="snap">Capture</button><button class="btn" type="button" data-cam="retake" hidden>Retake</button><button class="btn primary" type="button" data-cam="use" hidden>Use this photo</button></div></div>`;
+ document.body.appendChild(ov);
+ const v=ov.querySelector('video'),img=ov.querySelector('img');let stream=null,facing=opts.passport?'user':'environment',blob=null;
+ const stop=()=>{if(stream)stream.getTracks().forEach(t=>t.stop());stream=null};
+ const done=f=>{stop();ov.remove();resolve(f||null)};
+ const mode=t=>{ov.querySelector('[data-cam=snap]').hidden=t;ov.querySelector('[data-cam=flip]').hidden=t;ov.querySelector('[data-cam=retake]').hidden=!t;ov.querySelector('[data-cam=use]').hidden=!t};
+ const start=async()=>{stop();try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:960}},audio:false});v.srcObject=stream;v.classList.toggle('mirror',facing==='user');await v.play().catch(()=>{})}catch(_){stop();ov.remove();fallback()}};
+ ov.addEventListener('click',async ev=>{const b=ev.target.closest('[data-cam]');if(!b)return;const k=b.dataset.cam;
+  if(k==='close')return done(null);
+  if(k==='flip'){facing=facing==='user'?'environment':'user';return start()}
+  if(k==='snap'){const W=v.videoWidth,H=v.videoHeight;if(!W)return;let sx=0,sy=0,sw=W,sh=H;
+   if(opts.passport){const r=35/45;if(W/H>r){sw=Math.round(H*r);sx=Math.round((W-sw)/2)}else{sh=Math.round(W/r);sy=Math.round((H-sh)/2)}}
+   const sc=Math.min(1,(opts.passport?900:1800)/Math.max(sw,sh)),c=document.createElement('canvas');c.width=Math.round(sw*sc);c.height=Math.round(sh*sc);
+   c.getContext('2d').drawImage(v,sx,sy,sw,sh,0,0,c.width,c.height);blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));
+   img.src=URL.createObjectURL(blob);img.hidden=false;v.hidden=true;mode(true);return}
+  if(k==='retake'){img.hidden=true;v.hidden=false;mode(false);return}
+  if(k==='use')done(new File([blob],(opts.name||'photo')+'.jpg',{type:'image/jpeg'}));
+ });
+ ov.addEventListener('keydown',ev=>{if(ev.key==='Escape')done(null)});
+ start();
+})}
+async function shrinkImage(file,max){if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size<400*1024)return file;try{const bmp=await createImageBitmap(file),b=await toJpeg(bmp,max||1800);return b.size<file.size?new File([b],file.name.replace(/\.[^.]+$/,'')+'.jpg',{type:'image/jpeg'}):file}catch(_){return file}}
+
+/* ----- candidate page (opened from the invite link) ----- */
+function joinState(){const P=S.join;if(!S.jn||S.jn.t!==P.t){let d={};try{d=JSON.parse(localStorage.getItem('vetan:join:'+P.t)||'{}')}catch(_){}
+ S.jn={t:P.t,details:{name:P.n||'',email:P.em||'',phone:P.ph||'',...d},docs:{},done:null}}return S.jn}
+function joinSave(){const f=document.getElementById('jForm');if(!f)return;const d={};J_FIELDS.forEach(([k])=>{if(f.elements[k])d[k]=f.elements[k].value});if(f.elements.account2)d.account2=f.elements.account2.value;S.jn.details=d;try{localStorage.setItem('vetan:join:'+S.jn.t,JSON.stringify(d))}catch(_){}}
+function joinDocsHTML(){const P=S.join,J=S.jn,req=P.req||REQ_DOCS,fixD=new Set((P.fix&&P.fix.d)||[]);
+ const types=[...CAND_DOCS.filter(d=>req.includes(d[0])),...CAND_DOCS.filter(d=>!req.includes(d[0]))];
+ return `<h2>Documents</h2><p class="small muted" style="margin:0">Photos or PDFs, up to 10 MB each. Required documents are marked *. You can take a photo with your camera.</p><div class="docs">${types.map(([k,l])=>{const fs=J.docs[k]||[],rq=req.includes(k),multi=['edu','exp','other','address'].includes(k);
+  return `<div class="doc ${fixD.has(k)?'fixme':''}"><div class="grow"><b>${l}${rq?' *':''}</b>${fixD.has(k)?'<span class="chip bad" style="margin-left:6px">Please upload again</span>':''}
+  ${fs.length?fs.map((f,i)=>`<div class="file">${f.type.startsWith('image/')?`<img src="${f.url}" alt="">`:'<span class="pdf">PDF</span>'}<span class="grow small">${esc(f.name)}<br><span class="muted">${Math.max(1,Math.round(f.size/1024))} KB</span></span><button class="btn sm danger" type="button" data-act="jDel" data-k="${k}" data-i="${i}">Remove</button></div>`).join(''):`<div class="small ${rq?'warn-t':'muted'}">${rq?'Needed':'Optional'}</div>`}</div>
+  ${!fs.length||multi?`<div class="row" style="gap:6px"><label class="btn sm">${ic('up')}${fs.length?'Add another':'Upload'}<input class="vh" type="file" data-jup="${k}" accept="image/*,application/pdf"></label><button class="btn sm" type="button" data-act="jCam" data-k="${k}">${ic('scan')}${k==='photo'?'Take photo':'Camera'}</button></div>`:''}</div>`}).join('')}</div>`}
+function joinView(){const P=S.join,J=joinState(),co=esc(P.c||'Your new employer');
+ if(J.done)return `<div class="jwrap"><header class="jhead"><b>vetan<i>.</i></b><span>${co}</span></header><section class="jcard jdone"><span class="jok">${ic('check')}</span><h1>Your details are ready</h1>
+  <p>Send this file to HR so they can check your documents and prepare your appointment letter.</p>
+  <div class="row"><button class="btn primary" type="button" data-act="jShare">${ic('up')}Send to HR</button><button class="btn" type="button" data-act="jDl">${ic('down')}Download the file</button></div>
+  ${P.hr&&(P.hr.em||P.hr.ph)?`<p class="small">HR contact: ${P.hr.ph?`<b>${esc(P.hr.ph)}</b> (WhatsApp)`:''}${P.hr.ph&&P.hr.em?' · ':''}${P.hr.em?`<b>${esc(P.hr.em)}</b>`:''}</p>`:''}
+  <p class="small muted">File: ${esc(J.done.name)} · ${Math.max(1,Math.round(J.done.size/1024))} KB. On a phone, "Send to HR" opens WhatsApp, email and other apps. On a computer, download the file and attach it to an email or WhatsApp Web.</p>
+  <button class="btn link" type="button" data-act="jEdit">Go back and change something</button></section></div>`;
+ const d=J.details,fixF=new Set((P.fix&&P.fix.f)||[]);
+ const fieldHTML=k=>{const f=J_FIELDS.find(x=>x[0]===k),[,l,rq,ty,opts]=f;return fld(k,l+(rq?' *':''),d[k]||'',ty==='sel'?{sel:opts}:{type:ty||'text',full:k==='address',max:k==='pan'?10:k==='ifsc'?11:undefined})};
+ return `<div class="jwrap"><header class="jhead"><b>vetan<i>.</i></b><span>${co}</span></header>
+ <section class="jcard"><h1>Welcome${P.n?', '+esc(P.n.split(' ')[0]):''}</h1><p>${co} has invited you to share your joining details${P.d?` for the role of <b>${esc(P.d)}</b>`:''}${P.j?`, joining on <b>${longDate(P.j)}</b>`:''}. It takes about 10 minutes. Keep your PAN, Aadhaar and bank details handy.</p>
+ ${P.fix&&((P.fix.f||[]).length||(P.fix.d||[]).length)?`<div class="note warn"><b>HR asked you to correct a few things.</b> They are highlighted below.${P.note?`<br>Message from HR: ${esc(P.note)}`:''}</div>`:P.note?`<div class="note">Message from HR: ${esc(P.note)}</div>`:''}
+ <p class="small muted" style="margin:0">What you type is saved on this device as you go, so you can finish later. Documents need to be added in one sitting.</p></section>
+ <form id="jForm" class="jcard" novalidate>${J_SECTIONS.map(([t,ks])=>`<h2>${t}</h2><div class="fgrid">${ks.map(fieldHTML).join('')}${t==='ID and bank'?fld('account2','Re-enter account number *',d.account2||''):''}</div>`).join('')}</form>
+ <section class="jcard" id="jDocs">${joinDocsHTML()}</section>
+ <section class="jcard"><div class="check"><input type="checkbox" id="jDecl"><label for="jDecl">I confirm these details and documents are true and belong to me.</label></div>
+ <div class="note warn" id="jErr" role="alert" hidden></div><button class="btn primary jsubmit" type="button" data-act="jSubmit">Submit my details</button></section>
+ <p class="small muted" style="text-align:center">Your details go only to ${co}.</p></div>`;
+}
+function joinAfterRender(){const P=S.join;((P.fix&&P.fix.f)||[]).forEach(k=>{const el=document.querySelector('#jForm [name="'+k+'"]');if(el&&el.closest('.field'))el.closest('.field').classList.add('fixme')})}
+const refreshJDocs=()=>{const el=document.getElementById('jDocs');if(el)el.innerHTML=joinDocsHTML()};
+async function joinAddFiles(k,list){const J=S.jn;for(const f0 of [...list].slice(0,5)){
+ const okT=/^image\//.test(f0.type)||f0.type==='application/pdf'||/\.(pdf|jpe?g|png|webp)$/i.test(f0.name);if(!okT){toast('Use a photo or a PDF.','bad');continue}
+ const f=await shrinkImage(f0,k==='photo'?900:1800);if(f.size>10*1024*1024){toast(f.name+' is over 10 MB. Use a smaller file.','bad');continue}
+ const ty=f.type||(/\.pdf$/i.test(f.name)?'application/pdf':'image/jpeg');J.docs[k]=[...(J.docs[k]||[]).filter(()=>['edu','exp','other','address'].includes(k)),{name:f.name,size:f.size,type:ty,blob:f,url:URL.createObjectURL(f)}]}
+ refreshJDocs()}
+async function joinSubmit(){
+ joinSave();const P=S.join,J=S.jn,d=J.details,errs=[],req=P.req||REQ_DOCS;
+ J_FIELDS.forEach(([k,l,rq])=>{if(rq&&!String(d[k]||'').trim())errs.push(l+' is missing.')});
+ const pan=String(d.pan||'').trim().toUpperCase(),ifsc=String(d.ifsc||'').trim().toUpperCase(),ad=String(d.aadhaar||'').replace(/\D/g,''),ph=String(d.phone||'').replace(/\D/g,'').slice(-10),ac=String(d.account||'').replace(/\s/g,'');
+ if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))errs.push('PAN should look like ABCDE1234F.');
+ if(d.aadhaar&&ad.length!==12)errs.push('Aadhaar number should be 12 digits.');
+ if(d.phone&&!/^[6-9]\d{9}$/.test(ph))errs.push('Mobile number should be 10 digits.');
+ if(d.email&&!/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(d.email.trim()))errs.push('Check the email address.');
+ if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))errs.push('IFSC should be 11 characters, like HDFC0001234.');
+ if(ac&&!/^\d{9,18}$/.test(ac))errs.push('Bank account number should be 9 to 18 digits.');
+ if(ac&&ac!==String(d.account2||'').replace(/\s/g,''))errs.push('The two bank account numbers do not match.');
+ CAND_DOCS.forEach(([k,l])=>{if(req.includes(k)&&!(J.docs[k]||[]).length)errs.push(l+' is not uploaded.')});
+ if(!document.getElementById('jDecl').checked)errs.push('Tick the confirmation box.');
+ const E=document.getElementById('jErr');if(errs.length){E.innerHTML='<b>Please fix these:</b><br>'+errs.map(esc).join('<br>');E.hidden=false;E.scrollIntoView({behavior:'smooth',block:'center'});return}
+ E.hidden=true;const btn=document.querySelector('.jsubmit');if(btn){btn.disabled=true;btn.textContent='Preparing your file…'}
+ try{const det={...d,pan,ifsc,aadhaar:ad,phone:ph,account:ac,email:String(d.email||'').trim().toLowerCase()};delete det.account2;
+  const docs=[];for(const[k,fs]of Object.entries(J.docs))for(const f of fs)docs.push({type:k,name:f.name,ct:f.type,size:f.size,data:await toB64(f.blob)});
+  const sub={app:'vetan-submission',v:1,t:P.t,e:P.e,c:P.c,at:new Date().toISOString(),details:det,docs};
+  const nm='Joining-details-'+(det.name||'candidate').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'')+'.txt';
+  J.done=new File([JSON.stringify(sub)],nm,{type:'text/plain'});S._lgKey=null;render();window.scrollTo(0,0)}
+ catch(e){if(btn){btn.disabled=false;btn.textContent='Submit my details'}E.textContent='Could not prepare the file: '+((e&&e.message)||'try again');E.hidden=false}
+}
+async function joinShare(){const f=S.jn&&S.jn.done;if(!f)return;
+ try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Joining details',text:'My joining details for '+(S.join.c||'HR')});return}}catch(e){if(e&&e.name==='AbortError')return}
+ toast('Sharing a file is not available here. Download it and attach it to WhatsApp or email.','bad');joinDl()}
+function joinDl(){const f=S.jn&&S.jn.done;if(!f)return;const u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),15000);toast('Downloaded '+f.name)}
+
+/* ----- employer: invite ----- */
+function inviteForm(){
+ modal('Invite a candidate',`<p class="small muted" style="margin:0">Vetan makes a link for the candidate. They fill in their details and upload documents on their phone or computer, then send the result back to you.</p>
+ <div class="fgrid">${fld('ivName','Candidate name','')}${fld('ivPhone','Mobile (for WhatsApp)','',{type:'tel'})}${fld('ivEmail','Email','',{type:'email'})}${fld('ivDesig','Designation','')}${fld('ivDept','Department','')}${fld('ivDoj','Date of joining',isoD(new Date(Date.now()+7*864e5)),{type:'date'})}${fld('ivGross','Monthly gross ₹ (optional)','',{type:'number',hint:'Used later for the appointment letter'})}</div>
+ <fieldset class="docpick"><legend>Documents to ask for</legend>${CAND_DOCS.map(([k,l,rq])=>`<label class="check"><input type="checkbox" name="ivd_${k}" ${rq?'checked':''}> ${l}</label>`).join('')}</fieldset>
+ ${fld('ivNote','Message to the candidate (optional)','',{full:1,ph:'e.g. Please complete this before your joining date.'})}`,{sm:'Create link',submit:f=>{
+  const name=f.ivName.value.trim(),ph=f.ivPhone.value.replace(/\D/g,'').slice(-10);if(!name)return mErr('Enter the candidate\'s name.');if(f.ivPhone.value&&!/^[6-9]\d{9}$/.test(ph))return mErr('Enter a 10-digit mobile number.');
+  const req=CAND_DOCS.map(d=>d[0]).filter(k=>f.elements['ivd_'+k].checked);if(!req.length)return mErr('Ask for at least one document.');
+  const now=new Date().toISOString(),id=uid('e'),g=N(f.ivGross.value);
+  const rec={code:nextCode(),name,phone:ph,email:f.ivEmail.value.trim().toLowerCase(),designation:f.ivDesig.value.trim(),dept:f.ivDept.value.trim(),doj:f.ivDoj.value,status:'onboarding',docs:[],pf:true,state:S.cfg.company.state,weekOff:0,shift:S.cfg.defaultShift,empType:'Permanent',tdsOverride:'',ptOverride:'',basic:0,hra:0,conv:0,special:0,...(g?splitGross(g):{}),
+   onboarding:{started:now,step:1,stage:'invited',invite:{token:newSalt().slice(0,16),sentAt:now,req,note:f.ivNote.value.trim(),fix:null}},updated:now};
+  put('employees',id,rec);setTimeout(()=>inviteShare(id),0);return true}});
+}
+function inviteShare(id){const e=S.emps[id];if(!e)return;const link=inviteLink(id),co=S.cfg.company.name,inv=(e.onboarding||{}).invite||{},fix=inv.fix&&((inv.fix.f||[]).length||(inv.fix.d||[]).length);
+ const msg=fix?`Hi ${e.name}, please correct a few details and documents for joining ${co}. Open this link: ${link}`:`Hi ${e.name}, welcome to ${co}! Please fill in your joining details and upload your documents here: ${link}\n\nAt the end, send the file it gives you back to us on WhatsApp or email.`;
+ const wa=e.phone?`https://wa.me/91${e.phone}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`;
+ const mail=`mailto:${encodeURIComponent(e.email||'')}?subject=${encodeURIComponent((fix?'Corrections needed: ':'Joining details: ')+co)}&body=${encodeURIComponent(msg)}`;
+ modal(fix?'Send the correction link':'Send the joining link',`<p style="margin:0">Send this link to <b>${esc(e.name)}</b>${e.phone?` (${esc(e.phone)})`:''}. When they finish, they send you a file. Use <b>Import submission</b> on the Onboarding page to load it.</p>
+ <div class="field"><label for="invLink">Link</label><input id="invLink" readonly value="${esc(link)}"></div>
+ <div class="row"><button class="btn primary" type="button" data-act="copyInv">Copy link</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a><a class="btn" href="${esc(mail)}" target="_blank" rel="noopener">Email</a><button class="btn" type="button" data-act="copyInvMsg">Copy message</button></div>
+ <textarea id="invMsg" class="vh" aria-hidden="true" tabindex="-1">${esc(msg)}</textarea>
+ <p class="small muted" style="margin:0">The link opens your Vetan site at ${esc(publicBase())}. The candidate does not need to sign in and cannot see any of your data.</p>`,{foot:'<button class="btn primary" type="button" data-act="close">Done</button>'});
+}
+const copyText=(t,ok)=>{try{navigator.clipboard.writeText(t).then(()=>toast(ok),()=>{const i=document.getElementById('invLink');if(i){i.select()}toast('Press Ctrl+C to copy.','bad')})}catch(_){toast('Press Ctrl+C to copy.','bad')}};
+
+/* ----- employer: import submission ----- */
+function subImportForm(){S._sub=null;
+ modal('Import a candidate\'s submission',`<p style="margin:0">Choose the file the candidate sent you (it ends in <b>.txt</b> and starts with "Joining-details").</p>
+ <label class="drop" for="subFile">${ic('up')}<b>Choose the file</b><span class="small muted">Joining-details-Name.txt</span><input class="vh" type="file" id="subFile" accept=".txt,.json,text/plain,application/json"></label>
+ <div id="subProg" class="note" role="status" hidden></div>`,{foot:'<button class="btn" type="button" data-act="close">Cancel</button>'});
+}
+async function importSubmission(file){
+ const P=document.getElementById('subProg'),prog=t=>{if(P){P.hidden=false;P.textContent=t}};let o;
+ try{o=JSON.parse(await file.text())}catch(_){return mErr('This is not a Vetan joining-details file.')}
+ if(!o||o.app!=='vetan-submission'||!o.details)return mErr('This is not a Vetan joining-details file.');
+ const d=o.details||{},E=Object.entries(S.emps);
+ let id=o.e&&S.emps[o.e]&&((S.emps[o.e].onboarding||{}).invite||{}).token===o.t?o.e:null;
+ if(!id){const hit=E.find(([,e])=>(d.pan&&String(e.pan||'').toUpperCase()===d.pan)||(d.phone&&e.phone===d.phone&&e.status==='onboarding'));if(hit)id=hit[0]}
+ const now=new Date().toISOString();let e=id?S.emps[id]:null;
+ if(!e){id=uid('e');e={code:nextCode(),status:'onboarding',docs:[],pf:true,state:S.cfg.company.state,weekOff:0,shift:S.cfg.defaultShift,empType:'Permanent',tdsOverride:'',ptOverride:'',basic:0,hra:0,conv:0,special:0,onboarding:{started:now,step:1}}}
+ const rec={...e};J_FIELDS.forEach(([k])=>{const v=String(d[k]??'').trim();if(v)rec[k]=v});
+ if(rec.aadhaar)rec.aadhaar=String(rec.aadhaar).replace(/\D/g,'').replace(/(\d{4})(?=\d)/g,'$1 ');if(rec.pan)rec.pan=rec.pan.toUpperCase();if(rec.ifsc){rec.ifsc=rec.ifsc.toUpperCase();if(!rec.bankName&&IFSC_BANKS[rec.ifsc.slice(0,4)])rec.bankName=IFSC_BANKS[rec.ifsc.slice(0,4)]}
+ const types=new Set((o.docs||[]).map(x=>x.type));let docs=[...(e.docs||[])];const drop=docs.filter(x=>types.has(x.type)&&x.review==='rejected');docs=docs.filter(x=>!drop.includes(x));
+ let n=0,skipped=0;
+ for(const x of (o.docs||[])){if(!S.assets){skipped++;continue}prog(`Saving ${x.name} (${n+1} of ${o.docs.length})…`);
+  try{const ct=/pdf/.test(x.ct)?'application/pdf':/^image\/(jpeg|png|webp)$/.test(x.ct)?x.ct:'image/jpeg',r=await S.assets.upload(fromB64(x.data,ct),{type:ct});docs.push({id:r.id,type:x.type,name:x.name,size:r.sizeBytes,ct:r.contentType,at:now,review:'pending',src:'candidate'});n++}catch(_){skipped++}}
+ if(S.assets)drop.forEach(x=>S.assets.delete(x.id).catch(()=>{}));
+ rec.docs=docs;rec.onboarding={...(e.onboarding||{}),stage:'submitted',submittedAt:o.at||now,importedAt:now,detailsOk:false,fixFields:[]};rec.updated=now;
+ put('employees',id,rec);closeModal();toast(`Imported ${rec.name||'candidate'}: ${n} document${n===1?'':'s'}`+(skipped?`, ${skipped} could not be saved`:''));reviewCand(id);
+}
+
+/* ----- employer: review ----- */
+const fmtVal=(k,v)=>k==='dob'?ddmmyy(v):(k==='account'&&v?String(v):v||'');
+function reviewCand(id){const e=S.emps[id];if(!e)return;S._rvOpen=id;const ob=e.onboarding||{},fix=new Set(ob.fixFields||[]),docs=e.docs||[],req=((ob.invite||{}).req)||REQ_DOCS;
+ const missing=req.filter(k=>!docs.some(d=>d.type===k&&d.review!=='rejected'));const st=STAGE[ob.stage]||['In progress',''];
+ const docRow=d=>{const u=fileUrl(d.id),lab=(DOC_TYPES.find(x=>x[0]===d.type)||[0,'Other'])[1];return `<div class="doc rv-${d.review||'ok'}"><div class="file" style="margin:0;flex:1 1 260px">${String(d.ct).startsWith('image/')?(u?`<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="${esc(lab)}"></a>`:'<span class="pdf img">IMG</span>'):'<span class="pdf">PDF</span>'}<span class="grow small"><b>${esc(lab)}</b><br>${esc(d.name)}${d.review==='rejected'&&d.reason?`<br><span class="warn-t">Reason: ${esc(d.reason)}</span>`:''}</span></div>
+  <div class="rv-act">${d.review==='approved'?'<span class="chip ok">Approved</span>':d.review==='rejected'?'<span class="chip bad">Rejected</span>':d.review==='pending'?'<span class="chip warn">To review</span>':'<span class="chip ok">Added by HR</span>'}
+  ${u?`<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">View</a>`:''}<button class="btn sm ap-ok" type="button" data-act="rvDoc" data-id="${id}" data-doc="${esc(d.id)}" data-k="ok">Approve</button>
+  <input class="input rv-reason" id="rs-${esc(d.id)}" placeholder="Reason if rejecting" value="${esc(d.reason||'')}" aria-label="Reason for rejecting ${esc(lab)}"><button class="btn sm danger" type="button" data-act="rvDoc" data-id="${id}" data-doc="${esc(d.id)}" data-k="no">Reject</button></div></div>`};
+ modal('Review · '+esc(e.name||'Candidate'),`<div class="row"><span class="chip ${st[1]}">${st[0]}</span>${ob.submittedAt?`<span class="small muted">Submitted ${fmtDate(ob.submittedAt.slice(0,10))}</span>`:''}</div>
+ <h3>Details</h3><p class="small muted" style="margin:0">Tick anything the candidate needs to correct.</p>
+ <div class="tbl-wrap"><table class="tbl"><tbody>${J_FIELDS.map(([k,l])=>`<tr class="${fix.has(k)?'picked':''}"><td style="width:38%">${l.replace(' *','')}</td><td><b>${esc(fmtVal(k,e[k]))||'<span class="muted">—</span>'}</b></td><td class="n"><label class="small rvf"><input type="checkbox" data-rvf="${k}" data-id="${id}" ${fix.has(k)?'checked':''}> Correct</label></td></tr>`).join('')}</tbody></table></div>
+ <h3>Documents</h3>${missing.length?`<div class="note warn">Missing: ${missing.map(k=>esc((DOC_TYPES.find(x=>x[0]===k)||[0,k])[1])).join(', ')}</div>`:''}
+ <div class="docs">${docs.length?docs.map(docRow).join(''):'<p class="muted small" style="padding:12px;margin:0">No documents yet.</p>'}</div>
+ ${fld('rvNote','Message for the candidate if you ask for changes','',{full:1,ph:'e.g. Aadhaar photo is blurred, please upload a clear one.'})}`,
+ {foot:`<button class="btn" type="button" data-act="close">Close</button><span class="grow"></span><button class="btn" type="button" data-act="rvChanges" data-id="${id}">Ask for changes</button><button class="btn primary" type="button" data-act="rvVerify" data-id="${id}">Approve all and mark verified</button>`});
+}
+function rvDoc(d){const e=S.emps[d.id];if(!e)return;const inp=document.getElementById('rs-'+d.doc),reason=inp?inp.value.trim():'';
+ if(d.k==='no'&&!reason){if(inp){inp.focus();inp.classList.add('bad')}return toast('Write a short reason, then press Reject.','bad')}
+ const docs=(e.docs||[]).map(x=>x.id===d.doc?{...x,review:d.k==='ok'?'approved':'rejected',reason:d.k==='ok'?'':reason}:x);put('employees',d.id,{...e,docs});reviewCand(d.id)}
+function rvChanges(d){const e=S.emps[d.id];if(!e)return;const ob=e.onboarding||{},note=(document.getElementById('rvNote')||{}).value||'';
+ const f=ob.fixFields||[],dd=[...new Set((e.docs||[]).filter(x=>x.review==='rejected').map(x=>x.type))],req=((ob.invite||{}).req)||REQ_DOCS;
+ req.forEach(k=>{if(!(e.docs||[]).some(x=>x.type===k&&x.review!=='rejected')&&!dd.includes(k))dd.push(k)});
+ if(!f.length&&!dd.length)return mErr('Tick details to correct, or reject a document with a reason, first.');
+ const reasons=(e.docs||[]).filter(x=>x.review==='rejected'&&x.reason).map(x=>(DOC_TYPES.find(t=>t[0]===x.type)||[0,x.type])[1]+': '+x.reason);
+ const inv={...(ob.invite||{token:newSalt().slice(0,16),req}),fix:{f,d:dd},note:[note.trim(),...reasons].filter(Boolean).join(' · '),sentAt:new Date().toISOString()};
+ put('employees',d.id,{...e,onboarding:{...ob,stage:'changes',invite:inv}});inviteShare(d.id)}
+function rvVerify(d){const e=S.emps[d.id];if(!e)return;const ob=e.onboarding||{},docs=e.docs||[],req=((ob.invite||{}).req)||REQ_DOCS;
+ if(docs.some(x=>x.review==='rejected'))return mErr('Some documents are rejected. Ask for changes, or approve them.');
+ if((ob.fixFields||[]).length)return mErr('Some details are ticked for correction. Untick them or ask for changes.');
+ const miss=req.filter(k=>!docs.some(x=>x.type===k));if(miss.length)return mErr('Missing documents: '+miss.map(k=>(DOC_TYPES.find(x=>x[0]===k)||[0,k])[1]).join(', '));
+ put('employees',d.id,{...e,docs:docs.map(x=>x.review==='pending'?{...x,review:'approved'}:x),onboarding:{...ob,stage:'verified',detailsOk:true,verifiedAt:new Date().toISOString()}});
+ toast(e.name+' is verified. Prepare the appointment letter next.');apptLetter(d.id)}
+
+/* ----- employer: appointment letter ----- */
+let zipP=null;const loadZip=()=>zipP||(zipP=loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js','JSZip').catch(e=>{zipP=null;throw e}));
+const DOCX_CT='application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const tplRec=()=>(S.tpls||{}).appt||null;
+function addrLines(a){const p=String(a||'').split(',').map(x=>x.trim()).filter(Boolean);if(p.length<=3)return[p[0]||'',p[1]||'',p[2]||''];const n=Math.ceil(p.length/3);return[p.slice(0,n).join(', '),p.slice(n,2*n).join(', '),p.slice(2*n).join(', ')]}
+function apptLetter(id){const e=S.emps[id];if(!e)return;const co=S.cfg.company,t=tplRec(),al=addrLines(e.address),other=N(e.conv)+N(e.special);
+ modal('Appointment letter · '+esc(e.name),`${t?`<div class="note">Template: <b>${esc(t.name)}</b> · <button class="btn link" type="button" data-act="tplPick">Change template</button></div>`:`<div class="note warn">Upload your appointment letter template (.docx) once. Fields like &lt;&lt;EmployeeName&gt;&gt; are filled in automatically. <button class="btn link" type="button" data-act="tplPick">Upload template</button></div>`}
+ <div class="fgrid">${fld('alDate','Letter date',isoD(TODAY),{type:'date'})}${fld('alName','Employee name',e.name)}${fld('alEmail','Email',e.email)}
+ ${fld('alA1','Address line 1',al[0])}${fld('alA2','Address line 2',al[1])}${fld('alA3','Address line 3',al[2])}
+ ${fld('alDesig','Designation',e.designation)}${fld('alDoj','Date of joining',e.doj,{type:'date'})}<div></div>
+ <div class="fsec">Annexure I · monthly salary</div>${fld('alBasic','Basic',N(e.basic)||'',{type:'number'})}${fld('alHra','House rent allowance',N(e.hra)||'',{type:'number'})}${fld('alOther','Other allowances',other||'',{type:'number'})}
+ <div class="field"><label>Gross per month / year</label><b id="alGross" class="num" style="font-size:17px;padding-top:6px">${inr(N(e.basic)+N(e.hra)+other)} / ${inr((N(e.basic)+N(e.hra)+other)*12)}</b></div>
+ <div class="fsec">Signed by</div>${fld('alSign','Signatory name',co.signName||'')}${fld('alTitle','Signatory title',co.signTitle||'Director')}</div>
+ <p class="small muted" style="margin:0">Changing salary here only changes this letter. Update the employee's salary in their profile for payroll.</p>`,
+ {foot:`<button class="btn" type="button" data-act="close">Close</button><span class="grow"></span><button class="btn primary" type="button" data-act="alMake" data-id="${id}">${ic('down')}Create letter (.docx)</button>`});
+ const f=$('#mForm'),upd=()=>{const g=N(f.alBasic.value)+N(f.alHra.value)+N(f.alOther.value);document.getElementById('alGross').textContent=inr(g)+' / '+inr(g*12)};['alBasic','alHra','alOther'].forEach(k=>f[k].addEventListener('input',upd));
+}
+async function alMake(d){const e=S.emps[d.id],f=$('#mForm');if(!e||!f)return;const t=tplRec();if(!t)return mErr('Upload the template first.');
+ const v=n=>String(f.elements[n].value||'').trim(),nf=x=>Math.round(N(x)).toLocaleString('en-IN');
+ if(!v('alName')||!v('alDesig')||!v('alDoj'))return mErr('Fill in the name, designation and date of joining.');
+ const b=N(v('alBasic')),h=N(v('alHra')),o=N(v('alOther')),g=b+h+o;
+ const vals={DocumentDate:longDate(v('alDate')),EmployeeName:v('alName'),EmployeeAddress1:v('alA1'),EmployeeAddress2:v('alA2'),EmployeeAddress3:v('alA3'),EmployeeEmail:v('alEmail'),Designation:v('alDesig'),JoiningDate:longDate(v('alDoj')),
+  DirectorName:v('alSign'),DirectorTitle:v('alTitle'),BasicMonthly:nf(b),BasicAnnual:nf(b*12),HRAMonthly:nf(h),HRAAnnual:nf(h*12),OtherMonthly:nf(o),OtherAnnual:nf(o*12),GrossMonthly:nf(g),GrossAnnual:nf(g*12),
+  EmployeeCode:e.code||'',Department:e.dept||'',CompanyName:S.cfg.company.name||''};
+ const btn=document.querySelector('[data-act=alMake]');if(btn)btn.disabled=true;
+ try{const Z=await loadZip(),zip=await Z.loadAsync(fromB64(t.b64,DOCX_CT));let miss=new Set();
+  for(const name of Object.keys(zip.files).filter(n=>/^word\/(document|header\d*|footer\d*)\.xml$/.test(n))){const r=fillDocxXml(await zip.file(name).async('string'),vals);r.missing.forEach(m=>miss.add(m));zip.file(name,r.xml)}
+  const out=await zip.generateAsync({type:'blob',mimeType:DOCX_CT}),fn=`Appointment-letter-${v('alName').replace(/[^A-Za-z0-9]+/g,'-')}.docx`;
+  const c=clone(S.cfg);c.company={...c.company,signName:v('alSign'),signTitle:v('alTitle')};put('config','main',c);
+  const ob=e.onboarding||{};put('employees',d.id,{...e,designation:v('alDesig'),doj:v('alDoj'),onboarding:{...ob,stage:ob.stage==='submitted'||ob.stage==='changes'||ob.stage==='invited'||ob.stage==='verified'||!ob.stage?'offered':ob.stage,offer:{date:v('alDate'),at:new Date().toISOString(),gross:g}}});
+  S._letter={file:new File([out],fn,{type:DOCX_CT}),id:d.id};await download(fn,out);
+  const em=e.email,msg=`Dear ${v('alName')},\n\nPlease find attached your appointment letter for the role of ${v('alDesig')} at ${S.cfg.company.name}, effective ${longDate(v('alDoj'))}. Kindly sign and return a copy.\n\nRegards,\n${v('alSign')||S.cfg.company.name}`;
+  modal('Letter ready',`<p style="margin:0"><b>${esc(fn)}</b> is downloaded${miss.size?`. These template fields had no value: ${esc([...miss].join(', '))}`:''}.</p>
+  <p class="small muted" style="margin:0">Send it to ${esc(v('alName'))}: share the file directly, or open an email or WhatsApp message and attach the downloaded file.</p>
+  <div class="row"><button class="btn primary" type="button" data-act="alShare">Share file</button><a class="btn" target="_blank" rel="noopener" href="mailto:${encodeURIComponent(em||'')}?subject=${encodeURIComponent('Appointment letter · '+S.cfg.company.name)}&body=${encodeURIComponent(msg)}">Email</a>${e.phone?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/91${e.phone}?text=${encodeURIComponent(msg)}">WhatsApp</a>`:''}<button class="btn" type="button" data-act="alAgain" data-id="${d.id}">Download again</button></div>
+  ${e.status==='onboarding'?`<p class="small" style="margin:0">When they join, finish onboarding to add them to payroll.</p>`:''}`,{foot:`${e.status==='onboarding'?`<button class="btn" type="button" data-act="obGo" data-id="${d.id}" data-step="2">Open onboarding</button>`:''}<button class="btn primary" type="button" data-act="close">Done</button>`});
+ }catch(err){if(btn)btn.disabled=false;mErr(err&&err.message==='load'?'Could not load the Word file tools. Check your internet connection and try again.':'Could not create the letter. Check the template is a .docx file. '+((err&&err.message)||''))}
+}
+function tplPick(){const i=document.createElement('input');i.type='file';i.accept='.docx,'+DOCX_CT;i.style.display='none';document.body.appendChild(i);
+ i.onchange=async()=>{const f=i.files[0];i.remove();if(!f)return;if(!/\.docx$/i.test(f.name))return toast('Choose a Word .docx file.','bad');if(f.size>3*1024*1024)return toast('The template should be under 3 MB.','bad');
+  try{const Z=await loadZip(),zip=await Z.loadAsync(f),x=zip.file('word/document.xml');if(!x)throw new Error('not a Word document');const ph=docxPlaceholders(await x.async('string'));
+   put('templates','appt',{name:f.name,size:f.size,b64:await toB64(f),fields:ph,at:new Date().toISOString()});toast(`Template saved with ${ph.length} field${ph.length===1?'':'s'}`);
+   const m=document.querySelector('[data-act=alMake]');if(m){apptLetter(m.dataset.id)}}
+  catch(e){toast(e&&e.message==='load'?'Could not load the Word file tools. Check your internet connection.':'Could not read that template: '+((e&&e.message)||''),'bad')}};i.click()}
+const TPL_FIELDS='DocumentDate, EmployeeName, EmployeeAddress1, EmployeeAddress2, EmployeeAddress3, EmployeeEmail, Designation, JoiningDate, Director Name, DirectorTitle, BasicMonthly, BasicAnnual, HRAMonthly, HRAAnnual, OtherMonthly, OtherAnnual, GrossMonthly, GrossAnnual, EmployeeCode, Department, CompanyName';
+
+Object.assign(ACT_PERM,{inviteNew:['employees','edit'],inviteSend:['employees','edit'],copyInv:['employees','view'],copyInvMsg:['employees','view'],subImport:['employees','edit'],rvOpen:['employees','edit'],rvDoc:['employees','edit'],rvChanges:['employees','edit'],rvVerify:['employees','edit'],apptOpen:['employees','edit'],alMake:['employees','edit'],alAgain:['employees','edit'],alShare:['employees','edit'],tplPick:['employees','edit'],docCam:['employees','edit']});
+EMP_ACTS.add('docCam');
+Object.assign(A,{
+ inviteNew:()=>inviteForm(),inviteSend:d=>inviteShare(d.id),subImport:()=>subImportForm(),rvOpen:d=>reviewCand(d.id),rvDoc,rvChanges,rvVerify,apptOpen:d=>apptLetter(d.id),alMake,tplPick,
+ alAgain:()=>{const L=S._letter;if(L)download(L.file.name,L.file)},
+ alShare:async()=>{const L=S._letter;if(!L)return;try{if(navigator.canShare&&navigator.canShare({files:[L.file]})){await navigator.share({files:[L.file],title:L.file.name});return}}catch(e){if(e&&e.name==='AbortError')return}toast('Sharing files is not available here. Attach the downloaded file to an email or WhatsApp.','bad')},
+ copyInv:()=>copyText((document.getElementById('invLink')||{}).value||'','Link copied'),
+ copyInvMsg:()=>copyText((document.getElementById('invMsg')||{}).value||'','Message copied'),
+ docCam:d=>{if(isEmp()&&d.id!==meId())return;cameraCapture({passport:d.type==='photo',title:d.type==='photo'?'Passport-size photo':'Photograph the document',name:d.type}).then(f=>{if(f)uploadDoc(d.id,d.type,f)})},
+ jCam:d=>cameraCapture({passport:d.k==='photo',title:d.k==='photo'?'Passport-size photo':'Photograph the document',name:d.k}).then(f=>{if(f)joinAddFiles(d.k,[f])}),
+ jDel:d=>{const J=S.jn;if(!J||!J.docs[d.k])return;J.docs[d.k].splice(+d.i,1);refreshJDocs()},
+ jSubmit:()=>joinSubmit(),jShare:()=>joinShare(),jDl:()=>joinDl(),jEdit:()=>{S.jn.done=null;S._lgKey=null;render()}
+});
+
 /* ============ boot ============ */
 S.sess=sessGet();
 route();
@@ -1892,10 +2219,10 @@ route();
  S.dl=dl;S.assets=assets;S.loaded.tried=true;
  if(user){try{S.canEdit=await user.canEdit()}catch(_){}}
  if(!db){$('#connLabel').innerHTML='<span class="dot off"></span>Offline preview';render();return}
- S.db=db;let pending=8;const ready=()=>{if(--pending===0){S.live=true;$('#connLabel').innerHTML=S.local?'<span class="dot"></span>Saved in this browser':'<span class="dot"></span>Saved to your data';}render()};
+ S.db=db;let pending=9;const ready=()=>{if(--pending===0){S.live=true;$('#connLabel').innerHTML=S.local?'<span class="dot"></span>Saved in this browser':'<span class="dot"></span>Saved to your data';}render()};
  const once=f=>{let d=false;return(...a)=>{f(...a);if(!d){d=true;ready()}}};
  const err=e=>{if(e&&e.code==='revoked'){S.live=false;S.canEdit=false;render()}};
- [['employees','emps'],['attendance','att'],['runs','runs'],['leaves','leaves'],['loans','loans'],['filings','filings'],['roster','roster']].forEach(([c,k])=>db.collection(c).onSnapshot(once(q=>{const o={};q.docs.forEach(x=>o[x.id]=x.data());S[k]=o;render()}),err));
+ [['employees','emps'],['attendance','att'],['runs','runs'],['leaves','leaves'],['loans','loans'],['filings','filings'],['roster','roster'],['templates','tpls']].forEach(([c,k])=>db.collection(c).onSnapshot(once(q=>{const o={};q.docs.forEach(x=>o[x.id]=x.data());S[k]=o;render()}),err));
  db.doc('config/main').onSnapshot(once(s=>{S.cfg=mergeCfg(s.exists?s.data():null);render()}),err);
 })();
 </script>
