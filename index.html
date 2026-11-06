@@ -403,6 +403,9 @@ label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 .cam-guide{position:absolute;top:50%;left:50%;width:62%;aspect-ratio:35/45;transform:translate(-50%,-50%);border:3px dashed rgba(255,255,255,.85);border-radius:10px;box-shadow:0 0 0 2000px rgba(0,0,0,.35);pointer-events:none}
 .cam-msg{padding:10px 16px 0}
 .cam-a{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;padding:12px 16px 16px}
+.steps-ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.steps-ol code{font-size:12px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+#mailScript{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
 /* bulk update */
 .bulk{border:1px dashed var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
 .bulk.on{border:1px solid var(--lv-s);background:var(--lv-bg);box-shadow:0 0 0 3px color-mix(in srgb,var(--lv-s) 15%,transparent)}
@@ -925,6 +928,7 @@ VIEWS.settings=()=>{
  <p class="small muted" style="margin:0">${S.cfg.auth?`Signed in as <b>${esc(curAcct().user)}</b>. Enter your current password to change the username or password.`:'No employer login yet.'} Employees sign in with their employee code; manage them from Employees › Employee logins.</p>
  ${S.cfg.auth?`<div class="fgrid">${fld('auUser','Username',curAcct().user)}${fld('auCur','Current password','',{type:'password'})}${fld('auPw','New password','',{type:'password',hint:'Leave blank to keep the current one'})}${fld('auPw2','Confirm new password','',{type:'password'})}</div>
  <div class="row"><button class="btn primary" type="submit">Update login</button>${isOwner()?'<button class="btn" type="button" data-act="newRecovery">New recovery code</button>':''}<button class="btn" type="button" data-act="logout">Sign out</button></div>`:''}</form>
+ ${mailCard()}
  <section class="card" style="display:flex;flex-direction:column;gap:12px"><h2>Appointment letter template</h2>
  <p class="small muted" style="margin:0">${tplRec()?`Using <b>${esc(tplRec().name)}</b>, uploaded ${fmtDate((tplRec().at||'').slice(0,10))}, with ${(tplRec().fields||[]).length} fields.`:'No template yet.'} Write fields in the Word file as &lt;&lt;FieldName&gt;&gt;. Vetan fills: ${TPL_FIELDS}.</p>
  <div class="row"><button class="btn" type="button" data-act="tplPick" ${ro()}>${ic('up')}${tplRec()?'Replace template':'Upload template (.docx)'}</button></div></section>
@@ -1334,6 +1338,8 @@ document.addEventListener('submit',ev=>{
  if(f.id==='fAuth'){authChange(f);return}
  if(f.id==='mForm'){if(!onSubmit){closeModal();return}const ok=onSubmit(f);if(ok===true)closeModal();return}
  if(f.id==='fRole'){if(isOwner())saveRole(f);return}
+ if(f.id==='fMail'){if(!can('settings','edit'))return toast(NOPE,'bad');const mode=f.mMode.value,url=f.mUrl.value.trim();if(mode==='auto'&&url&&!MAIL_URL_RE.test(url))return toast('The web app address should look like https://script.google.com/macros/s/…/exec','bad');
+  const c=clone(S.cfg);c.mail={...mailCfg(),mode,url,fromName:f.mFrom.value.trim(),replyTo:f.mReply.value.trim()};if(mode==='auto'&&!c.mail.key)c.mail.key='vt_'+newSalt()+newSalt().slice(0,8);put('config','main',c);toast(mode==='auto'&&!url?'Saved. Now set up automatic sending.':'Email settings saved');return}
  if(!S.canEdit)return;if(!can('settings','edit')){toast(NOPE,'bad');return}const d=Object.fromEntries(new FormData(f));const c=clone(S.cfg);
  if(f.id==='fCompany'){if(!d.name.trim())return toast('Company name is required.','bad');c.company={...c.company,name:d.name.trim(),state:d.state,pan:d.pan.trim().toUpperCase(),tan:d.tan.trim().toUpperCase(),pfCode:d.pfCode.trim(),esiCode:d.esiCode.trim(),address:d.address.trim(),hrEmail:(d.hrEmail||'').trim(),hrPhone:(d.hrPhone||'').replace(/\D/g,'').slice(-10),signName:(d.signName||'').trim(),signTitle:(d.signTitle||'').trim(),publicUrl:(d.publicUrl||'').trim()};c.admin=d.admin.trim()||'HR Admin'}
  if(f.id==='fRates'){c.pf={ee:N(d.pfee),er:N(d.pfer),ceiling:N(d.pfc)};c.esi={ee:N(d.esee),er:N(d.eser),limit:N(d.esl)};c.tds={...c.tds,std:N(d.std),rebate:N(d.reb),cess:N(d.cess),slabs:c.tds.slabs.map((_,i)=>[N(d['sl_'+i]),N(d['sr_'+i])])}}
@@ -2067,6 +2073,7 @@ function joinDl(){const f=S.jn&&S.jn.done;if(!f)return;const u=URL.createObjectU
 function inviteForm(){
  modal('Send a joining link',`<p class="small muted" style="margin:0">Vetan makes a link for the candidate. They fill in their details and upload documents on their phone or computer, then send the result back to you.</p>
  <div class="fgrid">${fld('ivName','Candidate name','')}${fld('ivPhone','Mobile (for WhatsApp)','',{type:'tel'})}${fld('ivEmail','Email','',{type:'email'})}${fld('ivDesig','Designation','')}${fld('ivDept','Department','')}${fld('ivDoj','Date of joining',isoD(new Date(Date.now()+7*864e5)),{type:'date'})}${fld('ivGross','Monthly gross ₹ (optional)','',{type:'number',hint:'Used later for the appointment letter'})}</div>
+ ${autoMail()?'<div class="check"><input type="checkbox" id="ivSend" name="ivSend" checked><label for="ivSend">Email the link to the candidate now, from my account</label></div>':''}
  <fieldset class="docpick"><legend>Documents to ask for</legend>${CAND_DOCS.map(([k,l,rq])=>`<label class="check"><input type="checkbox" name="ivd_${k}" ${rq?'checked':''}> ${l}</label>`).join('')}</fieldset>
  ${fld('ivNote','Message to the candidate (optional)','',{full:1,ph:'e.g. Please complete this before your joining date.'})}`,{sm:'Create link',submit:f=>{
   const name=f.ivName.value.trim(),ph=f.ivPhone.value.replace(/\D/g,'').slice(-10);if(!name)return mErr('Enter the candidate\'s name.');if(f.ivPhone.value&&!/^[6-9]\d{9}$/.test(ph))return mErr('Enter a 10-digit mobile number.');
@@ -2074,7 +2081,7 @@ function inviteForm(){
   const now=new Date().toISOString(),id=uid('e'),g=N(f.ivGross.value);
   const rec={code:nextCode(),name,phone:ph,email:f.ivEmail.value.trim().toLowerCase(),designation:f.ivDesig.value.trim(),dept:f.ivDept.value.trim(),doj:f.ivDoj.value,status:'onboarding',docs:[],pf:true,state:S.cfg.company.state,weekOff:0,shift:S.cfg.defaultShift,empType:'Permanent',tdsOverride:'',ptOverride:'',basic:0,hra:0,conv:0,special:0,...(g?splitGross(g):{}),
    onboarding:{started:now,step:1,stage:'invited',invite:{token:newSalt().slice(0,16),sentAt:now,req,note:f.ivNote.value.trim(),fix:null}},updated:now};
-  put('employees',id,rec);setTimeout(()=>inviteShare(id),0);return true}});
+  const snd=!!(f.ivSend&&f.ivSend.checked&&rec.email);put('employees',id,rec);setTimeout(()=>{inviteShare(id);if(snd)emailInvite(id,true)},0);return true}});
 }
 function inviteShare(id){const e=S.emps[id];if(!e)return;const link=inviteLink(id),co=S.cfg.company.name,inv=(e.onboarding||{}).invite||{},fix=inv.fix&&((inv.fix.f||[]).length||(inv.fix.d||[]).length);
  const msg=fix?`Hi ${e.name}, please correct a few details and documents for joining ${co}. Open this link: ${link}`:`Hi ${e.name}, welcome to ${co}! Please fill in your joining details and upload your documents here: ${link}\n\nAt the end, send the file it gives you back to us on WhatsApp or email.`;
@@ -2082,7 +2089,9 @@ function inviteShare(id){const e=S.emps[id];if(!e)return;const link=inviteLink(i
  const mail=`mailto:${encodeURIComponent(e.email||'')}?subject=${encodeURIComponent((fix?'Corrections needed: ':'Joining details: ')+co)}&body=${encodeURIComponent(msg)}`;
  modal(fix?'Send the correction link':'Send the joining link',`<p style="margin:0">Send this link to <b>${esc(e.name)}</b>${e.phone?` (${esc(e.phone)})`:''}. When they finish, they send you a file. Use <b>Import submission</b> on the Onboarding page to load it.</p>
  <div class="field"><label for="invLink">Link</label><input id="invLink" readonly value="${esc(link)}"></div>
- <div class="row"><button class="btn primary" type="button" data-act="copyInv">Copy link</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a><a class="btn" href="${esc(mail)}" target="_blank" rel="noopener">Email</a><button class="btn" type="button" data-act="copyInvMsg">Copy message</button></div>
+ <div class="row"><button class="btn primary" type="button" data-act="copyInv">Copy link</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a>${autoMail()?`<button class="btn" type="button" data-act="invMail" data-id="${id}">Email now from my account</button>`:`<a class="btn" href="${esc(composeUrl(e.email,(inviteMail(id)).subject,(inviteMail(id)).body))}" target="_blank" rel="noopener">Email via ${mailApp()}</a>`}<button class="btn" type="button" data-act="copyInvMsg">Copy message</button></div>
+ <div id="mailSt" class="note" role="status" hidden></div>
+ <p class="small muted" style="margin:0">${autoMail()?'':`Want Vetan to send the email itself from your address? Set it up in Settings → Email. <a href="${esc(mail)}" target="_blank" rel="noopener">Other mail app</a>`}</p>
  <textarea id="invMsg" class="vh" aria-hidden="true" tabindex="-1">${esc(msg)}</textarea>
  <p class="small muted" style="margin:0">The link opens your Vetan site at ${esc(publicBase())}. The candidate does not need to sign in and cannot see any of your data.</p>`,{foot:'<button class="btn primary" type="button" data-act="close">Done</button>'});
 }
@@ -2174,14 +2183,14 @@ async function alMake(d){const e=S.emps[d.id],f=$('#mForm');if(!e||!f)return;con
  const btn=document.querySelector('[data-act=alMake]');if(btn)btn.disabled=true;
  try{const Z=await loadZip(),zip=await Z.loadAsync(fromB64(t.b64,DOCX_CT));let miss=new Set();
   for(const name of Object.keys(zip.files).filter(n=>/^word\/(document|header\d*|footer\d*)\.xml$/.test(n))){const r=fillDocxXml(await zip.file(name).async('string'),vals);r.missing.forEach(m=>miss.add(m));zip.file(name,r.xml)}
-  const out=await zip.generateAsync({type:'blob',mimeType:DOCX_CT}),fn=`Appointment-letter-${v('alName').replace(/[^A-Za-z0-9]+/g,'-')}.docx`;
+  const out=await zip.generateAsync({type:'blob',mimeType:DOCX_CT,compression:'DEFLATE',compressionOptions:{level:6}}),fn=`Appointment-letter-${v('alName').replace(/[^A-Za-z0-9]+/g,'-')}.docx`;
   const c=clone(S.cfg);c.company={...c.company,signName:v('alSign'),signTitle:v('alTitle')};put('config','main',c);
   const ob=e.onboarding||{};put('employees',d.id,{...e,designation:v('alDesig'),doj:v('alDoj'),onboarding:{...ob,stage:ob.stage==='submitted'||ob.stage==='changes'||ob.stage==='invited'||ob.stage==='verified'||!ob.stage?'offered':ob.stage,offer:{date:v('alDate'),at:new Date().toISOString(),gross:g}}});
   S._letter={file:new File([out],fn,{type:DOCX_CT}),id:d.id};await download(fn,out);
   const em=e.email,msg=`Dear ${v('alName')},\n\nPlease find attached your appointment letter for the role of ${v('alDesig')} at ${S.cfg.company.name}, effective ${longDate(v('alDoj'))}. Kindly sign and return a copy.\n\nRegards,\n${v('alSign')||S.cfg.company.name}`;
   modal('Letter ready',`<p style="margin:0"><b>${esc(fn)}</b> is downloaded${miss.size?`. These template fields had no value: ${esc([...miss].join(', '))}`:''}.</p>
-  <p class="small muted" style="margin:0">Send it to ${esc(v('alName'))}: share the file directly, or open an email or WhatsApp message and attach the downloaded file.</p>
-  <div class="row"><button class="btn primary" type="button" data-act="alShare">Share file</button><a class="btn" target="_blank" rel="noopener" href="mailto:${encodeURIComponent(em||'')}?subject=${encodeURIComponent('Appointment letter · '+S.cfg.company.name)}&body=${encodeURIComponent(msg)}">Email</a>${e.phone?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/91${e.phone}?text=${encodeURIComponent(msg)}">WhatsApp</a>`:''}<button class="btn" type="button" data-act="alAgain" data-id="${d.id}">Download again</button></div>
+  <p class="small muted" style="margin:0">${autoMail()?`Email it straight from your account with the letter attached, or share it another way.`:`Send it to ${esc(v('alName'))}: share the file, or open ${mailApp()} or WhatsApp and attach the downloaded file.`}</p>
+  <div class="row"><button class="btn primary" type="button" data-act="alShare">Share file</button>${autoMail()?`<button class="btn primary" type="button" data-act="alMail" data-id="${d.id}">Email the letter from my account</button>`:`<a class="btn" target="_blank" rel="noopener" href="${esc(composeUrl(em,'Appointment letter · '+S.cfg.company.name,msg))}">Email via ${mailApp()}</a>`}${e.phone?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/91${e.phone}?text=${encodeURIComponent(msg)}">WhatsApp</a>`:''}<button class="btn" type="button" data-act="alAgain" data-id="${d.id}">Download again</button></div><div id="mailSt" class="note" role="status" hidden></div>
   ${e.status==='onboarding'?`<p class="small" style="margin:0">When they join, finish onboarding to add them to payroll.</p>`:''}`,{foot:`${e.status==='onboarding'?`<button class="btn" type="button" data-act="obGo" data-id="${d.id}" data-step="2">Open onboarding</button>`:''}<button class="btn primary" type="button" data-act="close">Done</button>`});
  }catch(err){if(btn)btn.disabled=false;mErr(err&&err.message==='load'?'Could not load the Word file tools. Check your internet connection and try again.':'Could not create the letter. Check the template is a .docx file. '+((err&&err.message)||''))}
 }
@@ -2205,6 +2214,98 @@ Object.assign(A,{
  jCam:d=>cameraCapture({passport:d.k==='photo',title:d.k==='photo'?'Passport-size photo':'Photograph the document',name:d.k}).then(f=>{if(f)joinAddFiles(d.k,[f])}),
  jDel:d=>{const J=S.jn;if(!J||!J.docs[d.k])return;J.docs[d.k].splice(+d.i,1);refreshJDocs()},
  jSubmit:()=>joinSubmit(),jShare:()=>joinShare(),jDl:()=>joinDl(),jEdit:()=>{S.jn.done=null;S._lgKey=null;render()}
+});
+
+/* ============ email from the user's own account ============ */
+const mailCfg=()=>({mode:'gmail',url:'',key:'',fromName:'',replyTo:'',...(S.cfg.mail||{})});
+const MAIL_URL_RE=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec\/?$/;
+const autoMail=()=>{const m=mailCfg();return m.mode==='auto'&&MAIL_URL_RE.test(m.url)&&!!m.key&&!!S.local};
+const mailApp=()=>mailCfg().mode==='outlook'?'Outlook':'Gmail';
+function composeUrl(to,subj,body){const m=mailCfg(),e=encodeURIComponent;return m.mode==='outlook'?`https://outlook.office.com/mail/deeplink/compose?to=${e(to||'')}&subject=${e(subj)}&body=${e(body)}`:`https://mail.google.com/mail/?view=cm&fs=1&to=${e(to||'')}&su=${e(subj)}&body=${e(body)}`}
+async function sendMail(msg){const m=mailCfg();
+ const payload={key:m.key,to:msg.to,subject:msg.subject,body:msg.body,html:msg.html||'',fromName:m.fromName||S.cfg.company.name||'',replyTo:m.replyTo||S.cfg.company.hrEmail||'',attachments:msg.attachments||[]};
+ let r;try{r=await fetch(m.url,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain;charset=utf-8'},redirect:'follow'})}
+ catch(e){if(e instanceof TypeError)return{ok:true,confirmed:false};throw e}
+ if(!r.ok)throw new Error('The script address answered with an error ('+r.status+'). Check the web app address in Settings.');
+ let j;try{j=await r.json()}catch(_){throw new Error('The script address did not answer like the Vetan mail script. Check it was deployed as a web app with access for Anyone.')}
+ if(!j.ok)throw new Error(j.error==='Wrong key'?'The secret key does not match. Copy the setup script again and redeploy it.':(j.error||'The email was not sent.'));
+ return{ok:true,confirmed:true,quota:j.remaining};
+}
+const mailHtml=(title,paras,btn)=>`<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#1b2422;max-width:560px">${paras.map(p=>`<p style="margin:0 0 14px">${p}</p>`).join('')}${btn?`<p style="margin:22px 0"><a href="${esc(btn[1])}" style="background:#1B6A55;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold;display:inline-block">${esc(btn[0])}</a></p><p style="margin:0 0 14px;font-size:12px;color:#5b6762">If the button does not work, copy this link into your browser:<br><span style="word-break:break-all">${esc(btn[1])}</span></p>`:''}</div>`;
+function inviteMail(id){const e=S.emps[id],co=S.cfg.company,link=inviteLink(id),inv=(e.onboarding||{}).invite||{},fix=inv.fix&&((inv.fix.f||[]).length||(inv.fix.d||[]).length),sig=mailCfg().fromName||co.signName||co.name;
+ const subject=fix?`Corrections needed for your joining details · ${co.name}`:`Your joining details for ${co.name}`;
+ const intro=fix?`Please correct a few of your details and documents for joining ${co.name}.${inv.note?' '+inv.note:''}`:`Welcome to ${co.name}! Please fill in your joining details and upload your documents using the link below. It takes about 10 minutes; keep your PAN, Aadhaar and bank details handy.${inv.note?' '+inv.note:''}`;
+ const outro='At the end, the form gives you a file. Please send that file back to us by replying to this email or on WhatsApp.';
+ return{to:e.email,subject,body:`Dear ${e.name},\n\n${intro}\n\n${link}\n\n${outro}\n\nRegards,\n${sig}`,html:mailHtml(subject,[`Dear ${esc(e.name)},`,esc(intro)],[fix?'Correct my details':'Fill my joining details',link])+mailHtml('',[esc(outro),`Regards,<br>${esc(sig)}`])}}
+async function emailInvite(id,quiet){const e=S.emps[id];if(!e)return;if(!e.email)return toast('Add the candidate\'s email address first.','bad');
+ const st=document.getElementById('mailSt'),show=(t,k)=>{if(st){st.hidden=false;st.className='note'+(k?' '+k:'');st.textContent=t}};
+ show('Sending from your email…');
+ try{const r=await sendMail(inviteMail(id));const ob=e.onboarding||{};put('employees',id,{...S.emps[id],onboarding:{...ob,invite:{...(ob.invite||{}),emailedAt:new Date().toISOString()}}});
+  const t=r.confirmed?`Email sent to ${e.email}.`:`Email handed to your Google account for ${e.email}. Check your Gmail Sent folder to confirm.`;show(t);if(!quiet||!st)toast(t)}
+ catch(err){show('Not sent: '+err.message,'warn');toast('Email not sent: '+err.message,'bad')}}
+const MAIL_SCRIPT=key=>`// Vetan mail sender: sends email from this Google account.
+// 1) Paste this into a new project at script.google.com
+// 2) Deploy > New deployment > Web app > Execute as: Me > Who has access: Anyone > Deploy
+// 3) Copy the Web app URL (ends with /exec) into Vetan > Settings > Email
+const SECRET = '${key}';
+
+function doPost(e) {
+  try {
+    const d = JSON.parse(e.postData.contents);
+    if (d.key !== SECRET) return out({ ok: false, error: 'Wrong key' });
+    const opts = { name: d.fromName || 'HR' };
+    if (d.html) opts.htmlBody = d.html;
+    if (d.replyTo) opts.replyTo = d.replyTo;
+    if (d.attachments && d.attachments.length) {
+      opts.attachments = d.attachments.map(function (a) {
+        return Utilities.newBlob(Utilities.base64Decode(a.data), a.type, a.name);
+      });
+    }
+    MailApp.sendEmail(d.to, d.subject, d.body, opts);
+    return out({ ok: true, remaining: MailApp.getRemainingDailyQuota() });
+  } catch (err) {
+    return out({ ok: false, error: String(err) });
+  }
+}
+
+function doGet() { return out({ ok: true, app: 'vetan-mail' }); }
+
+function out(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+`;
+function ensureMailKey(){const m=mailCfg();if(m.key)return m.key;const c=clone(S.cfg);c.mail={...mailCfg(),key:'vt_'+newSalt()+newSalt().slice(0,8)};put('config','main',c);return c.mail.key}
+function mailScriptModal(){const key=ensureMailKey();
+ modal('Set up sending from your Google account',`<ol class="steps-ol"><li>Open <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">script.google.com</a> while signed in to the email account you send from, and start a <b>New project</b>.</li>
+ <li>Delete what is in the editor, then paste the script below. It already has your secret key.</li>
+ <li>Click <b>Deploy → New deployment</b>, choose type <b>Web app</b>, set <b>Execute as: Me</b> and <b>Who has access: Anyone</b>, then <b>Deploy</b>. Allow the permissions Google asks for (it only asks to send email as you).</li>
+ <li>Copy the <b>Web app URL</b> (it ends in <code>/exec</code>), paste it in Settings → Email, choose <b>Send automatically</b>, and save. Then press <b>Send test email</b>.</li></ol>
+ <div class="field"><label for="mailScript">Script</label><textarea id="mailScript" readonly spellcheck="false" style="min-height:220px">${esc(MAIL_SCRIPT(key))}</textarea></div>
+ <p class="small muted" style="margin:0">Emails go out from the Google account that owns the script (Gmail allows about 100 a day, Google Workspace 1,500). Keep the key private; anyone with both the address and the key could send email as you.</p>`,
+ {foot:'<button class="btn" type="button" data-act="close">Close</button><button class="btn primary" type="button" data-act="mailCopy">Copy script</button>'});
+}
+function mailCard(){const m=mailCfg();return `<form class="card" id="fMail" style="display:flex;flex-direction:column;gap:14px"><h2>Email</h2>
+ <p class="small muted" style="margin:0">How Vetan emails joining links and appointment letters from your own address.</p>
+ <div class="fgrid">${fld('mMode','Sending method',m.mode,{sel:[['gmail','Open Gmail with the email ready, I press Send'],['outlook','Open Outlook with the email ready, I press Send'],['auto','Send automatically from my Google account']],full:1})}
+ ${fld('mFrom','Sender name',m.fromName,{ph:S.cfg.company.name,hint:'Shown as the "from" name'})}${fld('mReply','Replies go to',m.replyTo,{type:'email',ph:S.cfg.company.hrEmail||'hr@yourcompany.com'})}
+ ${fld('mUrl','Web app address (for automatic sending)',m.url,{full:1,ph:'https://script.google.com/macros/s/…/exec'})}</div>
+ ${m.mode==='auto'?(S.local?(autoMail()?'<div class="note">Automatic sending is on. Joining links and letters (with the Word file attached) are sent from your Google account.</div>':'<div class="note warn">Finish the setup: copy the script, deploy it, and paste the web app address above.</div>'):'<div class="note warn">Automatic sending works on your GitHub site. Inside Claude, Vetan opens Gmail with the email ready instead.</div>'):''}
+ <div class="row"><button class="btn primary" type="submit" ${ro()}>Save email settings</button><button class="btn" type="button" data-act="mailScript" ${ro()}>Set up automatic sending</button>${autoMail()?`<button class="btn" type="button" data-act="mailTest" ${ro()}>Send test email</button>`:''}</div></form>`}
+Object.assign(ACT_PERM,{invMail:['employees','edit'],alMail:['employees','edit'],mailScript:['settings','edit'],mailCopy:['settings','edit'],mailTest:['settings','edit']});
+Object.assign(A,{
+ invMail:d=>emailInvite(d.id),
+ mailScript:()=>mailScriptModal(),
+ mailCopy:()=>{const t=(document.getElementById('mailScript')||{}).value||'';copyText(t,'Script copied. Paste it at script.google.com.')},
+ mailTest:async()=>{const to=mailCfg().replyTo||S.cfg.company.hrEmail;if(!to)return toast('Fill in "Replies go to" or the HR email first.','bad');toast('Sending a test email to '+to+'…');
+  try{const r=await sendMail({to,subject:'Vetan test email',body:'This is a test from Vetan Payroll. Automatic sending from your account works.',html:mailHtml('',['This is a test from Vetan Payroll.','Automatic sending from your account works.'])});toast(r.confirmed?'Test email sent to '+to+(r.quota!=null?` · ${r.quota} left today`:''):'Test handed to Google. Check your Gmail Sent folder.')}
+  catch(e){toast('Test failed: '+e.message,'bad')}},
+ alMail:async d=>{const L=S._letter,e=S.emps[d.id];if(!L||!e)return;if(!e.email)return toast('Add the employee\'s email address first.','bad');
+  const st=document.getElementById('mailSt'),show=(t,k)=>{if(st){st.hidden=false;st.className='note'+(k?' '+k:'');st.textContent=t}};show('Sending the letter from your email…');
+  try{const co=S.cfg.company,sig=mailCfg().fromName||co.signName||co.name,subject=`Appointment letter · ${co.name}`,body=`Dear ${e.name},\n\nPlease find attached your appointment letter for the role of ${e.designation||''} at ${co.name}, effective ${longDate(e.doj)}. Kindly sign and return a copy.\n\nRegards,\n${sig}`;
+   const r=await sendMail({to:e.email,subject,body,html:mailHtml(subject,[`Dear ${esc(e.name)},`,`Please find attached your appointment letter for the role of <b>${esc(e.designation||'')}</b> at ${esc(co.name)}, effective ${esc(longDate(e.doj))}. Kindly sign and return a copy.`,`Regards,<br>${esc(sig)}`]),attachments:[{name:L.file.name,type:DOCX_CT,data:await toB64(L.file)}]});
+   const ob=e.onboarding||{};put('employees',d.id,{...S.emps[d.id],onboarding:{...ob,offer:{...(ob.offer||{}),emailedAt:new Date().toISOString()}}});
+   show(r.confirmed?`Letter emailed to ${e.email}.`:`Letter handed to your Google account for ${e.email}. Check your Gmail Sent folder to confirm.`)}
+  catch(err){show('Not sent: '+err.message,'warn')}}
 });
 
 /* ============ boot ============ */
