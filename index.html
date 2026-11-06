@@ -1338,8 +1338,9 @@ document.addEventListener('submit',ev=>{
  if(f.id==='fAuth'){authChange(f);return}
  if(f.id==='mForm'){if(!onSubmit){closeModal();return}const ok=onSubmit(f);if(ok===true)closeModal();return}
  if(f.id==='fRole'){if(isOwner())saveRole(f);return}
- if(f.id==='fMail'){if(!can('settings','edit'))return toast(NOPE,'bad');const mode=f.mMode.value,url=f.mUrl.value.trim();if(mode==='auto'&&url&&!MAIL_URL_RE.test(url))return toast('The web app address should look like https://script.google.com/macros/s/…/exec','bad');
-  const c=clone(S.cfg);c.mail={...mailCfg(),mode,url,fromName:f.mFrom.value.trim(),replyTo:f.mReply.value.trim()};if(mode==='auto'&&!c.mail.key)c.mail.key='vt_'+newSalt()+newSalt().slice(0,8);put('config','main',c);toast(mode==='auto'&&!url?'Saved. Now set up automatic sending.':'Email settings saved');return}
+ if(f.id==='fMail'){if(!can('settings','edit'))return toast(NOPE,'bad');const mode=f.mMode.value,url=f.mUrl.value.trim(),fe=f.mFromEmail.value.trim().toLowerCase();if(mode==='auto'&&url&&!MAIL_URL_RE.test(url))return toast('The web app address should look like https://script.google.com/macros/s/…/exec','bad');
+  if(mode==='server'&&!EMAIL_RE.test(fe))return toast('Enter the company email address to send from.','bad');if(mode==='server'&&url&&!PHP_URL_RE.test(url))return toast('The mail sender address should look like https://yourcompany.in/vetan/mail.php (it must start with https).','bad');
+  const c=clone(S.cfg);c.mail={...mailCfg(),mode,url,fromEmail:fe,fromName:f.mFrom.value.trim(),replyTo:f.mReply.value.trim()};if((mode==='auto'||mode==='server')&&!c.mail.key)c.mail.key='vt_'+newSalt()+newSalt().slice(0,8);put('config','main',c);toast((mode==='auto'||mode==='server')&&!url?'Saved. Now press Set up automatic sending.':'Email settings saved');return}
  if(!S.canEdit)return;if(!can('settings','edit')){toast(NOPE,'bad');return}const d=Object.fromEntries(new FormData(f));const c=clone(S.cfg);
  if(f.id==='fCompany'){if(!d.name.trim())return toast('Company name is required.','bad');c.company={...c.company,name:d.name.trim(),state:d.state,pan:d.pan.trim().toUpperCase(),tan:d.tan.trim().toUpperCase(),pfCode:d.pfCode.trim(),esiCode:d.esiCode.trim(),address:d.address.trim(),hrEmail:(d.hrEmail||'').trim(),hrPhone:(d.hrPhone||'').replace(/\D/g,'').slice(-10),signName:(d.signName||'').trim(),signTitle:(d.signTitle||'').trim(),publicUrl:(d.publicUrl||'').trim()};c.admin=d.admin.trim()||'HR Admin'}
  if(f.id==='fRates'){c.pf={ee:N(d.pfee),er:N(d.pfer),ceiling:N(d.pfc)};c.esi={ee:N(d.esee),er:N(d.eser),limit:N(d.esl)};c.tds={...c.tds,std:N(d.std),rebate:N(d.reb),cess:N(d.cess),slabs:c.tds.slabs.map((_,i)=>[N(d['sl_'+i]),N(d['sr_'+i])])}}
@@ -2217,17 +2218,74 @@ Object.assign(A,{
 });
 
 /* ============ email from the user's own account ============ */
-const mailCfg=()=>({mode:'gmail',url:'',key:'',fromName:'',replyTo:'',...(S.cfg.mail||{})});
+const PHP_SCRIPT=(key,from,name)=>`<?php
+// Vetan mail sender for cPanel hosting: sends email from your company address.
+// Upload as mail.php to your website (cPanel > File Manager > public_html > vetan),
+// then paste its address (https://yourdomain/vetan/mail.php) into Vetan > Settings > Email.
+$SECRET     = '${key}';
+$FROM_EMAIL = '${from}';
+$FROM_NAME  = '${String(name||'').replace(/'/g,'')}';
+$COPY_TO_SELF = true; // keep a copy of every email in your own mailbox (BCC)
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json; charset=utf-8');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; }
+if ($_SERVER['REQUEST_METHOD'] === 'GET') { echo json_encode(['ok' => true, 'app' => 'vetan-mail']); exit; }
+
+function fail($m) { echo json_encode(['ok' => false, 'error' => $m]); exit; }
+function enc($s) { return '=?UTF-8?B?' . base64_encode($s) . '?='; }
+function clean($s) { return trim(str_replace(["\\r", "\\n"], ' ', (string)$s)); }
+
+$d = json_decode(file_get_contents('php://input'), true);
+if (!is_array($d) || !hash_equals($SECRET, (string)($d['key'] ?? ''))) fail('Wrong key');
+$to = clean($d['to'] ?? '');
+if (!filter_var($to, FILTER_VALIDATE_EMAIL)) fail('The recipient email address is not valid');
+$subject = clean($d['subject'] ?? '');
+$name = clean($d['fromName'] ?? '') ?: $FROM_NAME;
+$reply = filter_var(clean($d['replyTo'] ?? ''), FILTER_VALIDATE_EMAIL) ?: $FROM_EMAIL;
+
+$mix = '=_vetan_' . md5(uniqid('', true));
+$alt = '=_alt_' . md5(uniqid('', true));
+$headers  = 'From: ' . enc($name) . ' <' . $FROM_EMAIL . ">\\r\\n";
+$headers .= 'Reply-To: ' . $reply . "\\r\\n";
+if ($COPY_TO_SELF) $headers .= 'Bcc: ' . $FROM_EMAIL . "\\r\\n";
+$headers .= "MIME-Version: 1.0\\r\\n";
+$headers .= 'Content-Type: multipart/mixed; boundary="' . $mix . '"';
+
+$msg  = "--$mix\\r\\nContent-Type: multipart/alternative; boundary=\\"$alt\\"\\r\\n\\r\\n";
+$msg .= "--$alt\\r\\nContent-Type: text/plain; charset=UTF-8\\r\\nContent-Transfer-Encoding: base64\\r\\n\\r\\n" . chunk_split(base64_encode((string)($d['body'] ?? ''))) . "\\r\\n";
+if (!empty($d['html'])) {
+  $msg .= "--$alt\\r\\nContent-Type: text/html; charset=UTF-8\\r\\nContent-Transfer-Encoding: base64\\r\\n\\r\\n" . chunk_split(base64_encode((string)$d['html'])) . "\\r\\n";
+}
+$msg .= "--$alt--\\r\\n";
+foreach (($d['attachments'] ?? []) as $a) {
+  $fn = preg_replace('/[^A-Za-z0-9._ -]/', '_', (string)($a['name'] ?? 'file'));
+  $ty = preg_replace('/[^A-Za-z0-9.\\/+-]/', '', (string)($a['type'] ?? 'application/octet-stream'));
+  $data = preg_replace('/[^A-Za-z0-9+\\/=]/', '', (string)($a['data'] ?? ''));
+  $msg .= "--$mix\\r\\nContent-Type: $ty; name=\\"$fn\\"\\r\\nContent-Disposition: attachment; filename=\\"$fn\\"\\r\\nContent-Transfer-Encoding: base64\\r\\n\\r\\n" . chunk_split($data) . "\\r\\n";
+}
+$msg .= "--$mix--";
+
+$ok = mail($to, enc($subject), $msg, $headers, '-f' . $FROM_EMAIL);
+echo json_encode($ok ? ['ok' => true] : ['ok' => false, 'error' => 'The mail server could not send the email']);
+`;
+
+const mailCfg=()=>({mode:'gmail',url:'',key:'',fromName:'',replyTo:'',fromEmail:'',...(S.cfg.mail||{})});
+const PHP_URL_RE=/^https:\/\/[^\s?#]+\.php$/i;
+const EMAIL_RE=/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/;
 const MAIL_URL_RE=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec\/?$/;
-const autoMail=()=>{const m=mailCfg();return m.mode==='auto'&&MAIL_URL_RE.test(m.url)&&!!m.key&&!!S.local};
+const autoMail=()=>{const m=mailCfg();return !!m.key&&!!S.local&&((m.mode==='auto'&&MAIL_URL_RE.test(m.url))||(m.mode==='server'&&PHP_URL_RE.test(m.url)&&EMAIL_RE.test(m.fromEmail)))};
+const sentHint=()=>mailCfg().mode==='server'?'Check your mailbox for the copy to confirm.':'Check your Gmail Sent folder to confirm.';
 const mailApp=()=>mailCfg().mode==='outlook'?'Outlook':'Gmail';
 function composeUrl(to,subj,body){const m=mailCfg(),e=encodeURIComponent;return m.mode==='outlook'?`https://outlook.office.com/mail/deeplink/compose?to=${e(to||'')}&subject=${e(subj)}&body=${e(body)}`:`https://mail.google.com/mail/?view=cm&fs=1&to=${e(to||'')}&su=${e(subj)}&body=${e(body)}`}
 async function sendMail(msg){const m=mailCfg();
  const payload={key:m.key,to:msg.to,subject:msg.subject,body:msg.body,html:msg.html||'',fromName:m.fromName||S.cfg.company.name||'',replyTo:m.replyTo||S.cfg.company.hrEmail||'',attachments:msg.attachments||[]};
  let r;try{r=await fetch(m.url,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain;charset=utf-8'},redirect:'follow'})}
  catch(e){if(e instanceof TypeError)return{ok:true,confirmed:false};throw e}
- if(!r.ok)throw new Error('The script address answered with an error ('+r.status+'). Check the web app address in Settings.');
- let j;try{j=await r.json()}catch(_){throw new Error('The script address did not answer like the Vetan mail script. Check it was deployed as a web app with access for Anyone.')}
+ if(!r.ok)throw new Error('The mail sender address answered with an error ('+r.status+'). Check the address in Settings → Email.');
+ let j;try{j=await r.json()}catch(_){throw new Error(mailCfg().mode==='server'?'The mail.php address did not answer like the Vetan mail sender. Open it in your browser: it should show {"ok":true,"app":"vetan-mail"}.':'The script address did not answer like the Vetan mail script. Check it was deployed as a web app with access for Anyone.')}
  if(!j.ok)throw new Error(j.error==='Wrong key'?'The secret key does not match. Copy the setup script again and redeploy it.':(j.error||'The email was not sent.'));
  return{ok:true,confirmed:true,quota:j.remaining};
 }
@@ -2241,7 +2299,7 @@ async function emailInvite(id,quiet){const e=S.emps[id];if(!e)return;if(!e.email
  const st=document.getElementById('mailSt'),show=(t,k)=>{if(st){st.hidden=false;st.className='note'+(k?' '+k:'');st.textContent=t}};
  show('Sending from your email…');
  try{const r=await sendMail(inviteMail(id));const ob=e.onboarding||{};put('employees',id,{...S.emps[id],onboarding:{...ob,invite:{...(ob.invite||{}),emailedAt:new Date().toISOString()}}});
-  const t=r.confirmed?`Email sent to ${e.email}.`:`Email handed to your Google account for ${e.email}. Check your Gmail Sent folder to confirm.`;show(t);if(!quiet||!st)toast(t)}
+  const t=r.confirmed?`Email sent to ${e.email}.`:`Email handed over for ${e.email}. ${sentHint()}`;show(t);if(!quiet||!st)toast(t)}
  catch(err){show('Not sent: '+err.message,'warn');toast('Email not sent: '+err.message,'bad')}}
 const MAIL_SCRIPT=key=>`// Vetan mail sender: sends email from this Google account.
 // 1) Paste this into a new project at script.google.com
@@ -2275,7 +2333,17 @@ function out(o) {
 }
 `;
 function ensureMailKey(){const m=mailCfg();if(m.key)return m.key;const c=clone(S.cfg);c.mail={...mailCfg(),key:'vt_'+newSalt()+newSalt().slice(0,8)};put('config','main',c);return c.mail.key}
-function mailScriptModal(){const key=ensureMailKey();
+function phpSetupModal(){const m=mailCfg();if(!EMAIL_RE.test(m.fromEmail))return toast('Fill in "Send from address" with your company email and save first.','bad');const key=ensureMailKey(),dom=m.fromEmail.split('@')[1];
+ modal('Set up sending from '+esc(m.fromEmail),`<ol class="steps-ol"><li>Log in to <b>cPanel</b> for ${esc(dom)} (the same hosting as your webmail) and open <b>File Manager</b>.</li>
+ <li>Open <b>public_html</b>, create a folder named <b>vetan</b>, open it, and create a new file named <b>mail.php</b>.</li>
+ <li>Edit mail.php, paste the code below and <b>Save</b>. It already has your secret key and from address.</li>
+ <li>Open <code>https://${esc(dom)}/vetan/mail.php</code> in your browser. It should show <code>{"ok":true,"app":"vetan-mail"}</code>. If your website is on a different domain, use that domain instead.</li>
+ <li>Paste that address into <b>Mail sender address</b> in Settings → Email, save, then press <b>Send test email</b>.</li></ol>
+ <div class="field"><label for="mailScript">mail.php</label><textarea id="mailScript" readonly spellcheck="false" style="min-height:220px">${esc(PHP_SCRIPT(key,m.fromEmail,m.fromName||S.cfg.company.name))}</textarea></div>
+ <p class="small muted" style="margin:0">Emails go out from ${esc(m.fromEmail)} through your own mail server, and a copy lands in that mailbox. For best delivery, open cPanel → <b>Email Deliverability</b> and make sure SPF and DKIM show as valid. Keep the code private: anyone with the key and address could send email as you.</p>`,
+ {foot:'<button class="btn" type="button" data-act="close">Close</button><button class="btn primary" type="button" data-act="mailCopy">Copy code</button>'});
+}
+function mailScriptModal(){if(mailCfg().mode==='server')return phpSetupModal();const key=ensureMailKey();
  modal('Set up sending from your Google account',`<ol class="steps-ol"><li>Open <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">script.google.com</a> while signed in to the email account you send from, and start a <b>New project</b>.</li>
  <li>Delete what is in the editor, then paste the script below. It already has your secret key.</li>
  <li>Click <b>Deploy → New deployment</b>, choose type <b>Web app</b>, set <b>Execute as: Me</b> and <b>Who has access: Anyone</b>, then <b>Deploy</b>. Allow the permissions Google asks for (it only asks to send email as you).</li>
@@ -2286,25 +2354,26 @@ function mailScriptModal(){const key=ensureMailKey();
 }
 function mailCard(){const m=mailCfg();return `<form class="card" id="fMail" style="display:flex;flex-direction:column;gap:14px"><h2>Email</h2>
  <p class="small muted" style="margin:0">How Vetan emails joining links and appointment letters from your own address.</p>
- <div class="fgrid">${fld('mMode','Sending method',m.mode,{sel:[['gmail','Open Gmail with the email ready, I press Send'],['outlook','Open Outlook with the email ready, I press Send'],['auto','Send automatically from my Google account']],full:1})}
+ <div class="fgrid">${fld('mMode','Sending method',m.mode,{sel:[['server','Send automatically from my company email (cPanel hosting)'],['auto','Send automatically from a Google account (Gmail or Workspace)'],['gmail','Open Gmail with the email ready, I press Send'],['outlook','Open Outlook with the email ready, I press Send']],full:1})}
+ ${fld('mFromEmail','Send from address (company mail server)',m.fromEmail,{type:'email',ph:'hr@yourcompany.in',hint:'Used with the company email method'})}
  ${fld('mFrom','Sender name',m.fromName,{ph:S.cfg.company.name,hint:'Shown as the "from" name'})}${fld('mReply','Replies go to',m.replyTo,{type:'email',ph:S.cfg.company.hrEmail||'hr@yourcompany.com'})}
- ${fld('mUrl','Web app address (for automatic sending)',m.url,{full:1,ph:'https://script.google.com/macros/s/…/exec'})}</div>
- ${m.mode==='auto'?(S.local?(autoMail()?'<div class="note">Automatic sending is on. Joining links and letters (with the Word file attached) are sent from your Google account.</div>':'<div class="note warn">Finish the setup: copy the script, deploy it, and paste the web app address above.</div>'):'<div class="note warn">Automatic sending works on your GitHub site. Inside Claude, Vetan opens Gmail with the email ready instead.</div>'):''}
+ ${fld('mUrl','Mail sender address (for automatic sending)',m.url,{full:1,ph:m.mode==='server'?'https://yourcompany.in/vetan/mail.php':'https://script.google.com/macros/s/…/exec'})}</div>
+ ${m.mode==='auto'||m.mode==='server'?(S.local?(autoMail()?`<div class="note">Automatic sending is on. Joining links and letters (with the Word file attached) go out from ${m.mode==='server'?esc(m.fromEmail):'your Google account'}.</div>`:`<div class="note warn">Finish the setup: press Set up automatic sending${m.mode==='server'?' (after saving your send-from address)':''}, then paste the mail sender address above.</div>`):'<div class="note warn">Automatic sending works on your GitHub site. Inside Claude, Vetan opens Gmail with the email ready instead.</div>'):''}
  <div class="row"><button class="btn primary" type="submit" ${ro()}>Save email settings</button><button class="btn" type="button" data-act="mailScript" ${ro()}>Set up automatic sending</button>${autoMail()?`<button class="btn" type="button" data-act="mailTest" ${ro()}>Send test email</button>`:''}</div></form>`}
 Object.assign(ACT_PERM,{invMail:['employees','edit'],alMail:['employees','edit'],mailScript:['settings','edit'],mailCopy:['settings','edit'],mailTest:['settings','edit']});
 Object.assign(A,{
  invMail:d=>emailInvite(d.id),
  mailScript:()=>mailScriptModal(),
- mailCopy:()=>{const t=(document.getElementById('mailScript')||{}).value||'';copyText(t,'Script copied. Paste it at script.google.com.')},
- mailTest:async()=>{const to=mailCfg().replyTo||S.cfg.company.hrEmail;if(!to)return toast('Fill in "Replies go to" or the HR email first.','bad');toast('Sending a test email to '+to+'…');
-  try{const r=await sendMail({to,subject:'Vetan test email',body:'This is a test from Vetan Payroll. Automatic sending from your account works.',html:mailHtml('',['This is a test from Vetan Payroll.','Automatic sending from your account works.'])});toast(r.confirmed?'Test email sent to '+to+(r.quota!=null?` · ${r.quota} left today`:''):'Test handed to Google. Check your Gmail Sent folder.')}
+ mailCopy:()=>{const t=(document.getElementById('mailScript')||{}).value||'';copyText(t,mailCfg().mode==='server'?'Code copied. Paste it into mail.php in cPanel.':'Script copied. Paste it at script.google.com.')},
+ mailTest:async()=>{const to=mailCfg().replyTo||S.cfg.company.hrEmail||mailCfg().fromEmail;if(!to)return toast('Fill in "Replies go to" or the HR email first.','bad');toast('Sending a test email to '+to+'…');
+  try{const r=await sendMail({to,subject:'Vetan test email',body:'This is a test from Vetan Payroll. Automatic sending from your account works.',html:mailHtml('',['This is a test from Vetan Payroll.','Automatic sending from your account works.'])});toast(r.confirmed?'Test email sent to '+to+(r.quota!=null?` · ${r.quota} left today`:''):'Test handed over. '+sentHint())}
   catch(e){toast('Test failed: '+e.message,'bad')}},
  alMail:async d=>{const L=S._letter,e=S.emps[d.id];if(!L||!e)return;if(!e.email)return toast('Add the employee\'s email address first.','bad');
   const st=document.getElementById('mailSt'),show=(t,k)=>{if(st){st.hidden=false;st.className='note'+(k?' '+k:'');st.textContent=t}};show('Sending the letter from your email…');
   try{const co=S.cfg.company,sig=mailCfg().fromName||co.signName||co.name,subject=`Appointment letter · ${co.name}`,body=`Dear ${e.name},\n\nPlease find attached your appointment letter for the role of ${e.designation||''} at ${co.name}, effective ${longDate(e.doj)}. Kindly sign and return a copy.\n\nRegards,\n${sig}`;
    const r=await sendMail({to:e.email,subject,body,html:mailHtml(subject,[`Dear ${esc(e.name)},`,`Please find attached your appointment letter for the role of <b>${esc(e.designation||'')}</b> at ${esc(co.name)}, effective ${esc(longDate(e.doj))}. Kindly sign and return a copy.`,`Regards,<br>${esc(sig)}`]),attachments:[{name:L.file.name,type:DOCX_CT,data:await toB64(L.file)}]});
    const ob=e.onboarding||{};put('employees',d.id,{...S.emps[d.id],onboarding:{...ob,offer:{...(ob.offer||{}),emailedAt:new Date().toISOString()}}});
-   show(r.confirmed?`Letter emailed to ${e.email}.`:`Letter handed to your Google account for ${e.email}. Check your Gmail Sent folder to confirm.`)}
+   show(r.confirmed?`Letter emailed to ${e.email}.`:`Letter handed over for ${e.email}. ${sentHint()}`)}
   catch(err){show('Not sent: '+err.message,'warn')}}
 });
 
