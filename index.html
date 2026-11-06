@@ -365,6 +365,24 @@ label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 .cel{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none}.cel svg{width:17px;height:17px}
 .c-b{background:var(--rose-bg);color:var(--rose)}.c-a{background:var(--half-bg);color:var(--half)}
 .today-t{color:var(--rose)}
+/* bulk update */
+.bulk{border:1px dashed var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+.bulk.on{border:1px solid var(--lv-s);background:var(--lv-bg);box-shadow:0 0 0 3px color-mix(in srgb,var(--lv-s) 15%,transparent)}
+.bulk-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bulk-h .grow b{display:block}
+.bulk-n{min-width:38px;height:38px;padding:0 10px;border-radius:19px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:17px;background:var(--surface-2);color:var(--muted)}
+.bulk.on .bulk-n{background:var(--lv-s);color:var(--on-s)}
+.bk-pick{width:auto;min-width:190px;flex:0 1 240px}
+.bulk-f{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end}
+.bulk-f .field{flex:0 1 170px}
+.bulk-f .check{min-height:40px}
+.bulk:not(.on) .bulk-f{opacity:.75}
+.who-in{display:flex;align-items:center;gap:10px}
+.selbox{display:inline-grid;place-items:center;width:28px;height:28px;flex:none;cursor:pointer;border-radius:6px}
+.selbox:hover{background:var(--surface-2)}
+.selbox input{width:18px;height:18px;accent-color:var(--lv-s);cursor:pointer}
+tr.picked td{background:color-mix(in srgb,var(--lv-bg) 70%,var(--surface))}
+.att tr.picked .who-c{background:var(--lv-bg)}
 /* permissions */
 .role-chips{display:flex;flex-wrap:wrap;gap:8px}
 .role-chips button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;text-align:left;min-width:150px}
@@ -605,6 +623,7 @@ function draw(){
  nav();
  const v=VIEWS[S.route]||VIEWS.dashboard;
  $('#view').innerHTML=connBar()+v();
+ document.querySelectorAll('#view [data-mixed]').forEach(x=>x.indeterminate=true);
  if(aid){const el=document.getElementById(aid);if(el&&el!==document.activeElement&&el.closest('#view')){el.focus();try{if(sel!=null)el.setSelectionRange(sel,sel)}catch(_){}}}
 }
 function connBar(){return S.live?'':`<div class="conn off"><span class="dot off"></span>${S.db===null&&S.loaded.tried?'Offline preview: changes here are not saved. Open the app in Claude to keep your data.':'Connecting to your payroll data…'}</div>`}
@@ -732,8 +751,8 @@ function attGrid(){
  <button class="btn" type="button" data-act="dlAtt">${ic('down')}Export</button></div></div>
  <div class="legend">${Object.entries(CODES).map(([k,v])=>`<span><b class="c-${k}">${k}</b>${v}</span>`).join('')}</div>
  ${locked?`<div class="note">Payroll for ${ymLabel(ym)} is processed, so attendance is locked. Reopen the run on the payroll page to make changes.</div>`:''}
- ${emps.length?`<div class="att-wrap"><table class="att"><thead><tr><th class="who-c">Employee (${emps.length})</th>${days.map(d=>`<th class="${isT(d)?'today':''}">${d}<small>${'SMTWTFS'[new Date(y,m-1,d).getDay()]}</small></th>`).join('')}<th class="sum">Paid · LOP</th></tr></thead><tbody>
- ${emps.map(e=>{const s=attSummary(e,ym);tot+=s.lop;return `<tr><td class="who-c"><b>${esc(e.name)}</b><small>${esc(e.code)} · ${esc(e.dept||'')}</small></td>${days.map(d=>{const c=code(e,ym,d);return `<td><button type="button" class="c c-${c}" data-act="cell" data-id="${e.id}" data-d="${d}" ${c==='NJ'||locked||!S.canEdit||!canMod('attendance','edit')?'disabled':''} aria-label="${esc(e.name)}, ${d} ${MON[m-1]}: ${CODES[c]||'Not joined'}">${c==='NJ'?'–':c==='P'?'·':c}</button></td>`}).join('')}
+ ${bulkBar('att',emps,locked)}${emps.length?`<div class="att-wrap"><table class="att"><thead><tr><th class="who-c"><div class="who-in">${selAllBox('att',emps)}<span>Employee (${emps.length})</span></div></th>${days.map(d=>`<th class="${isT(d)?'today':''}">${d}<small>${'SMTWTFS'[new Date(y,m-1,d).getDay()]}</small></th>`).join('')}<th class="sum">Paid · LOP</th></tr></thead><tbody>
+ ${emps.map(e=>{const s=attSummary(e,ym);tot+=s.lop;return `<tr class="${selOf('att')[e.id]?'picked':''}"><td class="who-c"><div class="who-in">${selBox('att',e.id,e.name)}<div><b>${esc(e.name)}</b><small>${esc(e.code)} · ${esc(e.dept||'')}</small></div></div></td>${days.map(d=>{const c=code(e,ym,d);return `<td><button type="button" class="c c-${c}" data-act="cell" data-id="${e.id}" data-d="${d}" ${c==='NJ'||locked||!S.canEdit||!canMod('attendance','edit')?'disabled':''} aria-label="${esc(e.name)}, ${d} ${MON[m-1]}: ${CODES[c]||'Not joined'}">${c==='NJ'?'–':c==='P'?'·':c}</button></td>`}).join('')}
  <td class="sum num"><b>${s.paid}</b> / ${s.D}${s.lop?` <span class="chip bad">${s.lop} LOP</span>`:''}</td></tr>`}).join('')}
  </tbody></table></div><p class="small muted" style="margin:0">Total loss-of-pay days this month: <b>${tot}</b>. Approved leave requests are marked here automatically.</p>`:`<section class="card">${empty('No active employees for '+ymLabel(ym),'Add employees first; attendance starts from their joining date.')}</section>`}`;
 };
@@ -984,14 +1003,14 @@ function rosterView(){
   const changed=!!(S.roster[ym]&&S.roster[ym].a&&S.roster[ym].a[e.id]&&S.roster[ym].a[e.id][dd]);
   const s=slotOf(v);
   return `<td class="day"><input class="tcell ${cls(v)}" ${changed?'style="border-color:var(--fg)"':''} id="r-${e.id}-${ds}" list="rosOpts" value="${numText(v)}" data-rosin="${e.id}" data-date="${ds}" maxlength="13" autocomplete="off" spellcheck="false" title="${s?esc(s.name==='Custom'?'Custom time':s.name):'Week off'}" aria-label="${esc(e.name)}, ${WEEKDAYS[d.getDay()]} ${dd} ${MON[d.getMonth()]}: start-end in 24-hour time, or OFF" ${S.canEdit&&canMod('attendance','edit')?'':'disabled'}></td>`}).join('');
-  return `<tr><td><b>${esc(e.name)}</b><small>${esc(e.code)} · ${esc(e.dept||'')}</small></td>${cells}<td class="n num"><b>${hrs.toFixed(1)} h</b><small>${off} off</small></td></tr>`}).join('');
+  return `<tr class="${selOf('ros')[e.id]?'picked':''}"><td><div class="who-in">${selBox('ros',e.id,e.name)}<div><b>${esc(e.name)}</b><small>${esc(e.code)} · ${esc(e.dept||'')}</small></div></div></td>${cells}<td class="n num"><b>${hrs.toFixed(1)} h</b><small>${off} off</small></td></tr>`}).join('');
  const anyCustom=cov.some(c=>c.custom);
  return attTabs()+`<div class="head"><div><h1>Roster</h1><p>Type each day's start and end in 24-hour clock numbers, from 00:00 to 23:59, like 09:00-18:00 or 22:00-06:00 for overnight. Type OFF for a week off. Untouched days follow each employee's default shift and weekly off; outlined cells were changed.</p></div>
  <div class="row"><button class="btn sm" type="button" data-act="week" data-k="-1" aria-label="Previous week">‹</button><b style="min-width:170px;text-align:center">${label}</b><button class="btn sm" type="button" data-act="week" data-k="1" aria-label="Next week">›</button><button class="btn sm" type="button" data-act="weekNow">This week</button></div></div>
  <div class="row"><button class="btn primary" type="button" data-act="rosterImport" ${ro()}>${ic('up')}Import from Excel</button><button class="btn" type="button" data-act="dlRoster">${ic('down')}Download Excel</button><button class="btn" type="button" data-act="copyWeek" ${ro()}>Copy previous week</button><button class="btn" type="button" data-act="resetWeek" ${ro()}>Reset week</button></div>
  <div class="legend">${sh.map((s,i)=>`<span class="chip sh${i%6}">${esc(s.name)} ${s.start}-${s.end}</span>`).join('')}<span class="chip shOFF">OFF = week off</span><span class="chip shC" style="border:1px solid var(--line)">Custom time</span></div>
  <datalist id="rosOpts">${sh.map(s=>`<option value="${s.start}-${s.end}">${esc(s.name)}</option>`).join('')}<option value="OFF">Week off</option></datalist>
- ${emps.length?`<div class="tbl-wrap"><table class="tbl ros"><thead><tr><th>Employee (${emps.length})</th>${days.map(d=>`<th class="day ${isoD(d)===tIso?'today':''}">${WEEKDAYS[d.getDay()].slice(0,3)}<br>${d.getDate()} ${MON[d.getMonth()].slice(0,3)}</th>`).join('')}<th class="n">Week</th></tr></thead>
+ ${bulkBar('ros',emps)}${emps.length?`<div class="tbl-wrap"><table class="tbl ros"><thead><tr><th><div class="who-in">${selAllBox('ros',emps)}<span>Employee (${emps.length})</span></div></th>${days.map(d=>`<th class="day ${isoD(d)===tIso?'today':''}">${WEEKDAYS[d.getDay()].slice(0,3)}<br>${d.getDate()} ${MON[d.getMonth()].slice(0,3)}</th>`).join('')}<th class="n">Week</th></tr></thead>
  <tbody>${rows}</tbody><tfoot><tr><td>On shift</td>${cov.map(c=>`<td class="day cov">${sh.map(s=>`${esc(s.name)} ${c[s.id]||0}`).join('<br>')}${anyCustom?`<br>Custom ${c.custom||0}`:''}</td>`).join('')}<td></td></tr></tfoot></table></div>`
  :`<section class="card">${empty('No active employees','Add employees to build a roster.')}</section>`}`;
 }
@@ -1290,6 +1309,7 @@ function restore(file){const r=new FileReader();r.onload=()=>{let o;try{o=JSON.p
  confirmBox('Restore this backup?',`It has ${n} employee${n===1?'':'s'}, exported ${fmtDate((o.exported||'').slice(0,10))}. Records with the same ID are replaced; others stay.`,'Restore',()=>{
   if(o.config)put('config','main',o.config);BK.forEach(c=>Object.entries(o[c]||{}).forEach(([id,d])=>put(c,id,d)));toast('Backup restored')})};r.readAsText(file)}
 document.addEventListener('change',ev=>{const t=ev.target;
+ if(t.dataset&&(t.dataset.sel||t.dataset.selall||t.dataset.selby||t.dataset.bk)&&onSelChange(t))return;
  if(t.dataset&&t.dataset.pm&&t.closest&&t.closest('#fRole')){const f=t.closest('#fRole'),m=t.dataset.pm;if(t.dataset.pr!=='view'&&t.checked){const x=f.elements['p_'+m+'_view'];if(x)x.checked=true}if(t.dataset.pr==='view'&&!t.checked)['edit','approve'].forEach(r=>{const x=f.elements['p_'+m+'_'+r];if(x)x.checked=false});return}
  if(t.dataset&&t.dataset.up&&S.sess&&!(isEmp()?t.dataset.id===meId():can('employees','edit'))){toast(NOPE,'bad');t.value='';return}
  if(t.dataset&&(t.dataset.rosin||t.dataset.ros)&&!can('attendance','edit')){toast(NOPE,'bad');render();return}
@@ -1798,6 +1818,68 @@ Object.assign(A,A4);
 
 let NAVLAST='';const GRP={employees:'People',onboarding:'People',attendance:'People',payroll:'Payroll',leave:'Payroll',loans:'Payroll',compliance:'Statutory & admin',reports:'Statutory & admin',settings:'Statutory & admin',access:'Statutory & admin'};
 const navHead=k=>{const g=GRP[k]||'',h=g&&g!==NAVLAST?`<div class="grp">${g}</div>`:'';NAVLAST=g;return h};
+/* ============ bulk update: attendance & roster ============ */
+const BULK_ATT=[['P','Present'],['A','Absent'],['HD','Half day'],['L','Paid leave'],['LW','Leave without pay'],['H','Holiday'],['WO','Week off'],['RESET','Clear marks (follow roster)']];
+const selOf=k=>{S.ui.sel=S.ui.sel||{};return S.ui.sel[k]||(S.ui.sel[k]={})};
+const selIds=k=>Object.keys(selOf(k)).filter(id=>S.emps[id]&&isAct(S.emps[id]));
+function bkState(k){S.ui.bk=S.ui.bk||{};if(!S.ui.bk[k]){
+ if(k==='att'){const d=S.month===CUR?isoD(TODAY):iso(S.month,1);S.ui.bk.att={from:d,to:d,val:'A',skip:true}}
+ else{const w=weekDays();S.ui.bk.ros={from:isoD(w[0]),to:isoD(w[6]),val:defShiftOf({}),s:'09:00',e:'18:00',skip:true}}}
+ return S.ui.bk[k]}
+const selBox=(k,id,name)=>!(can('attendance','edit')&&S.canEdit)?'':`<label class="selbox"><input type="checkbox" data-sel="${k}" data-id="${id}" ${selOf(k)[id]?'checked':''}><span class="vh">Select ${esc(name)}</span></label>`;
+const selAllBox=(k,emps)=>{if(!(can('attendance','edit')&&S.canEdit))return '';const n=emps.filter(e=>selOf(k)[e.id]).length;return `<label class="selbox"><input type="checkbox" data-selall="${k}" ${emps.length&&n===emps.length?'checked':''} ${n&&n<emps.length?'data-mixed="1"':''}><span class="vh">Select all</span></label>`};
+function bulkBar(k,emps,locked){
+ if(!can('attendance','edit')||!S.canEdit||!emps.length)return '';
+ const b=bkState(k),n=emps.filter(e=>selOf(k)[e.id]).length,depts=[...new Set(emps.map(e=>e.dept||'Unassigned'))].sort();
+ const pick=`<select class="input bk-pick" data-selby="${k}" aria-label="Quick select"><option value="">Quick select…</option><option value="all">All employees</option><option value="none">Clear selection</option>${depts.map(d=>`<option value="d:${esc(d)}">${esc(d)}</option>`).join('')}${k==='ros'?S.cfg.shifts.map(s=>`<option value="s:${s.id}">On ${esc(s.name)} by default</option>`).join(''):''}</select>`;
+ const what=k==='att'?`<div class="field"><label for="bk-att-val">Mark as</label><select id="bk-att-val" data-bk="att" data-bkf="val">${BULK_ATT.map(([v,l])=>`<option value="${v}" ${b.val===v?'selected':''}>${l}</option>`).join('')}</select></div>`
+  :`<div class="field"><label for="bk-ros-val">Set to</label><select id="bk-ros-val" data-bk="ros" data-bkf="val">${S.cfg.shifts.map(s=>`<option value="${s.id}" ${b.val===s.id?'selected':''}>${esc(s.name)} ${s.start}-${s.end}</option>`).join('')}<option value="CUSTOM" ${b.val==='CUSTOM'?'selected':''}>Custom time…</option><option value="OFF" ${b.val==='OFF'?'selected':''}>Week off</option><option value="RESET" ${b.val==='RESET'?'selected':''}>Reset to default</option></select></div>
+  ${b.val==='CUSTOM'?`<div class="field"><label for="bk-ros-s">Starts</label><input id="bk-ros-s" type="time" value="${b.s}" data-bk="ros" data-bkf="s"></div><div class="field"><label for="bk-ros-e">Ends</label><input id="bk-ros-e" type="time" value="${b.e}" data-bk="ros" data-bkf="e"></div>`:''}`;
+ const skipL=k==='att'?'Skip week offs':'Only change working days';
+ return `<section class="bulk ${n?'on':''}" aria-label="Update several employees at once">
+ <div class="bulk-h"><span class="bulk-n">${n}</span><div class="grow"><b>${n?`${n} employee${n===1?'':'s'} selected`:'Update several employees at once'}</b><span class="small muted">${n?'Choose the dates and what to set, then apply.':'Tick employees in the table below, or quick select a group.'}</span></div>${pick}</div>
+ <div class="bulk-f"><div class="field"><label for="bk-${k}-from">From</label><input id="bk-${k}-from" type="date" value="${b.from}" data-bk="${k}" data-bkf="from"></div><div class="field"><label for="bk-${k}-to">To</label><input id="bk-${k}-to" type="date" value="${b.to}" data-bk="${k}" data-bkf="to"></div>${what}
+ <div class="check"><input type="checkbox" id="bk-${k}-skip" data-bk="${k}" data-bkf="skip" ${b.skip?'checked':''}><label for="bk-${k}-skip">${skipL}</label></div>
+ <button class="btn primary" type="button" data-act="${k==='att'?'bulkAtt':'bulkRos'}" ${n?'':'disabled'}>Apply to ${n||''} ${n===1?'employee':'employees'}</button></div></section>`;
+}
+function bkDates(b){if(!b.from||!b.to)return{err:'Choose a from and a to date.'};if(b.to<b.from)return{err:'The to date must be on or after the from date.'};
+ const out=[];for(let d=new Date(b.from+'T00:00');isoD(d)<=b.to;d.setDate(d.getDate()+1)){out.push(new Date(d));if(out.length>92)return{err:'Choose 92 days or fewer at a time.'}}return{dates:out}}
+const fmtRange=(a,b)=>a===b?fmtDate(a):fmtDate(a)+' to '+fmtDate(b);
+function bulkAtt(){
+ const ids=selIds('att'),b=bkState('att'),r=bkDates(b);if(!ids.length)return toast('Tick at least one employee.','bad');if(r.err)return toast(r.err,'bad');
+ const lbl=(BULK_ATT.find(x=>x[0]===b.val)||[])[1];
+ confirmBox('Update attendance?',`${b.val==='RESET'?'Clear the marks for':'Mark'} <b>${ids.length} employee${ids.length===1?'':'s'}</b>${b.val==='RESET'?'':` as <b>${esc(lbl)}</b>`} for <b>${fmtRange(b.from,b.to)}</b>${b.skip&&!['WO','H','RESET'].includes(b.val)?', skipping their week offs':''}.`,'Apply',()=>{
+  const docs={},lockedM=new Set();let n=0;
+  r.dates.forEach(d=>{const ym=ymOf(d),dd=d.getDate();if(S.runs[ym]){lockedM.add(ym);return}const doc=docs[ym]||(docs[ym]=clone(S.att[ym]));doc.marks=doc.marks||{};
+   ids.forEach(id=>{const e={...S.emps[id],id};if(e.doj&&isoD(d)<e.doj)return;const base=baseCode(e,ym,dd);
+    if(b.skip&&base==='WO'&&!['WO','H','RESET'].includes(b.val))return;
+    doc.marks[id]=doc.marks[id]||{};if(b.val==='RESET'||b.val===base)delete doc.marks[id][dd];else doc.marks[id][dd]=b.val;n++})});
+  Object.entries(docs).forEach(([ym,doc])=>put('attendance',ym,doc));
+  toast(`Updated ${n} attendance entr${n===1?'y':'ies'} for ${ids.length} employee${ids.length===1?'':'s'}`+(lockedM.size?`. Skipped ${[...lockedM].map(ymLabel).join(', ')} (payroll processed)`:''));
+ });
+}
+function bulkRos(){
+ const ids=selIds('ros'),b=bkState('ros'),r=bkDates(b);if(!ids.length)return toast('Tick at least one employee.','bad');if(r.err)return toast(r.err,'bad');
+ let v=b.val,txt;
+ if(v==='CUSTOM'){if(!b.s||!b.e||b.s===b.e)return toast('Set a start and an end time that differ.','bad');v=timeVal(b.s,b.e);txt=b.s+'-'+b.e}
+ else if(v==='OFF')txt='week off';else if(v==='RESET')txt='their default shift and weekly off';else{const s=shiftById(v);if(!s)return toast('Choose a shift.','bad');txt=s.name+' ('+s.start+'-'+s.end+')'}
+ confirmBox('Update the roster?',`Set <b>${ids.length} employee${ids.length===1?'':'s'}</b> to <b>${esc(txt)}</b> for <b>${fmtRange(b.from,b.to)}</b>${b.skip&&v!=='OFF'&&v!=='RESET'?', on their working days only':''}.`,'Apply',()=>{
+  const ch=[];r.dates.forEach(d=>{const ym=ymOf(d),dd=d.getDate();ids.forEach(id=>{const e={...S.emps[id],id};if(e.doj&&isoD(d)<e.doj)return;
+   if(b.skip&&v!=='OFF'&&v!=='RESET'&&rosterOf(e,ym,dd)==='OFF')return;ch.push([e,d,v==='RESET'?null:v])})});
+  rosterWrite(ch);toast(`Updated ${ch.length} roster entr${ch.length===1?'y':'ies'} for ${ids.length} employee${ids.length===1?'':'s'}`);
+ });
+}
+function onSelChange(t){
+ if(t.dataset.sel){const m=selOf(t.dataset.sel);if(t.checked)m[t.dataset.id]=1;else delete m[t.dataset.id];render();return true}
+ if(t.dataset.selall){const k=t.dataset.selall,m=selOf(k),em=k==='att'?activeIn(S.month):empList().filter(isAct);if(t.checked)em.forEach(e=>m[e.id]=1);else em.forEach(e=>delete m[e.id]);render();return true}
+ if(t.dataset.selby){const k=t.dataset.selby,v=t.value,em=k==='att'?activeIn(S.month):empList().filter(isAct);if(!v)return true;S.ui.sel=S.ui.sel||{};S.ui.sel[k]={};const m=selOf(k);
+  em.forEach(e=>{if(v==='all'||(v.startsWith('d:')&&(e.dept||'Unassigned')===v.slice(2))||(v.startsWith('s:')&&defShiftOf(e)===v.slice(2)))m[e.id]=1});render();return true}
+ if(t.dataset.bk){const b=bkState(t.dataset.bk),f=t.dataset.bkf;b[f]=t.type==='checkbox'?t.checked:t.value;if(f==='from'&&b.to<b.from)b.to=b.from;if(f==='val'||f==='from')render();return true}
+ return false;
+}
+Object.assign(ACT_PERM,{bulkAtt:['attendance','edit'],bulkRos:['attendance','edit']});
+Object.assign(A,{bulkAtt,bulkRos});
+
 /* ============ boot ============ */
 S.sess=sessGet();
 route();
