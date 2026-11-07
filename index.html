@@ -1340,7 +1340,7 @@ document.addEventListener('submit',ev=>{
  if(f.id==='fRole'){if(isOwner())saveRole(f);return}
  if(f.id==='fMail'){if(!can('settings','edit'))return toast(NOPE,'bad');const mode=f.mMode.value,url=f.mUrl.value.trim(),fe=f.mFromEmail.value.trim().toLowerCase();if(mode==='auto'&&url&&!MAIL_URL_RE.test(url))return toast('The web app address should look like https://script.google.com/macros/s/…/exec','bad');
   if(mode==='server'&&!EMAIL_RE.test(fe))return toast('Enter the company email address to send from.','bad');if(mode==='server'&&url&&!PHP_URL_RE.test(url))return toast('The mail sender address should look like https://yourcompany.in/vetan/mail.php (it must start with https).','bad');
-  const c=clone(S.cfg);c.mail={...mailCfg(),mode,url,fromEmail:fe,fromName:f.mFrom.value.trim(),replyTo:f.mReply.value.trim()};if((mode==='auto'||mode==='server')&&!c.mail.key)c.mail.key='vt_'+newSalt()+newSalt().slice(0,8);put('config','main',c);toast((mode==='auto'||mode==='server')&&!url?'Saved. Now press Set up automatic sending.':'Email settings saved');return}
+  const c=clone(S.cfg);c.mail={...mailCfg(),mode,url,fromEmail:fe,webmail:(f.mWeb.value.trim()||DEF_WEBMAIL),fromName:f.mFrom.value.trim(),replyTo:f.mReply.value.trim()};if((mode==='auto'||mode==='server')&&!c.mail.key)c.mail.key='vt_'+newSalt()+newSalt().slice(0,8);put('config','main',c);toast((mode==='auto'||mode==='server')&&!url?'Saved. Now press Set up automatic sending.':'Email settings saved');return}
  if(!S.canEdit)return;if(!can('settings','edit')){toast(NOPE,'bad');return}const d=Object.fromEntries(new FormData(f));const c=clone(S.cfg);
  if(f.id==='fCompany'){if(!d.name.trim())return toast('Company name is required.','bad');c.company={...c.company,name:d.name.trim(),state:d.state,pan:d.pan.trim().toUpperCase(),tan:d.tan.trim().toUpperCase(),pfCode:d.pfCode.trim(),esiCode:d.esiCode.trim(),address:d.address.trim(),hrEmail:(d.hrEmail||'').trim(),hrPhone:(d.hrPhone||'').replace(/\D/g,'').slice(-10),signName:(d.signName||'').trim(),signTitle:(d.signTitle||'').trim(),publicUrl:(d.publicUrl||'').trim()};c.admin=d.admin.trim()||'HR Admin'}
  if(f.id==='fRates'){c.pf={ee:N(d.pfee),er:N(d.pfer),ceiling:N(d.pfc)};c.esi={ee:N(d.esee),er:N(d.eser),limit:N(d.esl)};c.tds={...c.tds,std:N(d.std),rebate:N(d.reb),cess:N(d.cess),slabs:c.tds.slabs.map((_,i)=>[N(d['sl_'+i]),N(d['sr_'+i])])}}
@@ -2090,9 +2090,9 @@ function inviteShare(id){const e=S.emps[id];if(!e)return;const link=inviteLink(i
  const mail=`mailto:${encodeURIComponent(e.email||'')}?subject=${encodeURIComponent((fix?'Corrections needed: ':'Joining details: ')+co)}&body=${encodeURIComponent(msg)}`;
  modal(fix?'Send the correction link':'Send the joining link',`<p style="margin:0">Send this link to <b>${esc(e.name)}</b>${e.phone?` (${esc(e.phone)})`:''}. When they finish, they send you a file. Use <b>Import submission</b> on the Onboarding page to load it.</p>
  <div class="field"><label for="invLink">Link</label><input id="invLink" readonly value="${esc(link)}"></div>
- <div class="row"><button class="btn primary" type="button" data-act="copyInv">Copy link</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a>${autoMail()?`<button class="btn" type="button" data-act="invMail" data-id="${id}">Email now from my account</button>`:`<a class="btn" href="${esc(composeUrl(e.email,(inviteMail(id)).subject,(inviteMail(id)).body))}" target="_blank" rel="noopener">Email via ${mailApp()}</a>`}<button class="btn" type="button" data-act="copyInvMsg">Copy message</button></div>
+ <div class="row"><button class="btn primary" type="button" data-act="copyInv">Copy link</button><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a>${autoMail()?`<button class="btn" type="button" data-act="invMail" data-id="${id}">Email now from my account</button>`:mailBtn(e.email,inviteMail(id).subject,inviteMail(id).body)}<button class="btn" type="button" data-act="copyInvMsg">Copy message</button></div>
  <div id="mailSt" class="note" role="status" hidden></div>
- <p class="small muted" style="margin:0">${autoMail()?'':`Want Vetan to send the email itself from your address? Set it up in Settings → Email. <a href="${esc(mail)}" target="_blank" rel="noopener">Other mail app</a>`}</p>
+ <p class="small muted" style="margin:0">${autoMail()?'':`To change how email is sent, go to Settings → Email. <a href="${esc(mail)}" target="_blank" rel="noopener">Other mail app</a>`}</p>
  <textarea id="invMsg" class="vh" aria-hidden="true" tabindex="-1">${esc(msg)}</textarea>
  <p class="small muted" style="margin:0">The link opens your Vetan site at ${esc(publicBase())}. The candidate does not need to sign in and cannot see any of your data.</p>`,{foot:'<button class="btn primary" type="button" data-act="close">Done</button>'});
 }
@@ -2191,7 +2191,7 @@ async function alMake(d){const e=S.emps[d.id],f=$('#mForm');if(!e||!f)return;con
   const em=e.email,msg=`Dear ${v('alName')},\n\nPlease find attached your appointment letter for the role of ${v('alDesig')} at ${S.cfg.company.name}, effective ${longDate(v('alDoj'))}. Kindly sign and return a copy.\n\nRegards,\n${v('alSign')||S.cfg.company.name}`;
   modal('Letter ready',`<p style="margin:0"><b>${esc(fn)}</b> is downloaded${miss.size?`. These template fields had no value: ${esc([...miss].join(', '))}`:''}.</p>
   <p class="small muted" style="margin:0">${autoMail()?`Email it straight from your account with the letter attached, or share it another way.`:`Send it to ${esc(v('alName'))}: share the file, or open ${mailApp()} or WhatsApp and attach the downloaded file.`}</p>
-  <div class="row"><button class="btn primary" type="button" data-act="alShare">Share file</button>${autoMail()?`<button class="btn primary" type="button" data-act="alMail" data-id="${d.id}">Email the letter from my account</button>`:`<a class="btn" target="_blank" rel="noopener" href="${esc(composeUrl(em,'Appointment letter · '+S.cfg.company.name,msg))}">Email via ${mailApp()}</a>`}${e.phone?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/91${e.phone}?text=${encodeURIComponent(msg)}">WhatsApp</a>`:''}<button class="btn" type="button" data-act="alAgain" data-id="${d.id}">Download again</button></div><div id="mailSt" class="note" role="status" hidden></div>
+  <div class="row"><button class="btn primary" type="button" data-act="alShare">Share file</button>${autoMail()?`<button class="btn primary" type="button" data-act="alMail" data-id="${d.id}">Email the letter from my account</button>`:mailBtn(em,'Appointment letter · '+S.cfg.company.name,msg,'',fn)}${e.phone?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/91${e.phone}?text=${encodeURIComponent(msg)}">WhatsApp</a>`:''}<button class="btn" type="button" data-act="alAgain" data-id="${d.id}">Download again</button></div><div id="mailSt" class="note" role="status" hidden></div>
   ${e.status==='onboarding'?`<p class="small" style="margin:0">When they join, finish onboarding to add them to payroll.</p>`:''}`,{foot:`${e.status==='onboarding'?`<button class="btn" type="button" data-act="obGo" data-id="${d.id}" data-step="2">Open onboarding</button>`:''}<button class="btn primary" type="button" data-act="close">Done</button>`});
  }catch(err){if(btn)btn.disabled=false;mErr(err&&err.message==='load'?'Could not load the Word file tools. Check your internet connection and try again.':'Could not create the letter. Check the template is a .docx file. '+((err&&err.message)||''))}
 }
@@ -2272,13 +2272,23 @@ $ok = mail($to, enc($subject), $msg, $headers, '-f' . $FROM_EMAIL);
 echo json_encode($ok ? ['ok' => true] : ['ok' => false, 'error' => 'The mail server could not send the email']);
 `;
 
-const mailCfg=()=>({mode:'gmail',url:'',key:'',fromName:'',replyTo:'',fromEmail:'',...(S.cfg.mail||{})});
+const DEF_WEBMAIL='https://secureserver.titan.email/mail/';
+const mailCfg=()=>({mode:'webmail',webmail:DEF_WEBMAIL,url:'',key:'',fromName:'',replyTo:'',fromEmail:'',...(S.cfg.mail||{})});
 const PHP_URL_RE=/^https:\/\/[^\s?#]+\.php$/i;
 const EMAIL_RE=/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/;
 const MAIL_URL_RE=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec\/?$/;
 const autoMail=()=>{const m=mailCfg();return !!m.key&&!!S.local&&((m.mode==='auto'&&MAIL_URL_RE.test(m.url))||(m.mode==='server'&&PHP_URL_RE.test(m.url)&&EMAIL_RE.test(m.fromEmail)))};
 const sentHint=()=>mailCfg().mode==='server'?'Check your mailbox for the copy to confirm.':'Check your Gmail Sent folder to confirm.';
-const mailApp=()=>mailCfg().mode==='outlook'?'Outlook':'Gmail';
+const isWeb=()=>mailCfg().mode==='webmail';
+const webmailUrl=()=>{const u=(mailCfg().webmail||'').trim();return /^https:\/\//i.test(u)?u:DEF_WEBMAIL};
+const webName=()=>/titan\.email/i.test(webmailUrl())?'Titan Mail':'my webmail';
+const mailApp=()=>isWeb()?webName():mailCfg().mode==='outlook'?'Outlook':'Gmail';
+function mailBtn(to,subject,body,label,attach){S._wm={to:to||'',subject,body,attach};return isWeb()?`<button class="btn" type="button" data-act="wmOpen">${label||'Email via '+esc(webName())}</button>`:`<a class="btn" href="${esc(composeUrl(to,subject,body))}" target="_blank" rel="noopener">${label||'Email via '+mailApp()}</a>`}
+function webmailModal(){const w=S._wm||{},att=w.attach;
+ modal('Send from '+webName(),`<ol class="steps-ol" style="margin:0"><li>Press <b>Open ${esc(webName())}</b> and click <b>New mail</b> (Compose).</li><li>Copy each part below and paste it into the same box there${att?', then attach <b>'+esc(att)+'</b> from your Downloads folder':''}.</li><li>Press <b>Send</b>. It goes out from your company address.</li></ol>
+ ${[['wmTo','To',w.to],['wmSub','Subject',w.subject]].map(([i,l,v])=>`<div class="field"><label for="${i}">${l}</label><div class="row" style="flex-wrap:nowrap"><input id="${i}" readonly value="${esc(v)}" style="flex:1;min-width:0"><button class="btn" type="button" data-act="wmCopy" data-f="${i}">Copy</button></div></div>`).join('')}
+ <div class="field"><label for="wmBody">Message</label><textarea id="wmBody" readonly style="min-height:170px">${esc(w.body)}</textarea><div class="row" style="margin-top:8px"><button class="btn" type="button" data-act="wmCopy" data-f="wmBody">Copy message</button></div></div>`,
+ {foot:`<button class="btn" type="button" data-act="close">Close</button><a class="btn primary" href="${esc(webmailUrl())}" target="_blank" rel="noopener">Open ${esc(webName())}</a>`})}
 function composeUrl(to,subj,body){const m=mailCfg(),e=encodeURIComponent;return m.mode==='outlook'?`https://outlook.office.com/mail/deeplink/compose?to=${e(to||'')}&subject=${e(subj)}&body=${e(body)}`:`https://mail.google.com/mail/?view=cm&fs=1&to=${e(to||'')}&su=${e(subj)}&body=${e(body)}`}
 async function sendMail(msg){const m=mailCfg();
  const payload={key:m.key,to:msg.to,subject:msg.subject,body:msg.body,html:msg.html||'',fromName:m.fromName||S.cfg.company.name||'',replyTo:m.replyTo||S.cfg.company.hrEmail||'',attachments:msg.attachments||[]};
@@ -2354,15 +2364,18 @@ function mailScriptModal(){if(mailCfg().mode==='server')return phpSetupModal();c
 }
 function mailCard(){const m=mailCfg();return `<form class="card" id="fMail" style="display:flex;flex-direction:column;gap:14px"><h2>Email</h2>
  <p class="small muted" style="margin:0">How Vetan emails joining links and appointment letters from your own address.</p>
- <div class="fgrid">${fld('mMode','Sending method',m.mode,{sel:[['server','Send automatically from my company email (cPanel hosting)'],['auto','Send automatically from a Google account (Gmail or Workspace)'],['gmail','Open Gmail with the email ready, I press Send'],['outlook','Open Outlook with the email ready, I press Send']],full:1})}
+ <div class="fgrid">${fld('mMode','Sending method',m.mode,{sel:[['webmail','Titan Mail / company webmail: Vetan prepares the email, I paste and press Send'],['server','Send automatically from my company email (cPanel hosting)'],['auto','Send automatically from a Google account (Gmail or Workspace)'],['gmail','Open Gmail with the email ready, I press Send'],['outlook','Open Outlook with the email ready, I press Send']],full:1})}
+ ${fld('mWeb','Webmail address',m.webmail,{full:1,ph:DEF_WEBMAIL,hint:'Where you log in to read your company email'})}
  ${fld('mFromEmail','Send from address (company mail server)',m.fromEmail,{type:'email',ph:'hr@yourcompany.in',hint:'Used with the company email method'})}
  ${fld('mFrom','Sender name',m.fromName,{ph:S.cfg.company.name,hint:'Shown as the "from" name'})}${fld('mReply','Replies go to',m.replyTo,{type:'email',ph:S.cfg.company.hrEmail||'hr@yourcompany.com'})}
  ${fld('mUrl','Mail sender address (for automatic sending)',m.url,{full:1,ph:m.mode==='server'?'https://yourcompany.in/vetan/mail.php':'https://script.google.com/macros/s/…/exec'})}</div>
  ${m.mode==='auto'||m.mode==='server'?(S.local?(autoMail()?`<div class="note">Automatic sending is on. Joining links and letters (with the Word file attached) go out from ${m.mode==='server'?esc(m.fromEmail):'your Google account'}.</div>`:`<div class="note warn">Finish the setup: press Set up automatic sending${m.mode==='server'?' (after saving your send-from address)':''}, then paste the mail sender address above.</div>`):'<div class="note warn">Automatic sending works on your GitHub site. Inside Claude, Vetan opens Gmail with the email ready instead.</div>'):''}
  <div class="row"><button class="btn primary" type="submit" ${ro()}>Save email settings</button><button class="btn" type="button" data-act="mailScript" ${ro()}>Set up automatic sending</button>${autoMail()?`<button class="btn" type="button" data-act="mailTest" ${ro()}>Send test email</button>`:''}</div></form>`}
-Object.assign(ACT_PERM,{invMail:['employees','edit'],alMail:['employees','edit'],mailScript:['settings','edit'],mailCopy:['settings','edit'],mailTest:['settings','edit']});
+Object.assign(ACT_PERM,{wmOpen:['employees','view'],wmCopy:['employees','view'],invMail:['employees','edit'],alMail:['employees','edit'],mailScript:['settings','edit'],mailCopy:['settings','edit'],mailTest:['settings','edit']});
 Object.assign(A,{
  invMail:d=>emailInvite(d.id),
+ wmOpen:()=>webmailModal(),
+ wmCopy:d=>{const el=document.getElementById(d.f);if(el)copyText(el.value,({wmTo:'Email address',wmSub:'Subject',wmBody:'Message'})[d.f]+' copied. Paste it in '+webName()+'.')},
  mailScript:()=>mailScriptModal(),
  mailCopy:()=>{const t=(document.getElementById('mailScript')||{}).value||'';copyText(t,mailCfg().mode==='server'?'Code copied. Paste it into mail.php in cPanel.':'Script copied. Paste it at script.google.com.')},
  mailTest:async()=>{const to=mailCfg().replyTo||S.cfg.company.hrEmail||mailCfg().fromEmail;if(!to)return toast('Fill in "Replies go to" or the HR email first.','bad');toast('Sending a test email to '+to+'…');
