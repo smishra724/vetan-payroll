@@ -1345,8 +1345,8 @@ document.addEventListener('submit',ev=>{
  if(f.id==='mForm'){if(!onSubmit){closeModal();return}const ok=onSubmit(f);if(ok===true)closeModal();return}
  if(f.id==='fRole'){if(isOwner())saveRole(f);return}
  if(f.id==='fMail'){if(!can('settings','edit'))return toast(NOPE,'bad');const mode=f.mMode.value,url=f.mUrl.value.trim(),fe=f.mFromEmail.value.trim().toLowerCase();if(mode==='auto'&&url&&!MAIL_URL_RE.test(url))return toast('The web app address should look like https://script.google.com/macros/s/…/exec','bad');
-  if(mode==='server'&&!EMAIL_RE.test(fe))return toast('Enter the company email address to send from.','bad');if(mode==='server'&&url&&!PHP_URL_RE.test(url))return toast('The mail sender address should look like https://yourcompany.in/vetan/mail.php (it must start with https).','bad');
-  const c=clone(S.cfg);c.mail={...mailCfg(),mode,url,fromEmail:fe,webmail:(f.mWeb.value.trim()||DEF_WEBMAIL),fromName:f.mFrom.value.trim(),replyTo:f.mReply.value.trim()};if((mode==='auto'||mode==='server')&&!c.mail.key)c.mail.key='vt_'+newSalt()+newSalt().slice(0,8);put('config','main',c);toast((mode==='auto'||mode==='server')&&!url?'Saved. Now press Set up automatic sending.':'Email settings saved');return}
+  if(mode==='titan'&&url&&!MAIL_URL_RE.test(url))return toast('The mail sender address should look like https://script.google.com/macros/s/…/exec','bad');if((mode==='server'||mode==='titan')&&!EMAIL_RE.test(fe))return toast('Enter the company email address to send from.','bad');if(mode==='server'&&url&&!PHP_URL_RE.test(url))return toast('The mail sender address should look like https://yourcompany.in/vetan/mail.php (it must start with https).','bad');
+  const c=clone(S.cfg);c.mail={...mailCfg(),mode,url,fromEmail:fe,webmail:(f.mWeb.value.trim()||DEF_WEBMAIL),fromName:f.mFrom.value.trim(),replyTo:f.mReply.value.trim()};if(['auto','server','titan'].includes(mode)&&!c.mail.key)c.mail.key='vt_'+newSalt()+newSalt().slice(0,8);put('config','main',c);toast(['auto','server','titan'].includes(mode)&&!url?'Saved. Now press Set up automatic sending.':'Email settings saved');return}
  if(!S.canEdit)return;if(!can('settings','edit')){toast(NOPE,'bad');return}const d=Object.fromEntries(new FormData(f));const c=clone(S.cfg);
  if(f.id==='fCompany'){if(!d.name.trim())return toast('Company name is required.','bad');c.company={...c.company,name:d.name.trim(),state:d.state,pan:d.pan.trim().toUpperCase(),tan:d.tan.trim().toUpperCase(),pfCode:d.pfCode.trim(),esiCode:d.esiCode.trim(),address:d.address.trim(),hrEmail:(d.hrEmail||'').trim(),hrPhone:(d.hrPhone||'').replace(/\D/g,'').slice(-10),signName:(d.signName||'').trim(),signTitle:(d.signTitle||'').trim(),publicUrl:(d.publicUrl||'').trim()};c.admin=d.admin.trim()||'HR Admin'}
  if(f.id==='fRates'){c.pf={ee:N(d.pfee),er:N(d.pfer),ceiling:N(d.pfc)};c.esi={ee:N(d.esee),er:N(d.eser),limit:N(d.esl)};c.tds={...c.tds,std:N(d.std),rebate:N(d.reb),cess:N(d.cess),slabs:c.tds.slabs.map((_,i)=>[N(d['sl_'+i]),N(d['sr_'+i])])}}
@@ -2283,8 +2283,8 @@ const mailCfg=()=>({mode:'webmail',webmail:DEF_WEBMAIL,url:'',key:'',fromName:''
 const PHP_URL_RE=/^https:\/\/[^\s?#]+\.php$/i;
 const EMAIL_RE=/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/;
 const MAIL_URL_RE=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec\/?$/;
-const autoMail=()=>{const m=mailCfg();return !!m.key&&!!S.local&&((m.mode==='auto'&&MAIL_URL_RE.test(m.url))||(m.mode==='server'&&PHP_URL_RE.test(m.url)&&EMAIL_RE.test(m.fromEmail)))};
-const sentHint=()=>mailCfg().mode==='server'?'Check your mailbox for the copy to confirm.':'Check your Gmail Sent folder to confirm.';
+const autoMail=()=>{const m=mailCfg();return !!m.key&&!!S.local&&((m.mode==='auto'&&MAIL_URL_RE.test(m.url))||(m.mode==='titan'&&MAIL_URL_RE.test(m.url)&&EMAIL_RE.test(m.fromEmail))||(m.mode==='server'&&PHP_URL_RE.test(m.url)&&EMAIL_RE.test(m.fromEmail)))};
+const sentHint=()=>['server','titan'].includes(mailCfg().mode)?'Check your mailbox for the copy to confirm.':'Check your Gmail Sent folder to confirm.';
 const isWeb=()=>mailCfg().mode==='webmail';
 const webmailUrl=()=>{const u=(mailCfg().webmail||'').trim();return /^https:\/\//i.test(u)?u:DEF_WEBMAIL};
 const webName=()=>/titan\.email/i.test(webmailUrl())?'Titan Mail':'my webmail';
@@ -2297,7 +2297,7 @@ function webmailModal(){const w=S._wm||{},att=w.attach;
  {foot:`<button class="btn" type="button" data-act="close">Close</button><a class="btn primary" href="${esc(webmailUrl())}" target="_blank" rel="noopener">Open ${esc(webName())}</a>`})}
 function composeUrl(to,subj,body){const m=mailCfg(),e=encodeURIComponent;return m.mode==='outlook'?`https://outlook.office.com/mail/deeplink/compose?to=${e(to||'')}&subject=${e(subj)}&body=${e(body)}`:`https://mail.google.com/mail/?view=cm&fs=1&to=${e(to||'')}&su=${e(subj)}&body=${e(body)}`}
 async function sendMail(msg){const m=mailCfg();
- const payload={key:m.key,to:msg.to,subject:msg.subject,body:msg.body,html:msg.html||'',fromName:m.fromName||S.cfg.company.name||'',replyTo:m.replyTo||S.cfg.company.hrEmail||'',attachments:msg.attachments||[]};
+ const payload={key:m.key,from:m.mode==='titan'?m.fromEmail:'',to:msg.to,subject:msg.subject,body:msg.body,html:msg.html||'',fromName:m.fromName||S.cfg.company.name||'',replyTo:m.replyTo||S.cfg.company.hrEmail||'',attachments:msg.attachments||[]};
  let r;try{r=await fetch(m.url,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain;charset=utf-8'},redirect:'follow'})}
  catch(e){if(e instanceof TypeError)return{ok:true,confirmed:false};throw e}
  if(!r.ok)throw new Error('The mail sender address answered with an error ('+r.status+'). Check the address in Settings → Email.');
@@ -2335,7 +2335,15 @@ function doPost(e) {
         return Utilities.newBlob(Utilities.base64Decode(a.data), a.type, a.name);
       });
     }
-    MailApp.sendEmail(d.to, d.subject, d.body, opts);
+    if (d.from) {
+      // Send as your company address (added in Gmail > Settings > Accounts > Send mail as)
+      var al = GmailApp.getAliases().map(function (x) { return x.toLowerCase(); });
+      if (al.indexOf(String(d.from).toLowerCase()) < 0) return out({ ok: false, error: 'Gmail cannot send as ' + d.from + ' yet. Add it in Gmail > Settings > Accounts and Import > Send mail as, and verify it.' });
+      opts.from = d.from;
+      GmailApp.sendEmail(d.to, d.subject, d.body, opts);
+    } else {
+      MailApp.sendEmail(d.to, d.subject, d.body, opts);
+    }
     return out({ ok: true, remaining: MailApp.getRemainingDailyQuota() });
   } catch (err) {
     return out({ ok: false, error: String(err) });
@@ -2359,7 +2367,21 @@ function phpSetupModal(){const m=mailCfg();if(!EMAIL_RE.test(m.fromEmail))return
  <p class="small muted" style="margin:0">Emails go out from ${esc(m.fromEmail)} through your own mail server, and a copy lands in that mailbox. For best delivery, open cPanel → <b>Email Deliverability</b> and make sure SPF and DKIM show as valid. Keep the code private: anyone with the key and address could send email as you.</p>`,
  {foot:'<button class="btn" type="button" data-act="close">Close</button><button class="btn primary" type="button" data-act="mailCopy">Copy code</button>'});
 }
-function mailScriptModal(){if(mailCfg().mode==='server')return phpSetupModal();const key=ensureMailKey();
+function titanSetupModal(){const m=mailCfg();if(!EMAIL_RE.test(m.fromEmail))return toast('Fill in "Send from address" with your company email and save first.','bad');const key=ensureMailKey(),fe=esc(m.fromEmail);
+ modal('Send automatically from '+m.fromEmail,`<p style="margin:0">A web page cannot log in to Titan by itself, so Vetan sends through a free Google helper. Emails still go out <b>from ${fe}</b> through Titan's own mail server, and replies land in your Titan inbox. You need your Titan email password; you do not need cPanel or your IT person. One time, about 10 minutes.</p>
+ <h3 style="margin:4px 0 0">Part 1 · Let Gmail send as ${fe}</h3>
+ <ol class="steps-ol"><li>Open <a href="https://mail.google.com/mail/u/0/#settings/accounts" target="_blank" rel="noopener">Gmail → Settings → Accounts and Import</a> (any Gmail account you control).</li>
+ <li>Next to <b>Send mail as</b>, click <b>Add another email address</b>. Name: <b>${esc(m.fromName||S.cfg.company.name)}</b>, Email: <b>${fe}</b>. Click <b>Next step</b>.</li>
+ <li>Fill in: SMTP Server <code>smtp.titan.email</code> · Port <code>465</code> · Username <code>${fe}</code> · Password: your Titan email password · choose <b>Secured connection using SSL</b>. Click <b>Add account</b>.</li>
+ <li>Gmail emails a confirmation code to ${fe}. Open <a href="${esc(webmailUrl())}" target="_blank" rel="noopener">Titan Mail</a>, copy the code and paste it in the Gmail box to verify.</li></ol>
+ <h3 style="margin:4px 0 0">Part 2 · Connect Vetan</h3>
+ <ol class="steps-ol" start="5"><li>In the same Google account, open <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">script.google.com</a> (new project). Delete what is in the editor and paste the script below.</li>
+ <li>Click <b>Deploy → New deployment</b> → type <b>Web app</b> · <b>Execute as: Me</b> · <b>Who has access: Anyone</b> → <b>Deploy</b>. Allow the permissions Google asks for.</li>
+ <li>Copy the <b>Web app URL</b> (ends in <code>/exec</code>), paste it in Settings → Email → <b>Mail sender address</b>, save, then press <b>Send test email</b>.</li></ol>
+ <div class="field"><label for="mailScript">Script</label><textarea id="mailScript" readonly spellcheck="false" style="min-height:200px">${esc(MAIL_SCRIPT(key))}</textarea></div>
+ <p class="small muted" style="margin:0">Your Titan password is stored only in Google's Gmail settings, never in Vetan. Gmail allows about 100 emails a day. Keep the key private.</p>`,
+ {foot:'<button class="btn" type="button" data-act="close">Close</button><button class="btn primary" type="button" data-act="mailCopy">Copy script</button>'})}
+function mailScriptModal(){if(mailCfg().mode==='server')return phpSetupModal();if(mailCfg().mode==='titan')return titanSetupModal();const key=ensureMailKey();
  modal('Set up sending from your Google account',`<ol class="steps-ol"><li>Open <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">script.google.com</a> while signed in to the email account you send from, and start a <b>New project</b>.</li>
  <li>Delete what is in the editor, then paste the script below. It already has your secret key.</li>
  <li>Click <b>Deploy → New deployment</b>, choose type <b>Web app</b>, set <b>Execute as: Me</b> and <b>Who has access: Anyone</b>, then <b>Deploy</b>. Allow the permissions Google asks for (it only asks to send email as you).</li>
@@ -2370,12 +2392,12 @@ function mailScriptModal(){if(mailCfg().mode==='server')return phpSetupModal();c
 }
 function mailCard(){const m=mailCfg();return `<form class="card" id="fMail" style="display:flex;flex-direction:column;gap:14px"><h2>Email</h2>
  <p class="small muted" style="margin:0">How Vetan emails joining links and appointment letters from your own address.</p>
- <div class="fgrid">${fld('mMode','Sending method',m.mode,{sel:[['webmail','Titan Mail / company webmail: Vetan prepares the email, I paste and press Send'],['server','Send automatically from my company email (cPanel hosting)'],['auto','Send automatically from a Google account (Gmail or Workspace)'],['gmail','Open Gmail with the email ready, I press Send'],['outlook','Open Outlook with the email ready, I press Send']],full:1})}
+ <div class="fgrid">${fld('mMode','Sending method',m.mode,{sel:[['titan','Send automatically from my Titan / company email (no IT needed)'],['webmail','Titan Mail / company webmail: Vetan prepares the email, I paste and press Send'],['server','Send automatically from my company email (cPanel hosting)'],['auto','Send automatically from a Google account (Gmail or Workspace)'],['gmail','Open Gmail with the email ready, I press Send'],['outlook','Open Outlook with the email ready, I press Send']],full:1})}
  ${fld('mWeb','Webmail address',m.webmail,{full:1,ph:DEF_WEBMAIL,hint:'Where you log in to read your company email'})}
- ${fld('mFromEmail','Send from address (company mail server)',m.fromEmail,{type:'email',ph:'hr@yourcompany.in',hint:'Used with the company email method'})}
+ ${fld('mFromEmail','Send from address (company mail server)',m.fromEmail,{type:'email',ph:'hr@yourcompany.in',hint:'Your Titan / company email, e.g. hr@jerseyflights.com'})}
  ${fld('mFrom','Sender name',m.fromName,{ph:S.cfg.company.name,hint:'Shown as the "from" name'})}${fld('mReply','Replies go to',m.replyTo,{type:'email',ph:S.cfg.company.hrEmail||'hr@yourcompany.com'})}
- ${fld('mUrl','Mail sender address (for automatic sending)',m.url,{full:1,ph:m.mode==='server'?'https://yourcompany.in/vetan/mail.php':'https://script.google.com/macros/s/…/exec'})}</div>
- ${m.mode==='auto'||m.mode==='server'?(S.local?(autoMail()?`<div class="note">Automatic sending is on. Joining links and letters (with the Word file attached) go out from ${m.mode==='server'?esc(m.fromEmail):'your Google account'}.</div>`:`<div class="note warn">Finish the setup: press Set up automatic sending${m.mode==='server'?' (after saving your send-from address)':''}, then paste the mail sender address above.</div>`):'<div class="note warn">Automatic sending works on your GitHub site. Inside Claude, Vetan opens Gmail with the email ready instead.</div>'):''}
+ ${fld('mUrl','Mail sender address (for automatic sending)',m.url,{full:1,ph:m.mode==='server'?'https://yourcompany.in/vetan/mail.php':m.mode==='titan'?'https://script.google.com/macros/s/…/exec':'https://script.google.com/macros/s/…/exec'})}</div>
+ ${['auto','server','titan'].includes(m.mode)?(S.local?(autoMail()?`<div class="note">Automatic sending is on. Joining links and letters (with the Word file attached) go out from ${m.mode!=='auto'?esc(m.fromEmail):'your Google account'}.</div>`:`<div class="note warn">Finish the setup: press Set up automatic sending${m.mode!=='auto'?' (after saving your send-from address)':''}, then paste the mail sender address above.</div>`):'<div class="note warn">Automatic sending works on your GitHub site. Inside Claude, Vetan opens Gmail with the email ready instead.</div>'):''}
  <div class="row"><button class="btn primary" type="submit" ${ro()}>Save email settings</button><button class="btn" type="button" data-act="mailScript" ${ro()}>Set up automatic sending</button>${autoMail()?`<button class="btn" type="button" data-act="mailTest" ${ro()}>Send test email</button>`:''}</div></form>`}
 Object.assign(ACT_PERM,{wmOpen:['employees','view'],wmCopy:['employees','view'],invMail:['employees','edit'],alMail:['employees','edit'],mailScript:['settings','edit'],mailCopy:['settings','edit'],mailTest:['settings','edit']});
 Object.assign(A,{
